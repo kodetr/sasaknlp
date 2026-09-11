@@ -302,13 +302,21 @@ If you use **SasakNLP** in your research, computational linguistics publications
 
 ```bibtex
 @software{sasaknlp2026,
-  author = {SasakNLP Contributors},
+  author = {Tanwir},
   title = {SasakNLP: Research-Grade Natural Language Processing and Morphological Toolkit for Bahasa Sasak},
   year = {2026},
   publisher = {GitHub},
-  url = {https://github.com/sasaknlp/sasaknlp}
+  url = {https://github.com/kodetr/sasaknlp}
 }
 ```
+
+---
+
+## 👨‍💻 Pembuat / Author
+
+- **Pengembang & Peneliti Utama**: **Tanwir**
+- **Repositori Resmi**: [https://github.com/kodetr/sasaknlp](https://github.com/kodetr/sasaknlp)
+- **Lisensi**: MIT Open Source
 
 ---
 
