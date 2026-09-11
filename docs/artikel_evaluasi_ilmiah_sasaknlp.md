@@ -1,7 +1,7 @@
 # Laporan & Draf Publikasi Ilmiah: Evaluasi Kinerja Pemrosesan Bahasa Sasak (SasakNLP)
 
 > **Dokumen Publikasi Ilmiah & Kompilasi Evaluasi**  
-> **Penulis / Peneliti Utama**: **Tanwir**  
+> **Penulis / Peneliti Utama**: **kodetr**  
 > **Repositori Resmi**: [https://github.com/kodetr/sasaknlp](https://github.com/kodetr/sasaknlp)  
 > Ditujukan sebagai rujukan bab hasil dan pembahasan (*Results and Discussion*) untuk artikel jurnal ilmiah terindeks SINTA/Scopus serta naskah skripsi/tesis.  
 > Semua gambar grafik telah dihasilkan dalam resolusi tinggi (**300 DPI**) di direktori [`docs/figures/`](file:///Users/labtanwir/Documents/library-sasak/docs/figures).

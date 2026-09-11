@@ -5,7 +5,7 @@ Sasak language of Lombok, Indonesia.
 """
 
 __version__ = "0.1.0"
-__author__ = "Tanwir"
+__author__ = "kodetr"
 
 from sasaknlp.core.config import NormalizerConfig, PipelineConfig, RankingWeights
 from sasaknlp.core.pipeline import SasakNLP
