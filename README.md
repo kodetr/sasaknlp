@@ -184,7 +184,7 @@ Low-resource regional language NLP typically suffers from severe understemming, 
 ```
 
 <p align="center">
-  <img src="docs/figures/fig5_dataset_acquisition_pipeline.png" alt="Figure 5: Dataset Acquisition & Curation Protocol" width="100%">
+  <img src="https://raw.githubusercontent.com/kodetr/sasaknlp/main/docs/figures/fig5_dataset_acquisition_pipeline.png" alt="Figure 5: Dataset Acquisition & Curation Protocol" width="100%">
   <br>
   <em><b>Figure 5:</b> The 3-phase scientific protocol mapping multi-source authentic ingestion, 5-stage curation, and generation of 100k gold-standard benchmark datasets.</em>
 </p>
@@ -205,7 +205,7 @@ Based on standard dialectological taxonomies (**A. Teeuw 1958**, **Prof. Mahsun 
 | **6** | **General Sasak** | Cross-Island Baseline | `wah`, `ndeq`, `mangan`, `batur` | Standard written register across Lombok |
 
 <p align="center">
-  <img src="docs/figures/fig2_dialect_performance.png" alt="Figure 2: Performance Evaluation across the 5 Sasak Dialects" width="100%">
+  <img src="https://raw.githubusercontent.com/kodetr/sasaknlp/main/docs/figures/fig2_dialect_performance.png" alt="Figure 2: Performance Evaluation across the 5 Sasak Dialects" width="100%">
   <br>
   <em><b>Figure 2:</b> Empirical morphological disambiguation accuracy and F1-score across the five major Sasak dialect clusters (Selaparang, Ngeno-Ngene, Mriak-Mriku, Ngeto-Ngete, and Kuto-Kute). Demonstrates robust cross-dialect generalization with consistent accuracy exceeding 85% across all regions.</em>
 </p>
@@ -227,7 +227,7 @@ Evaluated against gold-standard curated benchmark datasets (**100,000 morphologi
 | **Average Latency** | **0.044 ms/word** | Instant real-time performance for production NLP pipelines |
 
 <p align="center">
-  <img src="docs/figures/fig1_morphology_accuracy.png" alt="Figure 1: Morphological Disambiguation Accuracy by Affix Class" width="100%">
+  <img src="https://raw.githubusercontent.com/kodetr/sasaknlp/main/docs/figures/fig1_morphology_accuracy.png" alt="Figure 1: Morphological Disambiguation Accuracy by Affix Class" width="100%">
   <br>
   <em><b>Figure 1:</b> Disaggregated morphological accuracy breakdown across affix classes (prefixes, suffixes, infixes, circumfixes, and reduplication constructs) evaluated on the 100,000-pair gold-standard benchmark.</em>
 </p>
@@ -240,7 +240,7 @@ Evaluated against gold-standard curated benchmark datasets (**100,000 morphologi
 - **Overstemming**: **0.00%** (Virtually zero root-clipping errors)
 
 <p align="center">
-  <img src="docs/figures/fig3_error_taxonomy.png" alt="Figure 3: Error Taxonomy and Failure Mode Analysis" width="100%">
+  <img src="https://raw.githubusercontent.com/kodetr/sasaknlp/main/docs/figures/fig3_error_taxonomy.png" alt="Figure 3: Error Taxonomy and Failure Mode Analysis" width="100%">
   <br>
   <em><b>Figure 3:</b> Error taxonomy distribution (left panel: donut chart) and failure-mode diagnostic matrix (right panel). The architecture eliminates overstemming (0.00%) and understemming (0.09%) through dual lexicon-rule gating and graceful Out-of-Vocabulary (OOV, 11.92%) fallback.</em>
 </p>
@@ -250,7 +250,7 @@ Evaluated against gold-standard curated benchmark datasets (**100,000 morphologi
 SasakNLP is optimized for real-time edge and server-side deployment with zero heavy machine learning framework dependencies:
 
 <p align="center">
-  <img src="docs/figures/fig4_pipeline_benchmark.png" alt="Figure 4: Computational Throughput and Latency Benchmarks" width="100%">
+  <img src="https://raw.githubusercontent.com/kodetr/sasaknlp/main/docs/figures/fig4_pipeline_benchmark.png" alt="Figure 4: Computational Throughput and Latency Benchmarks" width="100%">
   <br>
   <em><b>Figure 4:</b> Computational scalability and runtime performance. Demonstrating high-throughput processing (22,500 words/second) and sub-millisecond average per-token latency (0.044 ms) with flat scaling curves across varying sequence lengths.</em>
 </p>
