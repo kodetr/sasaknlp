@@ -1,0 +1,1282 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SasakNLP — Research-Grade Morphological & Dialect Toolkit for Bahasa Sasak</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --primary-light: #EEF2FF;
+      --primary-border: #C7D2FE;
+      
+      --accent-emerald: #059669;
+      --emerald-light: #ECFDF5;
+      --emerald-border: #A7F3D0;
+      
+      --accent-amber: #D97706;
+      --amber-light: #FFFBEB;
+      --amber-border: #FDE68A;
+      
+      --slate-900: #0F172A;
+      --slate-800: #1E293B;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748B;
+      --slate-400: #94A3B8;
+      --slate-300: #CBD5E1;
+      --slate-200: #E2E8F0;
+      --slate-100: #F1F5F9;
+      --slate-50: #F8FAFC;
+      
+      --bg-page: #F8FAFC;
+      --card-bg: #FFFFFF;
+      --font-sans: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+      
+      --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.04);
+      --shadow-md: 0 4px 12px -1px rgba(15, 23, 42, 0.06), 0 2px 4px -2px rgba(15, 23, 42, 0.04);
+      --shadow-lg: 0 12px 24px -4px rgba(15, 23, 42, 0.08), 0 4px 6px -2px rgba(15, 23, 42, 0.03);
+      --radius-lg: 14px;
+      --radius-md: 10px;
+      --radius-sm: 6px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: var(--font-sans);
+      background-color: var(--bg-page);
+      color: var(--slate-800);
+      line-height: 1.6;
+      min-height: 100vh;
+      padding-bottom: 5rem;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .container {
+      max-width: 1140px;
+      margin: 0 auto;
+      padding: 0 1.5rem;
+    }
+
+    /* Top Navigation / Header */
+    header {
+      background: #FFFFFF;
+      border-bottom: 1px solid var(--slate-200);
+      padding: 2.25rem 0 2rem 0;
+      margin-bottom: 2rem;
+      position: relative;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+      background: linear-gradient(90deg, #4F46E5 0%, #06B6D4 50%, #10B981 100%);
+    }
+
+    .header-layout {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .meta-row {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .pill-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.4rem;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 0.25rem 0.65rem;
+      border-radius: 9999px;
+      letter-spacing: 0.03em;
+    }
+    .pill-indigo { background: var(--primary-light); color: var(--primary); border: 1px solid var(--primary-border); }
+    .pill-emerald { background: var(--emerald-light); color: var(--accent-emerald); border: 1px solid var(--emerald-border); }
+    .pill-slate { background: var(--slate-100); color: var(--slate-700); border: 1px solid var(--slate-200); }
+
+    .title-group h1 {
+      font-size: 2.25rem;
+      font-weight: 800;
+      letter-spacing: -0.025em;
+      color: var(--slate-900);
+      line-height: 1.25;
+    }
+    .title-group h1 span.gradient-text {
+      background: linear-gradient(135deg, #4F46E5 0%, #0284C7 50%, #059669 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .title-group p.lead {
+      color: var(--slate-600);
+      font-size: 1.05rem;
+      max-width: 820px;
+      margin-top: 0.35rem;
+    }
+
+    .quick-links {
+      display: flex;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+      flex-wrap: wrap;
+      align-items: center;
+    }
+
+    .code-install-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.65rem;
+      background: var(--slate-900);
+      color: #F8FAFC;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      padding: 0.45rem 0.95rem;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #334155;
+    }
+    .code-install-pill:hover {
+      background: var(--slate-800);
+      border-color: #475569;
+    }
+
+    .btn-action-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.45rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      padding: 0.45rem 0.95rem;
+      border-radius: var(--radius-md);
+      text-decoration: none;
+      background: #FFFFFF;
+      border: 1px solid var(--slate-200);
+      color: var(--slate-700);
+      transition: all 0.2s;
+      box-shadow: var(--shadow-sm);
+    }
+    .btn-action-pill:hover {
+      border-color: var(--primary);
+      color: var(--primary);
+      transform: translateY(-1px);
+      box-shadow: var(--shadow-md);
+    }
+
+    /* Tabs Bar */
+    .tabs-nav {
+      display: flex;
+      gap: 0.35rem;
+      border-bottom: 1.5px solid var(--slate-200);
+      margin-bottom: 2rem;
+      overflow-x: auto;
+      scrollbar-width: none;
+    }
+    .tabs-nav::-webkit-scrollbar { display: none; }
+    
+    .tab-btn {
+      background: none;
+      border: none;
+      padding: 0.85rem 1.25rem;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: var(--slate-500);
+      cursor: pointer;
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+    .tab-btn:hover { color: var(--primary); }
+    .tab-btn.active {
+      color: var(--primary);
+      font-weight: 700;
+    }
+    .tab-btn.active::after {
+      content: '';
+      position: absolute;
+      bottom: -1.5px;
+      left: 0;
+      right: 0;
+      height: 2.5px;
+      background: var(--primary);
+      border-radius: 2px 2px 0 0;
+    }
+
+    .tab-pane { display: none; }
+    .tab-pane.active { display: block; animation: fadeIn 0.2s ease-in-out; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(4px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Cards */
+    .card {
+      background: var(--card-bg);
+      border: 1px solid var(--slate-200);
+      border-radius: var(--radius-lg);
+      padding: 1.75rem;
+      box-shadow: var(--shadow-sm);
+      margin-bottom: 1.5rem;
+    }
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.25rem;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+    }
+    .card-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Dialect Selector Grid */
+    .dialect-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 0.85rem;
+      margin-bottom: 1.25rem;
+    }
+    .dialect-card-btn {
+      background: var(--slate-50);
+      border: 1.5px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      padding: 0.85rem 1rem;
+      text-align: left;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .dialect-card-btn:hover {
+      border-color: var(--primary);
+      background: #FFFFFF;
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+    .dialect-card-btn.active {
+      border-color: var(--primary);
+      background: #FFFFFF;
+      box-shadow: 0 0 0 2px rgba(79, 70, 229, 0.15), var(--shadow-md);
+    }
+    .d-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .d-title {
+      font-size: 0.92rem;
+      font-weight: 700;
+      color: var(--slate-900);
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+    .d-sample {
+      font-size: 0.82rem;
+      color: var(--slate-600);
+      font-family: var(--font-mono);
+      background: #FFFFFF;
+      padding: 0.3rem 0.5rem;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--slate-200);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .d-markers-desc {
+      font-size: 0.75rem;
+      color: var(--slate-500);
+    }
+    .d-markers-desc code {
+      font-family: var(--font-mono);
+      color: var(--primary);
+      background: var(--primary-light);
+      padding: 0.1rem 0.3rem;
+      border-radius: 4px;
+    }
+
+    /* Input & Textarea */
+    textarea {
+      width: 100%;
+      min-height: 100px;
+      padding: 0.85rem 1rem;
+      font-family: var(--font-sans);
+      font-size: 1rem;
+      color: var(--slate-800);
+      border: 1.5px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      outline: none;
+      resize: vertical;
+      transition: all 0.2s;
+      line-height: 1.5;
+    }
+    textarea:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    .btn-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 0.85rem;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #FFFFFF;
+      font-family: var(--font-sans);
+      font-weight: 600;
+      font-size: 0.95rem;
+      padding: 0.65rem 1.35rem;
+      border-radius: var(--radius-md);
+      border: none;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s;
+      box-shadow: 0 2px 4px rgba(79, 70, 229, 0.2);
+    }
+    .btn-primary:hover {
+      background: var(--primary-hover);
+      transform: translateY(-1px);
+      box-shadow: 0 4px 10px rgba(79, 70, 229, 0.3);
+    }
+
+    /* Metrics Grid */
+    .metrics-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 1rem;
+      margin-bottom: 1.5rem;
+    }
+    .metric-card {
+      background: var(--slate-50);
+      border: 1px solid var(--slate-200);
+      padding: 1.2rem;
+      border-radius: var(--radius-md);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+    .metric-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: var(--slate-500);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .metric-val {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: var(--slate-900);
+      letter-spacing: -0.01em;
+    }
+
+    .dialect-highlight-card {
+      grid-column: span 2;
+      background: #FFFFFF;
+      border: 1.5px solid var(--primary-border);
+      border-radius: var(--radius-md);
+      padding: 1.25rem 1.5rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* Lemmatized output */
+    .lemma-box {
+      background: #F0F7FF;
+      border: 1.5px solid #BAE6FD;
+      padding: 1.15rem 1.35rem;
+      border-radius: var(--radius-md);
+      margin-bottom: 1.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .lemma-box-title {
+      font-size: 0.75rem;
+      font-weight: 700;
+      color: #0369A1;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 0.25rem;
+    }
+    .lemma-text {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #0C4A6E;
+      font-family: var(--font-mono);
+    }
+    .btn-copy-lemma {
+      background: #FFFFFF;
+      border: 1px solid #7DD3FC;
+      color: #0284C7;
+      padding: 0.4rem 0.75rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      transition: all 0.15s;
+    }
+    .btn-copy-lemma:hover {
+      background: #E0F2FE;
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--slate-200);
+      background: #FFFFFF;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.9rem;
+    }
+    thead th {
+      background: var(--slate-100);
+      color: var(--slate-700);
+      font-weight: 700;
+      font-size: 0.8rem;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--slate-200);
+      white-space: nowrap;
+    }
+    tbody td {
+      padding: 0.85rem 1rem;
+      border-bottom: 1px solid var(--slate-200);
+      vertical-align: middle;
+      color: var(--slate-700);
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover { background: var(--slate-50); }
+
+    .tag-lemma {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      font-weight: 600;
+      padding: 0.2rem 0.5rem;
+      border-radius: 4px;
+      background: #EEF2FF;
+      color: #4338CA;
+      border: 1px solid #C7D2FE;
+    }
+    .tag-rule {
+      font-family: var(--font-mono);
+      font-size: 0.78rem;
+      padding: 0.15rem 0.45rem;
+      border-radius: 4px;
+      background: var(--slate-100);
+      color: var(--slate-600);
+    }
+    .badge-valid {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #059669;
+      background: #ECFDF5;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      border: 1px solid #A7F3D0;
+    }
+    .badge-oov {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.3rem;
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #D97706;
+      background: #FFFBEB;
+      padding: 0.2rem 0.55rem;
+      border-radius: 9999px;
+      border: 1px solid #FDE68A;
+    }
+
+    /* Search input */
+    .search-wrapper {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+    .search-wrapper svg {
+      position: absolute;
+      left: 1rem;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--slate-400);
+    }
+    .search-input {
+      width: 100%;
+      padding: 0.8rem 1rem 0.8rem 2.75rem;
+      font-family: var(--font-sans);
+      font-size: 0.95rem;
+      border: 1.5px solid var(--slate-200);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all 0.2s;
+    }
+    .search-input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.12);
+    }
+
+    /* Code blocks */
+    pre {
+      background: var(--slate-900);
+      color: #F8FAFC;
+      padding: 1.15rem 1.35rem;
+      border-radius: var(--radius-md);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      overflow-x: auto;
+      line-height: 1.6;
+      border: 1px solid #334155;
+      position: relative;
+    }
+
+    /* SVGs helper */
+    .icon {
+      display: inline-block;
+      width: 1.1rem;
+      height: 1.1rem;
+      vertical-align: middle;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      flex-shrink: 0;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- HEADER -->
+  <header>
+    <div class="container">
+      <div class="header-layout">
+        <div class="meta-row">
+          <span class="pill-badge pill-indigo">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><path d="M6 6h10"/><path d="M6 10h10"/></svg>
+            SasakNLP v0.1.1
+          </span>
+          <span class="pill-badge pill-emerald">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            Verified Research Grade
+          </span>
+          <a class="pill-badge pill-slate" href="https://kodetr.com" target="_blank" style="text-decoration: none; transition: all 0.15s;" title="Kunjungi website resmi kodetr.com">
+            <svg class="icon" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
+            Author: <b>kodetr.com</b>
+            <svg class="icon" viewBox="0 0 24 24" style="width: 0.75rem; height: 0.75rem; opacity: 0.7; margin-left: 2px;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+        </div>
+
+        <div class="title-group">
+          <h1><span class="gradient-text">SasakNLP</span>: Computational Linguistics for Bahasa Sasak</h1>
+          <p class="lead">Open-source morphological analyzer, rule-based stemmer, and dialect classification framework for <b>Bahasa Sasak</b>, an Austronesian low-resource language of Lombok, Indonesia.</p>
+        </div>
+
+        <div class="quick-links">
+          <a class="btn-action-pill" href="https://kodetr.com" target="_blank" style="border-color: var(--primary-border); background: var(--primary-light); color: var(--primary); font-weight: 700;">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+            kodetr.com
+            <svg class="icon" viewBox="0 0 24 24" style="width: 0.75rem; height: 0.75rem; opacity: 0.7;"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+          </a>
+
+          <div class="code-install-pill" onclick="copyInstall()" title="Klik untuk menyalin perintah instalasi">
+            <svg class="icon" viewBox="0 0 24 24" style="color: #60A5FA;"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <span>pip install sasaknlp</span>
+            <span id="copy-status">
+              <svg class="icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            </span>
+          </div>
+          
+          <a class="btn-action-pill" href="https://pypi.org/project/sasaknlp/0.1.0/" target="_blank">
+            <svg class="icon" viewBox="0 0 24 24" style="color: #3B82F6;"><path d="m7.5 4.27 9 5.15"/><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></svg>
+            PyPI Package
+          </a>
+          
+          <a class="btn-action-pill" href="https://huggingface.co/datasets/kodetr/sasak-benchmark-100k" target="_blank">
+            <svg class="icon" viewBox="0 0 24 24" style="color: #F59E0B;"><circle cx="12" cy="12" r="10"/><path d="M12 2a14.5 14.5 0 0 0 0 20 14.5 14.5 0 0 0 0-20"/><path d="M2 12h20"/></svg>
+            100k Benchmark Dataset
+          </a>
+
+          <a class="btn-action-pill" href="https://github.com/kodetr/sasaknlp" target="_blank">
+            <svg class="icon" viewBox="0 0 24 24" style="color: #1E293B;"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg>
+            GitHub Repository
+          </a>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- MAIN WRAPPER -->
+  <main class="container">
+    
+    <!-- NAVIGATION TABS -->
+    <div class="tabs-nav">
+      <button class="tab-btn active" onclick="switchTab('analyzer')">
+        <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+        Live Morphological Analyzer
+      </button>
+      <button class="tab-btn" onclick="switchTab('dialects')">
+        <svg class="icon" viewBox="0 0 24 24"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+        5 Dialects Taxonomy & Map
+      </button>
+      <button class="tab-btn" onclick="switchTab('dictionary')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+        Balai Bahasa NTB Lexicon (2,761 Words)
+      </button>
+      <button class="tab-btn" onclick="switchTab('benchmark')">
+        <svg class="icon" viewBox="0 0 24 24"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+        Benchmark & Scientific Evaluation
+      </button>
+      <button class="tab-btn" onclick="switchTab('citation')">
+        <svg class="icon" viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+        Citation & Documentation
+      </button>
+    </div>
+
+    <!-- TAB 1: Live Analyzer -->
+    <div id="tab-analyzer" class="tab-pane active">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+            <span>Dialect Test Preset (Select Any Dialect):</span>
+          </div>
+          <span style="font-size: 0.8rem; font-weight: 500; color: var(--slate-500);">Click any dialect card to load & analyze its authentic sentence</span>
+        </div>
+        
+        <!-- Dialect Selector Grid -->
+        <div class="dialect-grid">
+          <div class="dialect-card-btn active" id="btn-d-selaparang" onclick="setDialectExample('selaparang')">
+            <div class="d-header">
+              <span class="d-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: #4F46E5;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                1. Selaparang (Menu-Meni)
+              </span>
+              <span class="pill-badge pill-indigo">East Lombok</span>
+            </div>
+            <div class="d-sample">"Tiyang mangan nasiq menu meni kance baturne."</div>
+            <div class="d-markers-desc">Markers: <code>menu</code>, <code>meni</code>, <code>tiyang</code> (kramak/alus)</div>
+          </div>
+
+          <div class="dialect-card-btn" id="btn-d-ngeno_ngene" onclick="setDialectExample('ngeno_ngene')">
+            <div class="d-header">
+              <span class="d-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: #059669;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                2. Ngeno-Ngene
+              </span>
+              <span class="pill-badge pill-emerald">Mataram & West</span>
+            </div>
+            <div class="d-sample">"Ngeno ngene carene ente tulung aku leq dese."</div>
+            <div class="d-markers-desc">Markers: <code>ngeno</code>, <code>ngene</code>, <code>ente</code>, <code>aku</code></div>
+          </div>
+
+          <div class="dialect-card-btn" id="btn-d-mriak_mriku" onclick="setDialectExample('mriak_mriku')">
+            <div class="d-header">
+              <span class="d-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: #4F46E5;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                3. Mriak-Mriku
+              </span>
+              <span class="pill-badge pill-indigo">Central South (Praya)</span>
+            </div>
+            <div class="d-sample">"Mriak mriku ite meriq kance batur bareng-bareng."</div>
+            <div class="d-markers-desc">Markers: <code>mriak</code>, <code>mriku</code>, <code>meriq</code></div>
+          </div>
+
+          <div class="dialect-card-btn" id="btn-d-ngeto_ngete" onclick="setDialectExample('ngeto_ngete')">
+            <div class="d-header">
+              <span class="d-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: #059669;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                4. Ngeto-Ngete
+              </span>
+              <span class="pill-badge pill-emerald">Northeast (Suela)</span>
+            </div>
+            <div class="d-sample">"Ngeto ngete petuah bajang leq sedin gubuk."</div>
+            <div class="d-markers-desc">Markers: <code>ngeto</code>, <code>ngete</code></div>
+          </div>
+
+          <div class="dialect-card-btn" id="btn-d-kuto_kute" onclick="setDialectExample('kuto_kute')">
+            <div class="d-header">
+              <span class="d-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: #4F46E5;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                5. Kuto-Kute
+              </span>
+              <span class="pill-badge pill-indigo">North Lombok (Bayan)</span>
+            </div>
+            <div class="d-sample">"Kuto kute adat wetu telu leq Bayan."</div>
+            <div class="d-markers-desc">Markers: <code>kuto</code>, <code>kute</code>, <code>wetu</code> (archaic)</div>
+          </div>
+
+          <div class="dialect-card-btn" id="btn-d-general" onclick="setDialectExample('general')">
+            <div class="d-header">
+              <span class="d-title">
+                <svg class="icon" viewBox="0 0 24 24" style="color: #64748B;"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg>
+                6. General Sasak
+              </span>
+              <span class="pill-badge pill-slate">Standard Baseline</span>
+            </div>
+            <div class="d-sample">"Wah ndeq mangan bareng kance batur bajang."</div>
+            <div class="d-markers-desc">Common words: <code>wah</code>, <code>ndeq</code>, <code>mangan</code></div>
+          </div>
+        </div>
+
+        <div class="card-title" style="font-size: 0.95rem; margin-top: 0.5rem; margin-bottom: 0.5rem;">
+          <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          <span>Input Sasak Text:</span>
+        </div>
+        <textarea id="input-text" placeholder="Type or paste any Sasak phrase or sentence here...">Tiyang mangan nasiq menu meni kance baturne.</textarea>
+        
+        <div class="btn-row">
+          <button class="btn-primary" onclick="runAnalysis()">
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            Execute Morphological Analysis
+          </button>
+          <span style="font-size: 0.85rem; color: var(--slate-500);">Client-side zero-latency processing &bull; Pure Standard JavaScript</span>
+        </div>
+      </div>
+
+      <!-- Results Area -->
+      <div id="results-card" class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <span>Morphological & Dialect Analysis Results</span>
+          </div>
+          <span id="latency-pill" class="pill-badge pill-emerald">
+            <svg class="icon" viewBox="0 0 24 24"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+            <span id="latency-val">0.00 ms</span>
+          </span>
+        </div>
+
+        <!-- Metrics Row -->
+        <div class="metrics-grid">
+          <div class="dialect-highlight-card">
+            <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+              <div>
+                <div class="metric-label">Detected Dialect Classification</div>
+                <div id="metric-dialect" class="metric-val" style="color: var(--primary);">Selaparang (Menu-Meni)</div>
+                <div id="metric-region" style="font-size: 0.85rem; color: var(--slate-600); font-weight: 600; margin-top: 0.25rem; display: flex; align-items: center; gap: 0.35rem;">
+                  <svg class="icon" viewBox="0 0 24 24" style="width: 0.9rem; height: 0.9rem; color: var(--primary);"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z"/><circle cx="12" cy="10" r="3"/></svg>
+                  <span>East Lombok & Central East</span>
+                </div>
+              </div>
+              <div style="text-align: right;">
+                <div class="metric-label">Calibrated Confidence</div>
+                <div id="metric-conf" class="metric-val" style="color: var(--accent-emerald);">95%</div>
+              </div>
+            </div>
+            <div id="metric-markers-row" style="margin-top: 0.75rem; font-size: 0.82rem; color: var(--slate-600); display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap;">
+              <span>Diagnostic Markers:</span>
+              <span id="metric-markers" class="pill-badge pill-slate" style="font-family: var(--font-mono); font-size: 0.78rem;">menu, meni, tiyang</span>
+            </div>
+          </div>
+
+          <div class="metric-card">
+            <div class="metric-label">Total Word Tokens</div>
+            <div id="metric-tokens" class="metric-val">6</div>
+          </div>
+          <div class="metric-card">
+            <div class="metric-label">Unique Root Lemmas</div>
+            <div id="metric-lemmas" class="metric-val">6</div>
+          </div>
+        </div>
+
+        <!-- Lemmatized Output Box -->
+        <div class="lemma-box">
+          <div>
+            <div class="lemma-box-title">Normalized Lemmatized String (Kata Dasar):</div>
+            <div id="lemma-output" class="lemma-text">tiyang mangan nasiq bareng kance batur</div>
+          </div>
+          <button class="btn-copy-lemma" onclick="copyLemmas()">
+            <svg class="icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span id="copy-lemma-label">Copy Lemmas</span>
+          </button>
+        </div>
+
+        <!-- Token Breakdown Table -->
+        <div class="card-header" style="margin-bottom: 0.75rem;">
+          <div class="card-title" style="font-size: 1rem;">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--slate-600);"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1" ry="1"/></svg>
+            <span>Token-Level Morphological Deconstruction</span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Surface Token</th>
+                <th>Predicted Lemma</th>
+                <th>Rule Designation</th>
+                <th>Affix Components</th>
+                <th>Confidence</th>
+                <th>Lexicon Status</th>
+              </tr>
+            </thead>
+            <tbody id="analysis-tbody">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 2: Dialects Taxonomy & Map -->
+    <div id="tab-dialects" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><polygon points="3 6 9 3 15 6 21 3 21 18 15 21 9 18 3 21"/><line x1="9" x2="9" y1="3" y2="18"/><line x1="15" x2="15" y1="6" y2="21"/></svg>
+            <span>Dialectal Taxonomy & Isogloss Classification (Teeuw & Mahsun)</span>
+          </div>
+          <span class="pill-badge pill-indigo">5 Major Dialect Clusters</span>
+        </div>
+        <p style="color: var(--slate-600); margin-bottom: 1.25rem;">
+          Bahasa Sasak exhibits rich phonological and lexical variation structured around diagnostic shibboleths (isoglosses) signifying <b>"this/that way"</b> (begini-begitu) or directional indicators (kemari-kesana). Click <b>"Test This Dialect"</b> to load and analyze sample sentences directly:
+        </p>
+
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Dialect Cluster</th>
+                <th>Geographical Range</th>
+                <th>Diagnostic Markers (Shibboleths)</th>
+                <th>Linguistic Characteristics</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>1. Selaparang (Menu-Meni)</b></td>
+                <td>East Lombok & Central East</td>
+                <td><span class="tag-lemma">menu</span>, <span class="tag-lemma">meni</span>, <span class="tag-lemma">tiyang</span>, <span class="tag-lemma">kaken</span></td>
+                <td>Refined register (kramak/alus), glottal stop retention.</td>
+                <td><button class="btn-action-pill" style="padding: 0.35rem 0.75rem;" onclick="setDialectAndSwitch('selaparang')">Test Dialect &rarr;</button></td>
+              </tr>
+              <tr>
+                <td><b>2. Ngeno-Ngene</b></td>
+                <td>Mataram, West Lombok & Central West</td>
+                <td><span class="tag-lemma">ngeno</span>, <span class="tag-lemma">ngene</span>, <span class="tag-lemma">ente</span>, <span class="tag-lemma">aku</span></td>
+                <td>Metropolitan and western maritime dialect cluster.</td>
+                <td><button class="btn-action-pill" style="padding: 0.35rem 0.75rem;" onclick="setDialectAndSwitch('ngeno_ngene')">Test Dialect &rarr;</button></td>
+              </tr>
+              <tr>
+                <td><b>3. Mriak-Mriku</b></td>
+                <td>Central South Lombok (Praya, Pujut)</td>
+                <td><span class="tag-lemma">mriak</span>, <span class="tag-lemma">mriku</span>, <span class="tag-lemma">meriq</span>, <span class="tag-lemma">merik</span></td>
+                <td>Spatial deictic directionality markers.</td>
+                <td><button class="btn-action-pill" style="padding: 0.35rem 0.75rem;" onclick="setDialectAndSwitch('mriak_mriku')">Test Dialect &rarr;</button></td>
+              </tr>
+              <tr>
+                <td><b>4. Ngeto-Ngete</b></td>
+                <td>Northeast Lombok (Suela, Sembalun, Sambelia)</td>
+                <td><span class="tag-lemma">ngeto</span>, <span class="tag-lemma">ngete</span></td>
+                <td>Highland variation along northeastern Mt. Rinjani slopes.</td>
+                <td><button class="btn-action-pill" style="padding: 0.35rem 0.75rem;" onclick="setDialectAndSwitch('ngeto_ngete')">Test Dialect &rarr;</button></td>
+              </tr>
+              <tr>
+                <td><b>5. Kuto-Kute</b></td>
+                <td>North Lombok (Bayan, Tanjung, Gangga)</td>
+                <td><span class="tag-lemma">kuto</span>, <span class="tag-lemma">kute</span>, <span class="tag-lemma">wetu</span></td>
+                <td>Archaic cluster retaining oldest Austronesian traits.</td>
+                <td><button class="btn-action-pill" style="padding: 0.35rem 0.75rem;" onclick="setDialectAndSwitch('kuto_kute')">Test Dialect &rarr;</button></td>
+              </tr>
+              <tr>
+                <td><b>6. General Sasak</b></td>
+                <td>Cross-Island Baseline</td>
+                <td><span class="tag-lemma">wah</span>, <span class="tag-lemma">ndeq</span>, <span class="tag-lemma">mangan</span>, <span class="tag-lemma">batur</span></td>
+                <td>Standard written register common across all regions.</td>
+                <td><button class="btn-action-pill" style="padding: 0.35rem 0.75rem;" onclick="setDialectAndSwitch('general')">Test Dialect &rarr;</button></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 3: Balai Bahasa NTB Lexicon -->
+    <div id="tab-dictionary" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+            <span>Balai Bahasa Provinsi NTB Integrated Lexicon (Kamus Terpadu Sasambo)</span>
+          </div>
+          <span id="dict-count" class="pill-badge pill-indigo">2,761 Headwords Loaded</span>
+        </div>
+
+        <div class="search-wrapper">
+          <svg class="icon" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+          <input type="text" id="dict-search" class="search-input" placeholder="Search Sasak word, lemma, or Indonesian translation..." oninput="filterDictionary()">
+        </div>
+
+        <div class="table-container" style="max-height: 520px; overflow-y: auto;">
+          <table>
+            <thead>
+              <tr>
+                <th>Surface Word</th>
+                <th>Root Lemma</th>
+                <th>POS Category</th>
+                <th>Dialect Register</th>
+                <th>Indonesian Translation / Meaning</th>
+              </tr>
+            </thead>
+            <tbody id="dict-tbody">
+              <!-- Populated dynamically via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 4: Benchmark & Evaluation -->
+    <div id="tab-benchmark" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><line x1="18" x2="18" y1="20" y2="10"/><line x1="12" x2="12" y1="20" y2="4"/><line x1="6" x2="6" y1="20" y2="14"/></svg>
+            <span>Scientific Evaluation & Empirical Benchmark</span>
+          </div>
+          <span class="pill-badge pill-emerald">100,000 Verified Test Pairs</span>
+        </div>
+        
+        <p style="color: var(--slate-600); margin-bottom: 1.25rem;">
+          SasakNLP undergoes rigorous verification against gold-standard curated benchmark pairs following Sastrawi-grade computational standards:
+        </p>
+
+        <div class="metrics-grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));">
+          <div class="metric-card" style="border-top: 3px solid #059669;">
+            <div class="metric-label">Morphological Accuracy</div>
+            <div class="metric-val" style="color: #059669;">87.98%</div>
+          </div>
+          <div class="metric-card" style="border-top: 3px solid #4F46E5;">
+            <div class="metric-label">Macro Precision</div>
+            <div class="metric-val" style="color: #4F46E5;">99.00%</div>
+          </div>
+          <div class="metric-card" style="border-top: 3px solid #4F46E5;">
+            <div class="metric-label">Macro Recall</div>
+            <div class="metric-val" style="color: #4F46E5;">95.35%</div>
+          </div>
+          <div class="metric-card" style="border-top: 3px solid #7C3AED;">
+            <div class="metric-label">Macro F1-Score</div>
+            <div class="metric-val" style="color: #7C3AED;">96.22%</div>
+          </div>
+          <div class="metric-card" style="border-top: 3px solid #D97706;">
+            <div class="metric-label">Engine Throughput</div>
+            <div class="metric-val" style="color: #D97706;">22,500 wps</div>
+          </div>
+          <div class="metric-card" style="border-top: 3px solid #0284C7;">
+            <div class="metric-label">Sub-ms Latency</div>
+            <div class="metric-val" style="color: #0284C7;">0.044 ms</div>
+          </div>
+        </div>
+
+        <div class="card-header" style="margin-top: 1.5rem; margin-bottom: 0.75rem;">
+          <div class="card-title" style="font-size: 1rem;">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--slate-600);"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1-2.5-2.5Z"/><polyline points="10 2 10 10 13 7 16 10 16 2"/></svg>
+            <span>Open Research Datasets Hosted on Hugging Face</span>
+          </div>
+        </div>
+        <div class="table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Dataset Resource</th>
+                <th>Scale</th>
+                <th>Format</th>
+                <th>Academic Description</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><b>Benchmark Morfologi 100k</b></td>
+                <td>100,000 pairs</td>
+                <td><code>.parquet</code> / <code>.csv</code></td>
+                <td>Gold-standard pairs (surface, lemma, prefix, infix, suffix, dialect).</td>
+              </tr>
+              <tr>
+                <td><b>Korpus Kalimat Autentik</b></td>
+                <td>12,591 sentences</td>
+                <td><code>.parquet</code> / <code>.csv</code></td>
+                <td>Folklore (*Putri Mandalika*, *Dewi Anjani*), biblical text, and regional texts.</td>
+              </tr>
+              <tr>
+                <td><b>Leksikon Kamus NTB</b></td>
+                <td>2,761 entries</td>
+                <td><code>.parquet</code> / <code>.csv</code></td>
+                <td>Official dictionary harvested from Balai Bahasa Provinsi NTB (*Kamus Sasambo*).</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 5: Citation & Documentation -->
+    <div id="tab-citation" class="tab-pane">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--primary);"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" x2="8" y1="13" y2="13"/><line x1="16" x2="8" y1="17" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+            <span>Scholarly Citation (BibTeX)</span>
+          </div>
+          <button class="btn-action-pill" onclick="copyCitation()">
+            <svg class="icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+            <span id="copy-citation-label">Copy Citation</span>
+          </button>
+        </div>
+        <p style="color: var(--slate-600); margin-bottom: 0.75rem;">
+          If you utilize the SasakNLP toolkit or datasets in academic research, theses, or publications, please cite:
+        </p>
+        <pre><code id="bibtex-text">@software{sasaknlp2026,
+  author    = {kodetr},
+  title     = {SasakNLP: Research-Grade Natural Language Processing and Morphological Toolkit for Bahasa Sasak},
+  year      = {2026},
+  publisher = {Hugging Face / GitHub / PyPI},
+  url       = {https://github.com/kodetr/sasaknlp}
+}</code></pre>
+
+        <div class="card-header" style="margin-top: 1.75rem; margin-bottom: 0.75rem;">
+          <div class="card-title" style="font-size: 1rem;">
+            <svg class="icon" viewBox="0 0 24 24" style="color: var(--slate-600);"><polyline points="4 17 10 11 4 5"/><line x1="12" y1="19" x2="20" y2="19"/></svg>
+            <span>Python Integration Quickstart</span>
+          </div>
+        </div>
+        <pre><code># 1. Install library
+pip install sasaknlp
+
+# 2. Pipeline Usage
+from sasaknlp import SasakNLP
+
+nlp = SasakNLP()
+result = nlp.process("Tiyang mangan nasiq menu meni kance baturne.")
+
+print("Detected Dialect :", result.dialect)
+print("Root Lemmas      :", result.lemmas)
+for a in result.analyses:
+    print(f"Token: {a.surface_form:12} -> Lemma: {a.lemma:10} (Rule: {a.rule_applied})")</code></pre>
+      </div>
+    </div>
+
+    <!-- FOOTER -->
+    <footer style="margin-top: 3.5rem; padding-top: 1.5rem; border-top: 1px solid var(--slate-200); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; font-size: 0.85rem; color: var(--slate-500);">
+      <div>
+        <span>Developed by <a href="https://kodetr.com" target="_blank" style="color: var(--primary); font-weight: 700; text-decoration: none;">kodetr.com</a> &bull; Open-Source Computational Linguistics for Bahasa Sasak</span>
+      </div>
+      <div style="display: flex; gap: 1.25rem; align-items: center;">
+        <a href="https://kodetr.com" target="_blank" style="color: var(--primary); text-decoration: none; font-weight: 700; display: inline-flex; align-items: center; gap: 0.35rem;">
+          <svg class="icon" viewBox="0 0 24 24" style="width:0.85rem;height:0.85rem;"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1 4-10z"/></svg>
+          kodetr.com
+        </a>
+        <a href="https://github.com/kodetr/sasaknlp" target="_blank" style="color: var(--slate-600); text-decoration: none; font-weight: 500;">GitHub</a>
+        <a href="https://pypi.org/project/sasaknlp/0.1.0/" target="_blank" style="color: var(--slate-600); text-decoration: none; font-weight: 500;">PyPI</a>
+        <a href="https://huggingface.co/datasets/kodetr/sasak-benchmark-100k" target="_blank" style="color: var(--slate-600); text-decoration: none; font-weight: 500;">Hugging Face</a>
+      </div>
+    </footer>
+  </main>
+
+  <script src="data.js"></script>
+  <script src="stemmer.js"></script>
+  <script>
+    // Tab switching
+    function switchTab(tabId) {
+      document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+      document.querySelectorAll('.tab-pane').forEach(pane => pane.classList.remove('active'));
+      
+      const activeBtn = Array.from(document.querySelectorAll('.tab-btn')).find(b => b.getAttribute('onclick').includes(tabId));
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const pane = document.getElementById('tab-' + tabId);
+      if (pane) pane.classList.add('active');
+    }
+
+    // Dialect Examples Dictionary
+    const dialectExamples = {
+      selaparang: "Tiyang mangan nasiq menu meni kance baturne.",
+      ngeno_ngene: "Ngeno ngene carene ente tulung aku leq dese.",
+      mriak_mriku: "Mriak mriku ite meriq kance batur bareng-bareng.",
+      ngeto_ngete: "Ngeto ngete petuah bajang leq sedin gubuk.",
+      kuto_kute: "Kuto kute adat wetu telu leq Bayan.",
+      general: "Wah ndeq mangan bareng kance batur bajang."
+    };
+
+    function setDialectExample(code) {
+      document.querySelectorAll('.dialect-card-btn').forEach(btn => btn.classList.remove('active'));
+      const activeBtn = document.getElementById('btn-d-' + code);
+      if (activeBtn) activeBtn.classList.add('active');
+      
+      const sampleText = dialectExamples[code] || dialectExamples.general;
+      document.getElementById('input-text').value = sampleText;
+      runAnalysis();
+    }
+
+    function setDialectAndSwitch(code) {
+      switchTab('analyzer');
+      setDialectExample(code);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    // Run analysis
+    function runAnalysis() {
+      const text = document.getElementById('input-text').value;
+      if (!text.trim()) return;
+      
+      const res = processText(text);
+      
+      // Update UI
+      document.getElementById('latency-val').textContent = `${res.latency_ms.toFixed(2)} ms`;
+      document.getElementById('metric-dialect').textContent = res.dialectName;
+      document.getElementById('metric-region').querySelector('span').textContent = res.dialectRegion;
+      
+      const markersSpan = document.getElementById('metric-markers');
+      if (res.matchedMarkers && res.matchedMarkers.length > 0) {
+        markersSpan.textContent = res.matchedMarkers.join(', ');
+        markersSpan.className = 'pill-badge pill-emerald';
+      } else {
+        markersSpan.textContent = 'Cross-dialectal Baseline (No regional isoglosses)';
+        markersSpan.className = 'pill-badge pill-slate';
+      }
+      
+      document.getElementById('metric-conf').textContent = `${Math.round(res.dialectConfidence * 100)}%`;
+      document.getElementById('metric-tokens').textContent = res.tokens.length;
+      document.getElementById('metric-lemmas').textContent = new Set(res.lemmas).size;
+      
+      document.getElementById('lemma-output').textContent = res.lemmas.join(' ');
+      
+      const tbody = document.getElementById('analysis-tbody');
+      tbody.innerHTML = '';
+      
+      res.analyses.forEach(a => {
+        const tr = document.createElement('tr');
+        
+        let affixParts = [];
+        if (a.prefix) affixParts.push(`Prefix: ${a.prefix}`);
+        if (a.infix) affixParts.push(`Infix: ${a.infix}`);
+        if (a.suffix) affixParts.push(`Suffix: ${a.suffix}`);
+        if (a.reduplication) affixParts.push(`Redup: ${a.reduplication}`);
+        const affixText = affixParts.length > 0 ? affixParts.join(', ') : 'Root / Lexicon';
+        
+        const statusHtml = a.is_oov 
+          ? '<span class="badge-oov"><svg class="icon" viewBox="0 0 24 24" style="width:0.85rem;height:0.85rem;"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> OOV</span>'
+          : '<span class="badge-valid"><svg class="icon" viewBox="0 0 24 24" style="width:0.85rem;height:0.85rem;"><polyline points="20 6 9 17 4 12"/></svg> Valid in Lexicon</span>';
+          
+        tr.innerHTML = `
+          <td><b>${a.surface_form}</b></td>
+          <td><span class="tag-lemma">${a.lemma}</span></td>
+          <td><span class="tag-rule">${a.rule_applied}</span></td>
+          <td>${affixText}</td>
+          <td><b>${Math.round(a.confidence * 100)}%</b></td>
+          <td>${statusHtml}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Copy handlers
+    function copyInstall() {
+      navigator.clipboard.writeText("pip install sasaknlp");
+      const st = document.getElementById('copy-status');
+      st.innerHTML = '<svg class="icon" viewBox="0 0 24 24" style="color:#10B981;"><polyline points="20 6 9 17 4 12"/></svg>';
+      setTimeout(() => { 
+        st.innerHTML = '<svg class="icon" viewBox="0 0 24 24"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>'; 
+      }, 1500);
+    }
+
+    function copyLemmas() {
+      const text = document.getElementById('lemma-output').textContent;
+      navigator.clipboard.writeText(text);
+      const label = document.getElementById('copy-lemma-label');
+      label.textContent = "Copied!";
+      setTimeout(() => { label.textContent = "Copy Lemmas"; }, 1500);
+    }
+
+    function copyCitation() {
+      const text = document.getElementById('bibtex-text').textContent;
+      navigator.clipboard.writeText(text);
+      const label = document.getElementById('copy-citation-label');
+      label.textContent = "Citation Copied!";
+      setTimeout(() => { label.textContent = "Copy Citation"; }, 1500);
+    }
+
+    // Dictionary explorer
+    function renderDictionary(items) {
+      const tbody = document.getElementById('dict-tbody');
+      tbody.innerHTML = '';
+      const displayItems = items.slice(0, 100);
+      
+      displayItems.forEach(item => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td><b>${item.w}</b></td>
+          <td><span class="tag-lemma">${item.l || item.w}</span></td>
+          <td><span class="pill-badge pill-slate">${item.p || 'UMUM'}</span></td>
+          <td>${item.d || 'Sasak Umum'}</td>
+          <td>${item.m || '-'}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+      document.getElementById('dict-count').textContent = `${items.length} Headwords`;
+    }
+
+    function filterDictionary() {
+      const q = document.getElementById('dict-search').value.toLowerCase().trim();
+      if (!q) {
+        renderDictionary(SASAK_KAMUS);
+        return;
+      }
+      const filtered = SASAK_KAMUS.filter(item => 
+        (item.w && item.w.toLowerCase().includes(q)) ||
+        (item.l && item.l.toLowerCase().includes(q)) ||
+        (item.m && item.m.toLowerCase().includes(q))
+      );
+      renderDictionary(filtered);
+    }
+
+    // Initial run
+    window.addEventListener('DOMContentLoaded', () => {
+      runAnalysis();
+      if (typeof SASAK_KAMUS !== 'undefined') {
+        renderDictionary(SASAK_KAMUS);
+      }
+    });
+  </script>
+</body>
+</html>
