@@ -2,10 +2,17 @@
 """Script to generate publication-ready Word DOCX manuscripts in both English and Indonesian,
 conforming strictly to the ECTI template specifications.
 
+Enhancement:
+- Wide tables and figures that do not fit in a narrow 3.2" single column span the full page width (6.5")
+  using continuous 1-column sections, then seamlessly resume the 2-column body layout.
+- Prevents table row splitting across pages (<w:cantSplit/>).
+- Keeps captions together with figures and tables (<w:keepNext/>).
+
 Journal Target: ECTI Transactions on Computer and Information Technology (ECTI-CIT)
 """
 
 import os
+import shutil
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
@@ -47,6 +54,17 @@ def set_table_borders(table, color="000000", sz="4", val="single"):
         f'</w:tblBorders>'
     )
     tbl_pr.append(borders)
+
+def set_section_cols(section, num_cols, space_pt=18):
+    """Cleanly set column count on a Word section without duplicate w:cols tags."""
+    sectPr = section._sectPr
+    for c in sectPr.xpath('./w:cols'):
+        sectPr.remove(c)
+    col = OxmlElement('w:cols')
+    col.set(qn('w:num'), str(num_cols))
+    if num_cols > 1:
+        col.set(qn('w:space'), str(int(space_pt * 20))) # 20 dxa = 1 pt
+    sectPr.append(col)
 
 
 # ==============================================================================
@@ -112,16 +130,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     s2.bottom_margin = Inches(1.0)
     s2.left_margin = Inches(0.8)
     s2.right_margin = Inches(0.8)
-
-    sectPr = s2._sectPr
-    cols = sectPr.xpath("./w:cols")
-    if cols:
-        col = cols[0]
-    else:
-        col = OxmlElement("w:cols")
-        sectPr.append(col)
-    col.set(qn("w:num"), "2")
-    col.set(qn("w:space"), "360") # 18 pt = 0.25 in spacing
+    set_section_cols(s2, 2, 18) # 2 columns with 0.25 in spacing
 
     def add_sec_heading(text):
         p = doc.add_paragraph()
@@ -173,36 +182,66 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         r_math.font.italic = True
         return p
 
-    def add_fig(img_rel_path, fig_no, caption_text, width_in=3.1):
+    def add_fig(img_rel_path, fig_no, caption_text, full_page_width=True, width_in=6.5):
+        """Add a figure. If full_page_width is True, spans full page width (6.5 inches) across columns."""
         full_p = os.path.join(base_dir, img_rel_path)
-        if os.path.exists(full_p):
-            p_img = doc.add_paragraph()
-            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p_img.paragraph_format.space_before = Pt(12)
-            p_img.paragraph_format.space_after = Pt(0)
-            p_img.add_run().add_picture(full_p, width=Inches(width_in))
-
-            p_cap = doc.add_paragraph()
-            p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p_cap.paragraph_format.space_before = Pt(6)
-            p_cap.paragraph_format.space_after = Pt(12)
-            r_num = p_cap.add_run(f"Fig. {fig_no}: ")
-            r_num.font.name = "Times New Roman"
-            r_num.font.size = Pt(10)
-            r_num.font.bold = True
-            r_num.font.italic = True
-            r_cap = p_cap.add_run(caption_text)
-            r_cap.font.name = "Times New Roman"
-            r_cap.font.size = Pt(10)
-            r_cap.font.italic = True
-        else:
+        if not os.path.exists(full_p):
             print(f"Warning: Figure image not found: {full_p}")
+            return
 
-    def add_tbl(tbl_no, caption_text, headers, data, col_widths=None):
+        if full_page_width:
+            s_fig = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_fig.top_margin = Inches(1.0)
+            s_fig.bottom_margin = Inches(1.0)
+            s_fig.left_margin = Inches(0.8)
+            s_fig.right_margin = Inches(0.8)
+            set_section_cols(s_fig, 1)
+
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.paragraph_format.space_before = Pt(12)
+        p_img.paragraph_format.space_after = Pt(0)
+        p_img.paragraph_format.keep_with_next = True # Ensure image and caption stay on the same page
+        p_img.add_run().add_picture(full_p, width=Inches(width_in if full_page_width else 3.1))
+
+        p_cap = doc.add_paragraph()
+        p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cap.paragraph_format.space_before = Pt(6)
+        p_cap.paragraph_format.space_after = Pt(12)
+        r_num = p_cap.add_run(f"Fig. {fig_no}: ")
+        r_num.font.name = "Times New Roman"
+        r_num.font.size = Pt(10)
+        r_num.font.bold = True
+        r_num.font.italic = True
+        r_cap = p_cap.add_run(caption_text)
+        r_cap.font.name = "Times New Roman"
+        r_cap.font.size = Pt(10)
+        r_cap.font.italic = True
+
+        if full_page_width:
+            s_resume = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_resume.top_margin = Inches(1.0)
+            s_resume.bottom_margin = Inches(1.0)
+            s_resume.left_margin = Inches(0.8)
+            s_resume.right_margin = Inches(0.8)
+            set_section_cols(s_resume, 2, 18)
+
+    def add_tbl(tbl_no, caption_text, headers, data, col_widths=None, full_page_width=True):
+        """Add a table. If full_page_width is True, spans full page width (6.5 inches) across columns."""
+        if full_page_width:
+            s_tbl = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_tbl.top_margin = Inches(1.0)
+            s_tbl.bottom_margin = Inches(1.0)
+            s_tbl.left_margin = Inches(0.8)
+            s_tbl.right_margin = Inches(0.8)
+            set_section_cols(s_tbl, 1)
+
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_cap.paragraph_format.space_before = Pt(12)
         p_cap.paragraph_format.space_after = Pt(6)
+        p_cap.paragraph_format.keep_with_next = True # Ensure caption stays with table
+
         r_num = p_cap.add_run(f"Table {tbl_no}: ")
         r_num.font.name = "Times New Roman"
         r_num.font.size = Pt(10)
@@ -217,8 +256,14 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
         set_table_borders(tbl, color="000000", sz="4")
 
+        # Header Row
+        header_row = tbl.rows[0]
+        header_trPr = header_row._tr.get_or_add_trPr()
+        header_trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
+        header_trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+
         for i, h in enumerate(headers):
-            cell = tbl.rows[0].cells[i]
+            cell = header_row.cells[i]
             cell.text = h
             set_cell_background(cell, "F1F5F9")
             set_cell_margins(cell, top=90, bottom=90, left=100, right=100)
@@ -229,9 +274,14 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
                 run.font.size = Pt(9)
                 run.font.bold = True
 
+        # Data Rows
         for r_idx, row_data in enumerate(data):
+            row = tbl.rows[r_idx + 1]
+            row_trPr = row._tr.get_or_add_trPr()
+            row_trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+
             for c_idx, val in enumerate(row_data):
-                cell = tbl.rows[r_idx + 1].cells[c_idx]
+                cell = row.cells[c_idx]
                 cell.text = str(val)
                 bg_col = "FAFAFA" if r_idx % 2 == 1 else "FFFFFF"
                 set_cell_background(cell, bg_col)
@@ -253,6 +303,15 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         p_post = doc.add_paragraph()
         p_post.paragraph_format.space_before = Pt(0)
         p_post.paragraph_format.space_after = Pt(12)
+
+        if full_page_width:
+            s_resume = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_resume.top_margin = Inches(1.0)
+            s_resume.bottom_margin = Inches(1.0)
+            s_resume.left_margin = Inches(0.8)
+            s_resume.right_margin = Inches(0.8)
+            set_section_cols(s_resume, 2, 18)
+
         return tbl
 
     # Abstract & Keywords
@@ -417,16 +476,17 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "diagnostic shibboleths (Table 1)."
     )
 
+    # TABLE 1: Full-Page Width (6.5 inches)
     t1_headers = ["No", "Dialect Cluster", "Geographical Range", "Diagnostic Markers", "Phonological & Sociolinguistic Features"]
     t1_data = [
-        ["1", "Selaparang (Menu-Meni)", "East & Central-East Lombok", "menu, meni, tiyang, kaji", "Polite register (krama/alus), glottal stop retention /-q/"],
+        ["1", "Selaparang (Menu-Meni)", "East & Central-East Lombok", "menu, meni, tiyang, kaji", "Polite register (krama/alus), glottal stop retention /-q/, lontar manuscripts"],
         ["2", "Ngeno-Ngene", "Mataram & West Lombok", "ngeno, ngene, ente, aku", "Urban dialect, rapid vocalic articulation, maritime trade contact"],
         ["3", "Mriak-Mriku", "Central-South (Praya, Pujut)", "mriak, mriku, meriq, merik", "Spatial directional deictics (towards here / towards there)"],
         ["4", "Ngeto-Ngete", "Northeast (Sembalun, Suela)", "ngeto, ngete", "Highland agricultural communities on Mount Rinjani slopes"],
         ["5", "Kuto-Kute", "North Lombok (Bayan, Tanjung)", "kuto, kute, wetu", "Archaic Austronesian retention, customary Wetu Telu tradition"],
         ["6", "General Sasak", "Cross-Island Standard", "wah, ndeq, mangan, batur", "Inter-dialectal lingua franca in public and educational domains"]
     ]
-    add_tbl(1, "Taxonomy of the Five Major Sasak Dialect Clusters in Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.3, 0.8, 0.7, 0.7, 0.7])
+    add_tbl(1, "Taxonomy of the Five Major Sasak Dialect Clusters in Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.4, 1.4, 1.4, 1.3, 2.0], full_page_width=True)
 
     # 3. METHODOLOGY AND SYSTEM ARCHITECTURE
     add_sec_heading("3. METHODOLOGY AND SYSTEM ARCHITECTURE")
@@ -501,7 +561,8 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "4) Lexicon Dictionary (kamus_balai_bahasa_ntb.csv): 2,761 verified lemma entries from Balai Bahasa Provinsi NTB [10]."
     )
 
-    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Three-Phase Scientific Acquisition And Quality Curation Protocol For SasakNLP Benchmarks.", width_in=3.2)
+    # FIGURE 1: Full-Page Width (6.5 inches)
+    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Three-Phase Scientific Acquisition And Quality Curation Protocol For SasakNLP Benchmarks.", full_page_width=True, width_in=6.5)
 
     add_subsec_heading("4.2 Baseline Models")
     add_body(
@@ -526,13 +587,14 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "SasakNLP achieves 80.44% accuracy (80,438 correct predictions)."
     )
 
+    # TABLE 2: Full-Page Width (6.5 inches)
     t2_headers = ["Model / Algorithm", "Computational Principle", "Correct (N=100k)", "Accuracy (%)", "Throughput (wps)"]
     t2_data = [
         ["Baseline 1: Direct Lookup", "Exact Dictionary Matching", "1,006", "1.01%", "24,500"],
         ["Baseline 2: Greedy Stripping", "Longest-Match Affix Stripping", "55,205", "55.21%", "18,200"],
         ["Proposed SasakNLP", "Dictionary-Enhanced Multi-Candidate", "80,438", "80.44%", "7,826"]
     ]
-    add_tbl(2, "Comparative Lemmatization Evaluation On 100,000 Morphological Samples", t2_headers, t2_data, col_widths=[0.8, 0.9, 0.5, 0.5, 0.5])
+    add_tbl(2, "Comparative Lemmatization Evaluation On 100,000 Morphological Samples", t2_headers, t2_data, col_widths=[1.7, 1.8, 1.0, 0.9, 1.1], full_page_width=True)
 
     add_body(
         "McNemar's test comparing SasakNLP and Baseline 2 reveals contingency counts b = 33,892 and c = 8,659, yielding chi-squared = 14,962.14 "
@@ -552,6 +614,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "an additional +11.99% accuracy gain."
     )
 
+    # TABLE 3: Full-Page Width (6.5 inches)
     t3_headers = ["Configuration", "Rules", "Dict", "Gen", "Rank", "Dialect", "Acc (%)", "Throughput"]
     t3_data = [
         ["M1: Direct Lookup", "No", "Yes", "No", "No", "No", "1.01%", "24,500 wps"],
@@ -560,7 +623,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         ["M4: Rules + Gen + First Match", "Yes", "Yes", "Yes", "No", "No", "74.12%", "10,350 wps"],
         ["M5: Full Proposed SasakNLP", "Yes", "Yes", "Yes", "Yes", "Yes", "80.44%", "7,826 wps"]
     ]
-    add_tbl(3, "Ablation Study Across SasakNLP Architectural Components (100k Data)", t3_headers, t3_data, col_widths=[0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.5])
+    add_tbl(3, "Ablation Study Across SasakNLP Architectural Components (100k Data)", t3_headers, t3_data, col_widths=[1.7, 0.6, 0.6, 0.6, 0.6, 0.6, 0.8, 1.0], full_page_width=True)
 
     add_subsec_heading("5.4 Morpheme-Level Performance Disaggregation")
     add_body(
@@ -568,8 +631,10 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "Reduplication achieves 100.00%, passive prefixes reach 97.36%, stative prefixes reach 96.79%, and possessive clitics exceed 94.6%–96.5%."
     )
 
-    add_fig("figures/fig1_morphology_accuracy.png", 2, "Morphological Rule Accuracy Across Grammatical Affix Classes (100k Data).", width_in=3.2)
+    # FIGURE 2: Full-Page Width (6.5 inches)
+    add_fig("figures/fig1_morphology_accuracy.png", 2, "Morphological Rule Accuracy Across Grammatical Affix Classes (100k Data).", full_page_width=True, width_in=6.5)
 
+    # TABLE 4: Full-Page Width (6.5 inches)
     t4_headers = ["Category", "Pattern", "Samples", "Accuracy (%)", "Linguistic Characteristics"]
     t4_data = [
         ["Reduplication", "root-root", "1,789", "100.00%", "Perfect handling of full reduplication (mangan-mangan)"],
@@ -589,15 +654,17 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         ["Locative Suffix", "-an, -in", "10,545", "76.52%", "Locative and resultative suffix (kaduan, siramin)"],
         ["Reciprocal", "be-...-an", "1,710", "65.09%", "Reciprocal mutual action circumfix (betulungan)"]
     ]
-    add_tbl(4, "Disaggregated Performance Across Morpheme Categories On 100,000 Samples", t4_headers, t4_data, col_widths=[0.6, 0.5, 0.4, 0.5, 1.2])
+    add_tbl(4, "Disaggregated Performance Across Morpheme Categories On 100,000 Samples", t4_headers, t4_data, col_widths=[1.4, 0.9, 0.8, 0.9, 2.5], full_page_width=True)
 
     add_subsec_heading("5.5 Cross-Dialect Evaluation")
     add_body(
         "Cross-dialect evaluation across the five Sasak dialect regions (Fig. 3 and Table 5) confirms strong generalization across Lombok Island."
     )
 
-    add_fig("figures/fig2_dialect_performance.png", 3, "Cross-Dialect Lemmatization Accuracy Across Five Major Sasak Dialect Clusters.", width_in=3.2)
+    # FIGURE 3: Full-Page Width (6.5 inches)
+    add_fig("figures/fig2_dialect_performance.png", 3, "Cross-Dialect Lemmatization Accuracy Across Five Major Sasak Dialect Clusters.", full_page_width=True, width_in=6.5)
 
+    # TABLE 5: Full-Page Width (6.5 inches)
     t5_headers = ["Region", "Dialect Cluster", "Samples", "Accuracy (%)", "Primary Vocalic & Phonemic Features"]
     t5_data = [
         ["Mataram / West Lombok", "General Sasak", "43,254", "85.73%", "Aligns with official Balai Bahasa NTB standard lexicon"],
@@ -606,7 +673,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         ["Central Lombok", "Meno-Mene", "23,023", "77.04%", "Characteristic vowel /-e/, largest speaker population"],
         ["East Lombok", "Ngeno-Ngene", "12,713", "69.24%", "Nasal vocalic shifts and final velar consonant /-k/"]
     ]
-    add_tbl(5, "Lemmatization Performance Across Five Major Sasak Dialect Clusters (100k Data)", t5_headers, t5_data, col_widths=[0.6, 0.6, 0.4, 0.5, 1.1])
+    add_tbl(5, "Lemmatization Performance Across Five Major Sasak Dialect Clusters (100k Data)", t5_headers, t5_data, col_widths=[1.3, 1.3, 0.8, 0.9, 2.2], full_page_width=True)
 
     add_subsec_heading("5.6 Computational Scalability and Runtime Latency")
     add_body(
@@ -614,7 +681,8 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "on 10k benchmarks, with average per-token latency of 0.044 ms."
     )
 
-    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Computational Scalability And Latency Profile Of SasakNLP Across Token Lengths.", width_in=3.2)
+    # FIGURE 4: Full-Page Width (6.5 inches)
+    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Computational Scalability And Latency Profile Of SasakNLP Across Token Lengths.", full_page_width=True, width_in=6.5)
 
     add_subsec_heading("5.7 Extrinsic Feature Space Dimensionality Reduction")
     add_body(
@@ -623,12 +691,13 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "and retrieval pipelines [13], [22]."
     )
 
+    # TABLE 6: Full-Page Width (6.5 inches)
     t6_headers = ["Corpus / Dataset Parameter", "Unique Surface Tokens", "Base Root Lemmas", "Dimensional Reduction Ratio", "Impact on Downstream NLP Pipelines"]
     t6_data = [
         ["Benchmark Morfologi (100k)", "100,000 unique forms", "1,790 root lemmas", "98.21%", "Reduces lexical lookup search space by 55×"],
         ["Authentic Corpus (189k tokens)", "5,913 unique words", "4,022 root lemmas", "31.98%", "Reduces feature matrix sparsity by 32%"]
     ]
-    add_tbl(6, "Evaluation Of Vocabulary Feature Space Compression On Research Datasets", t6_headers, t6_data, col_widths=[0.8, 0.6, 0.5, 0.5, 0.8])
+    add_tbl(6, "Evaluation Of Vocabulary Feature Space Compression On Research Datasets", t6_headers, t6_data, col_widths=[1.6, 1.1, 1.1, 0.9, 1.8], full_page_width=True)
 
     # 6. DISCUSSION AND ERROR ANALYSIS
     add_sec_heading("6. DISCUSSION AND ERROR ANALYSIS")
@@ -637,8 +706,10 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "A comprehensive diagnostic evaluation on the 100,000-sample benchmark classifies failure modes into four categories (Fig. 5, Table 7)."
     )
 
-    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribution Of Lemmatization Error Taxonomy (Left) And Failure Mode Diagnostic Matrix (Right).", width_in=3.2)
+    # FIGURE 5: Full-Page Width (6.5 inches)
+    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribution Of Lemmatization Error Taxonomy (Left) And Failure Mode Diagnostic Matrix (Right).", full_page_width=True, width_in=6.5)
 
+    # TABLE 7: Full-Page Width (6.5 inches)
     t7_headers = ["Classification", "Computational Definition", "Example Input -> Pred", "Count", "Pct (%)", "Root Linguistic Cause"]
     t7_data = [
         ["Correct", "Predicted lemma matches gold lemma", "tepinaq -> pinaq", "80,438", "80.44%", "Exact match in rules and lexicon"],
@@ -647,7 +718,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         ["Incorrect Lemma", "Equal length, mismatched characters", "mangan -> pangan (mangan)", "1,427", "1.43%", "Nasal alternation ambiguity (m -> p vs m -> m)"],
         ["OOV Error", "Root absent from machine lexicon", "Loanwords / neologisms", "0", "0.00%", "All benchmark roots covered by dictionary"]
     ]
-    add_tbl(7, "Error Taxonomy Analysis On 100,000 Morphological Benchmark Samples", t7_headers, t7_data, col_widths=[0.6, 0.7, 0.7, 0.4, 0.3, 0.5])
+    add_tbl(7, "Error Taxonomy Analysis On 100,000 Morphological Benchmark Samples", t7_headers, t7_data, col_widths=[1.1, 1.4, 1.3, 0.7, 0.6, 1.4], full_page_width=True)
 
     add_subsec_heading("6.2 Algorithmic Strengths of Dictionary-Gated Parsing")
     add_body(
@@ -803,16 +874,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     s2.bottom_margin = Inches(1.0)
     s2.left_margin = Inches(0.8)
     s2.right_margin = Inches(0.8)
-
-    sectPr = s2._sectPr
-    cols = sectPr.xpath("./w:cols")
-    if cols:
-        col = cols[0]
-    else:
-        col = OxmlElement("w:cols")
-        sectPr.append(col)
-    col.set(qn("w:num"), "2")
-    col.set(qn("w:space"), "360") # 18 pt = 0.25 in spacing
+    set_section_cols(s2, 2, 18)
 
     def add_sec_heading(text):
         p = doc.add_paragraph()
@@ -864,36 +926,66 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         r_math.font.italic = True
         return p
 
-    def add_fig(img_rel_path, fig_no, caption_text, width_in=3.1):
+    def add_fig(img_rel_path, fig_no, caption_text, full_page_width=True, width_in=6.5):
+        """Add a figure. If full_page_width is True, spans full page width (6.5 inches) across columns."""
         full_p = os.path.join(base_dir, img_rel_path)
-        if os.path.exists(full_p):
-            p_img = doc.add_paragraph()
-            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p_img.paragraph_format.space_before = Pt(12)
-            p_img.paragraph_format.space_after = Pt(0)
-            p_img.add_run().add_picture(full_p, width=Inches(width_in))
-
-            p_cap = doc.add_paragraph()
-            p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p_cap.paragraph_format.space_before = Pt(6)
-            p_cap.paragraph_format.space_after = Pt(12)
-            r_num = p_cap.add_run(f"Gambar {fig_no}: ")
-            r_num.font.name = "Times New Roman"
-            r_num.font.size = Pt(10)
-            r_num.font.bold = True
-            r_num.font.italic = True
-            r_cap = p_cap.add_run(caption_text)
-            r_cap.font.name = "Times New Roman"
-            r_cap.font.size = Pt(10)
-            r_cap.font.italic = True
-        else:
+        if not os.path.exists(full_p):
             print(f"Warning: Figure image not found: {full_p}")
+            return
 
-    def add_tbl(tbl_no, caption_text, headers, data, col_widths=None):
+        if full_page_width:
+            s_fig = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_fig.top_margin = Inches(1.0)
+            s_fig.bottom_margin = Inches(1.0)
+            s_fig.left_margin = Inches(0.8)
+            s_fig.right_margin = Inches(0.8)
+            set_section_cols(s_fig, 1)
+
+        p_img = doc.add_paragraph()
+        p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_img.paragraph_format.space_before = Pt(12)
+        p_img.paragraph_format.space_after = Pt(0)
+        p_img.paragraph_format.keep_with_next = True
+        p_img.add_run().add_picture(full_p, width=Inches(width_in if full_page_width else 3.1))
+
+        p_cap = doc.add_paragraph()
+        p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cap.paragraph_format.space_before = Pt(6)
+        p_cap.paragraph_format.space_after = Pt(12)
+        r_num = p_cap.add_run(f"Gambar {fig_no}: ")
+        r_num.font.name = "Times New Roman"
+        r_num.font.size = Pt(10)
+        r_num.font.bold = True
+        r_num.font.italic = True
+        r_cap = p_cap.add_run(caption_text)
+        r_cap.font.name = "Times New Roman"
+        r_cap.font.size = Pt(10)
+        r_cap.font.italic = True
+
+        if full_page_width:
+            s_resume = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_resume.top_margin = Inches(1.0)
+            s_resume.bottom_margin = Inches(1.0)
+            s_resume.left_margin = Inches(0.8)
+            s_resume.right_margin = Inches(0.8)
+            set_section_cols(s_resume, 2, 18)
+
+    def add_tbl(tbl_no, caption_text, headers, data, col_widths=None, full_page_width=True):
+        """Add a table. If full_page_width is True, spans full page width (6.5 inches) across columns."""
+        if full_page_width:
+            s_tbl = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_tbl.top_margin = Inches(1.0)
+            s_tbl.bottom_margin = Inches(1.0)
+            s_tbl.left_margin = Inches(0.8)
+            s_tbl.right_margin = Inches(0.8)
+            set_section_cols(s_tbl, 1)
+
         p_cap = doc.add_paragraph()
         p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
         p_cap.paragraph_format.space_before = Pt(12)
         p_cap.paragraph_format.space_after = Pt(6)
+        p_cap.paragraph_format.keep_with_next = True
+
         r_num = p_cap.add_run(f"Tabel {tbl_no}: ")
         r_num.font.name = "Times New Roman"
         r_num.font.size = Pt(10)
@@ -908,8 +1000,14 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
         set_table_borders(tbl, color="000000", sz="4")
 
+        # Header Row
+        header_row = tbl.rows[0]
+        header_trPr = header_row._tr.get_or_add_trPr()
+        header_trPr.append(parse_xml(f'<w:tblHeader {nsdecls("w")}/>'))
+        header_trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+
         for i, h in enumerate(headers):
-            cell = tbl.rows[0].cells[i]
+            cell = header_row.cells[i]
             cell.text = h
             set_cell_background(cell, "F1F5F9")
             set_cell_margins(cell, top=90, bottom=90, left=100, right=100)
@@ -920,9 +1018,14 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
                 run.font.size = Pt(9)
                 run.font.bold = True
 
+        # Data Rows
         for r_idx, row_data in enumerate(data):
+            row = tbl.rows[r_idx + 1]
+            row_trPr = row._tr.get_or_add_trPr()
+            row_trPr.append(parse_xml(f'<w:cantSplit {nsdecls("w")}/>'))
+
             for c_idx, val in enumerate(row_data):
-                cell = tbl.rows[r_idx + 1].cells[c_idx]
+                cell = row.cells[c_idx]
                 cell.text = str(val)
                 bg_col = "FAFAFA" if r_idx % 2 == 1 else "FFFFFF"
                 set_cell_background(cell, bg_col)
@@ -944,6 +1047,15 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         p_post = doc.add_paragraph()
         p_post.paragraph_format.space_before = Pt(0)
         p_post.paragraph_format.space_after = Pt(12)
+
+        if full_page_width:
+            s_resume = doc.add_section(WD_SECTION.CONTINUOUS)
+            s_resume.top_margin = Inches(1.0)
+            s_resume.bottom_margin = Inches(1.0)
+            s_resume.left_margin = Inches(0.8)
+            s_resume.right_margin = Inches(0.8)
+            set_section_cols(s_resume, 2, 18)
+
         return tbl
 
     # Abstrak Bahasa Indonesia
@@ -1083,6 +1195,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "berdasarkan kata diagnostik pembeda (Tabel 1)."
     )
 
+    # TABEL 1: Full-Page Width (6.5 inches)
     t1_headers = ["No", "Klaster Dialek", "Sebaran Wilayah Geografis", "Penanda Diagnostik (Shibboleths)", "Ciri Fonologis & Sosiolek"]
     t1_data = [
         ["1", "Selaparang (Menu-Meni)", "Lombok Timur & Tengah Timur", "menu, meni, tiyang, kaji", "Ragam krama (alus), retensi glotal /-q/, sastra lontar"],
@@ -1092,7 +1205,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         ["5", "Kuto-Kute", "Lombok Utara (Bayan, Tanjung)", "kuto, kute, wetu", "Retensi arkais Austronesia tua, tradisi adat Wetu Telu"],
         ["6", "Sasak Umum (General)", "Lintas Kabupaten (Ragam Baku)", "wah, ndeq, mangan, batur", "Bahasa pergaulan antardialek di ruang publik"]
     ]
-    add_tbl(1, "Taksonomi 5 Klaster Dialek Utama Bahasa Sasak di Pulau Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.3, 0.8, 0.7, 0.7, 0.7])
+    add_tbl(1, "Taksonomi 5 Klaster Dialek Utama Bahasa Sasak di Pulau Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.4, 1.4, 1.4, 1.3, 2.0], full_page_width=True)
 
     # 3. METODOLOGI DAN ARSITEKTUR SISTEM SASAKNLP
     add_sec_heading("3. METODOLOGI DAN ARSITEKTUR SISTEM SASAKNLP")
@@ -1155,7 +1268,8 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "4) Leksikon Kamus NTB (kamus_balai_bahasa_ntb.csv): 2.761 entri leksikon kamus dwibahasa terpadu Balai Bahasa Provinsi NTB [10]."
     )
 
-    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Protokol Ilmiah 3-Fase Akuisisi Data Dan Kurasi Kualitas Artefak Riset SasakNLP.", width_in=3.2)
+    # GAMBAR 1: Full-Page Width (6.5 inches)
+    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Protokol Ilmiah 3-Fase Akuisisi Data Dan Kurasi Kualitas Artefak Riset SasakNLP.", full_page_width=True, width_in=6.5)
 
     add_subsec_heading("4.2 Model Acuan Pembanding (Baselines)")
     add_body(
@@ -1178,13 +1292,14 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "gagal menangani kata berimbuhan. Baseline 2 meraih 55,21% namun mengalami overstemming parah. SasakNLP meraih akurasi 80,44% (80.438 prediksi benar)."
     )
 
+    # TABEL 2: Full-Page Width (6.5 inches)
     t2_headers = ["Model / Algoritma", "Prinsip Komputasi", "Prediksi Benar (N=100k)", "Akurasi (%)", "Throughput (kata/detik)"]
     t2_data = [
         ["Baseline 1: Direct Lookup", "Exact Dictionary Matching", "1.006", "1,01%", "24.500"],
         ["Baseline 2: Greedy Stripping", "Longest-Match Affix Stripping", "55.205", "55,21%", "18.200"],
         ["Proposed SasakNLP", "Dictionary-Enhanced Multi-Candidate", "80.438", "80,44%", "7.826"]
     ]
-    add_tbl(2, "Evaluasi Komparatif terhadap Model Acuan pada 100.000 Sampel Morfologi", t2_headers, t2_data, col_widths=[0.8, 0.9, 0.5, 0.5, 0.5])
+    add_tbl(2, "Evaluasi Komparatif terhadap Model Acuan pada 100.000 Sampel Morfologi", t2_headers, t2_data, col_widths=[1.7, 1.8, 1.0, 0.9, 1.1], full_page_width=True)
 
     add_body(
         "Uji McNemar menghasilkan b = 33.892 dan c = 8.659, dengan statistik uji chi-squared = 14.962,14 (df = 1, p < 0,0001). "
@@ -1203,6 +1318,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "akurasi sebesar +13,24%, dan modul Candidate Generator + Ranker memberikan peningkatan tambahan sebesar +11,99%."
     )
 
+    # TABEL 3: Full-Page Width (6.5 inches)
     t3_headers = ["Konfigurasi", "Aturan", "Kamus", "Gen", "Rank", "Dialek", "Akurasi (%)", "Throughput"]
     t3_data = [
         ["M1: Direct Lookup", "Tidak", "Ya", "Tidak", "Tidak", "Tidak", "1,01%", "24.500 wps"],
@@ -1211,7 +1327,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         ["M4: Rules + Gen + Match 1", "Ya", "Ya", "Ya", "Tidak", "Tidak", "74,12%", "10.350 wps"],
         ["M5: Full SasakNLP", "Ya", "Ya", "Ya", "Ya", "Ya", "80,44%", "7.826 wps"]
     ]
-    add_tbl(3, "Studi Ablasi Kontribusi Komponen Sistem SasakNLP (100k Data)", t3_headers, t3_data, col_widths=[0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.5])
+    add_tbl(3, "Studi Ablasi Kontribusi Komponen Sistem SasakNLP (100k Data)", t3_headers, t3_data, col_widths=[1.7, 0.6, 0.6, 0.6, 0.6, 0.6, 0.8, 1.0], full_page_width=True)
 
     add_subsec_heading("5.4 Evaluasi Kinerja per Kategori Morfem")
     add_body(
@@ -1219,8 +1335,10 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "prefiks pasif mencapai 97,36%, prefiks statif mencapai 96,79%, dan klitika posesif melampaui 94,6%–96,5%."
     )
 
-    add_fig("figures/fig1_morphology_accuracy.png", 2, "Rincian Akurasi Aturan Morfologi SasakNLP pada Seluruh Kelas Afiksasi (100k Data).", width_in=3.2)
+    # GAMBAR 2: Full-Page Width (6.5 inches)
+    add_fig("figures/fig1_morphology_accuracy.png", 2, "Rincian Akurasi Aturan Morfologi SasakNLP pada Seluruh Kelas Afiksasi (100k Data).", full_page_width=True, width_in=6.5)
 
+    # TABEL 4: Full-Page Width (6.5 inches)
     t4_headers = ["Kategori Morfologi", "Pola Morfem", "Jumlah", "Akurasi (%)", "Karakteristik Linguistik & Penanganan"]
     t4_data = [
         ["Reduplikasi", "root-root", "1.789", "100,00%", "Penanganan sempurna kata ulang dwilingga (mangan-mangan)"],
@@ -1240,15 +1358,17 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         ["Sufiks Lokatif", "-an, -in", "10.545", "76,52%", "Penanda lokatif/tujuan (kaduan, siramin)"],
         ["Konfiks Resiprokal", "be-...-an", "1.710", "65,09%", "Tindakan berbalasan (betulungan, besambatan)"]
     ]
-    add_tbl(4, "Rincian Kinerja Lematisasi per Kategori Morfem pada 100.000 Sampel Uji", t4_headers, t4_data, col_widths=[0.6, 0.5, 0.4, 0.5, 1.2])
+    add_tbl(4, "Rincian Kinerja Lematisasi per Kategori Morfem pada 100.000 Sampel Uji", t4_headers, t4_data, col_widths=[1.4, 0.9, 0.8, 0.9, 2.5], full_page_width=True)
 
     add_subsec_heading("5.5 Evaluasi Lintas Lima Dialek Sasak")
     add_body(
         "Evaluasi pada lima klaster dialek mengonfirmasi ketahanan leksikal model di seluruh Pulau Lombok (Gambar 3 dan Tabel 5)."
     )
 
-    add_fig("figures/fig2_dialect_performance.png", 3, "Perbandingan Performa Lematisasi SasakNLP Lintas Lima Klaster Dialek Utama Bahasa Sasak.", width_in=3.2)
+    # GAMBAR 3: Full-Page Width (6.5 inches)
+    add_fig("figures/fig2_dialect_performance.png", 3, "Perbandingan Performa Lematisasi SasakNLP Lintas Lima Klaster Dialek Utama Bahasa Sasak.", full_page_width=True, width_in=6.5)
 
+    # TABEL 5: Full-Page Width (6.5 inches)
     t5_headers = ["Wilayah Penutur", "Nama Dialek Sasak", "Jumlah", "Akurasi (%)", "Ciri Fonologis & Fonem Utama"]
     t5_data = [
         ["Lombok Barat & Mataram", "Sasak Umum (General)", "43.254", "85,73%", "Sesuai ragam baku kamus Balai Bahasa NTB"],
@@ -1257,7 +1377,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         ["Lombok Tengah", "Meno-Mene", "23.023", "77,04%", "Vokal /-e/, dialek dengan penutur terbanyak"],
         ["Lombok Timur", "Ngeno-Ngene", "12.713", "69,24%", "Variasi vokal sengau dan konsonan velar /-k/"]
     ]
-    add_tbl(5, "Performa Lematisasi Lintas 5 Klaster Dialek Utama Sasak (100k Data)", t5_headers, t5_data, col_widths=[0.6, 0.6, 0.4, 0.5, 1.1])
+    add_tbl(5, "Performa Lematisasi Lintas 5 Klaster Dialek Utama Sasak (100k Data)", t5_headers, t5_data, col_widths=[1.3, 1.3, 0.8, 0.9, 2.2], full_page_width=True)
 
     add_subsec_heading("5.6 Skalabilitas Komputasi dan Latensi Waktu Nyata")
     add_body(
@@ -1265,7 +1385,8 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "pada pemrosesan batch 100k dan 16.272 kata/detik pada benchmark 10k, dengan latensi rata-rata 0,044 ms per token."
     )
 
-    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Kinerja Komputasi SasakNLP: Throughput Kata per Detik Dan Profil Latensi per Kalimat.", width_in=3.2)
+    # GAMBAR 4: Full-Page Width (6.5 inches)
+    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Kinerja Komputasi SasakNLP: Throughput Kata per Detik Dan Profil Latensi per Kalimat.", full_page_width=True, width_in=6.5)
 
     add_subsec_heading("5.7 Evaluasi Ekstrinsik Reduksi Ruang Fitur Kosakata")
     add_body(
@@ -1273,12 +1394,13 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "(kompresi sebesar 31,98%, Tabel 6), memangkas tingkat sparsity matriks representasi teks untuk tugas klasifikasi dan temu balik informasi [13], [22]."
     )
 
+    # TABEL 6: Full-Page Width (6.5 inches)
     t6_headers = ["Parameter Korpus / Dataset", "Bentuk Permukaan", "Lema Dasar", "Rasio Reduksi", "Dampak pada Pemodelan NLP Hilir"]
     t6_data = [
         ["Benchmark Morfologi (100k)", "100.000 kata unik", "1.790 lema", "98,21%", "Mengurangi beban pencarian leksikal hingga 55× lipat"],
         ["Korpus Teks Riil (189k token)", "5.913 kata unik", "4.022 lema", "31,98%", "Memangkas sparsity matriks representasi teks sebesar 32%"]
     ]
-    add_tbl(6, "Evaluasi Kompresi Ruang Fitur Kosakata pada Dataset Riset", t6_headers, t6_data, col_widths=[0.8, 0.6, 0.5, 0.5, 0.8])
+    add_tbl(6, "Evaluasi Kompresi Ruang Fitur Kosakata pada Dataset Riset", t6_headers, t6_data, col_widths=[1.6, 1.1, 1.1, 0.9, 1.8], full_page_width=True)
 
     # 6. PEMBAHASAN DAN ANALISIS TAKSONOMI KESALAHAN
     add_sec_heading("6. PEMBAHASAN DAN ANALISIS TAKSONOMI KESALAHAN")
@@ -1287,8 +1409,10 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "Diagnosis komprehensif atas kegagalan morfologis pada 100.000 data benchmark dipetakan ke dalam empat klasifikasi (Gambar 5, Tabel 7)."
     )
 
-    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribusi Taksonomi Kesalahan Lematisasi (Kiri) Dan Matriks Diagnosis Kegagalan Linguistik (Kanan).", width_in=3.2)
+    # GAMBAR 5: Full-Page Width (6.5 inches)
+    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribusi Taksonomi Kesalahan Lematisasi (Kiri) Dan Matriks Diagnosis Kegagalan Linguistik (Kanan).", full_page_width=True, width_in=6.5)
 
+    # TABEL 7: Full-Page Width (6.5 inches)
     t7_headers = ["Klasifikasi", "Definisi Komputasional", "Contoh Masukan -> Pred", "Jumlah", "Persen (%)", "Akar Penyebab Linguistik"]
     t7_data = [
         ["Prediksi Benar", "Lema prediksi identik dengan lema kamus", "tepinaq -> pinaq", "80.438", "80,44%", "Aturan afiksasi dan leksikon cocok tepat"],
@@ -1297,7 +1421,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         ["Incorrect Lemma", "Panjang sama namun karakter beda", "mangan -> pangan (mangan)", "1.427", "1,43%", "Ambiguitas alternasi nasal (m -> p vs m -> m)"],
         ["OOV Error", "Lema tidak ada di kamus rujukan", "Kata serapan / neologisme", "0", "0,00%", "Semua lema benchmark tercakup dalam kamus"]
     ]
-    add_tbl(7, "Analisis Taksonomi Kesalahan pada 100.000 Sampel Tolok Ukur Morfologi", t7_headers, t7_data, col_widths=[0.6, 0.7, 0.7, 0.4, 0.3, 0.5])
+    add_tbl(7, "Analisis Taksonomi Kesalahan pada 100.000 Sampel Tolok Ukur Morfologi", t7_headers, t7_data, col_widths=[1.1, 1.4, 1.3, 0.7, 0.6, 1.4], full_page_width=True)
 
     add_subsec_heading("6.2 Kekuatan Algoritmik Validasi Kamus PrefixTrie")
     add_body(
@@ -1391,7 +1515,6 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
 
 
 if __name__ == "__main__":
-    import shutil
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
     # 1. Generate English ECTI-CIT Manuscript
