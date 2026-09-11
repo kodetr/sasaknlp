@@ -1,0 +1,265 @@
+{
+  "version": "1.0.0",
+  "language": "sasak",
+  "description": "Morphological rule definitions and morphophonemic transformations for Bahasa Sasak",
+  "prefixes": [
+    {
+      "name": "passive_te",
+      "prefix": "te",
+      "type": "inflectional",
+      "meaning": "passive marker (ter-/di- in Indonesian)",
+      "confidence": 0.90,
+      "phonological_rules": []
+    },
+    {
+      "name": "causative_pe",
+      "prefix": "pe",
+      "type": "derivational",
+      "meaning": "agentive/instrumental/causative nominalizer",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "stative_ka",
+      "prefix": "ka",
+      "type": "derivational",
+      "meaning": "stative or accidental prefix (ke- in Indonesian)",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "reciprocal_be",
+      "prefix": "be",
+      "type": "derivational",
+      "meaning": "reciprocal or middle voice prefix (ber- in Indonesian)",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "nasal_active_m",
+      "prefix": "m",
+      "type": "inflectional",
+      "meaning": "nasal prefix replacing/preceding bilabial p, b",
+      "confidence": 0.85,
+      "phonological_rules": [
+        { "pattern": "^m([aeiou].*)", "restores": ["p\\1", "b\\1", "m\\1"] },
+        { "pattern": "^mb(.*)", "restores": ["b\\1"] }
+      ]
+    },
+    {
+      "name": "nasal_active_n",
+      "prefix": "n",
+      "type": "inflectional",
+      "meaning": "nasal prefix replacing alveolar t, d",
+      "confidence": 0.85,
+      "phonological_rules": [
+        { "pattern": "^n([aeiou].*)", "restores": ["t\\1", "d\\1", "n\\1"] },
+        { "pattern": "^nd(.*)", "restores": ["d\\1"] }
+      ]
+    },
+    {
+      "name": "nasal_active_ny",
+      "prefix": "ny",
+      "type": "inflectional",
+      "meaning": "nasal prefix replacing s, c",
+      "confidence": 0.85,
+      "phonological_rules": [
+        { "pattern": "^ny([aeiou].*)", "restores": ["s\\1", "c\\1"] }
+      ]
+    },
+    {
+      "name": "nasal_active_ng",
+      "prefix": "ng",
+      "type": "inflectional",
+      "meaning": "nasal prefix replacing velar k, g or before vowels",
+      "confidence": 0.85,
+      "phonological_rules": [
+        { "pattern": "^ng([aeiou].*)", "restores": ["k\\1", "g\\1", "\\1"] },
+        { "pattern": "^nge([bcdfghjklmnpqrstvwxyz].*)", "restores": ["\\1"] }
+      ]
+    },
+    {
+      "name": "equative_se",
+      "prefix": "se",
+      "type": "derivational",
+      "meaning": "equative or unitary prefix (se- in Sasak)",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "nominalizer_ke",
+      "prefix": "ke",
+      "type": "derivational",
+      "meaning": "nominalizer or state prefix",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "agentive_pen",
+      "prefix": "pen",
+      "type": "derivational",
+      "meaning": "agentive nominalizer prefix",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "agentive_peng",
+      "prefix": "peng",
+      "type": "derivational",
+      "meaning": "agentive nominalizer prefix",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "causative_per",
+      "prefix": "per",
+      "type": "derivational",
+      "meaning": "causative or iterative prefix",
+      "confidence": 0.85,
+      "phonological_rules": []
+    },
+    {
+      "name": "agentive_pel",
+      "prefix": "pel",
+      "type": "derivational",
+      "meaning": "nominalizer prefix",
+      "confidence": 0.85,
+      "phonological_rules": []
+    }
+  ],
+  "suffixes": [
+    {
+      "name": "locative_an",
+      "suffix": "an",
+      "type": "derivational",
+      "meaning": "nominalizer or locative marker (-an in Indonesian)",
+      "confidence": 0.90
+    },
+    {
+      "name": "transitive_ang",
+      "suffix": "ang",
+      "type": "inflectional",
+      "meaning": "transitive/causative/benefactive suffix (-kan in Indonesian)",
+      "confidence": 0.90
+    },
+    {
+      "name": "focus_in",
+      "suffix": "in",
+      "type": "inflectional",
+      "meaning": "iterative or object focus suffix (-i in Indonesian)",
+      "confidence": 0.85
+    },
+    {
+      "name": "possessive_ne",
+      "suffix": "ne",
+      "type": "clitic",
+      "meaning": "third-person possessive enclitic (-nya)",
+      "confidence": 0.95
+    },
+    {
+      "name": "possessive_ku",
+      "suffix": "ku",
+      "type": "clitic",
+      "meaning": "first-person possessive enclitic (-ku)",
+      "confidence": 0.95
+    },
+    {
+      "name": "possessive_mu",
+      "suffix": "mu",
+      "type": "clitic",
+      "meaning": "second-person possessive enclitic (-mu)",
+      "confidence": 0.95
+    },
+    {
+      "name": "possessive_de",
+      "suffix": "de",
+      "type": "clitic",
+      "meaning": "second-person polite possessive enclitic (-mu/Anda)",
+      "confidence": 0.95
+    },
+    {
+      "name": "possessive_te",
+      "suffix": "te",
+      "type": "clitic",
+      "meaning": "first-person plural inclusive possessive enclitic (-kita)",
+      "confidence": 0.95
+    },
+    {
+      "name": "possessive_m",
+      "suffix": "m",
+      "type": "clitic",
+      "meaning": "second-person informal possessive enclitic (-mu/kau)",
+      "confidence": 0.90
+    },
+    {
+      "name": "iterative_i",
+      "suffix": "i",
+      "type": "inflectional",
+      "meaning": "iterative/locative suffix (-i in Indonesian/Sasak)",
+      "confidence": 0.85
+    }
+  ],
+  "infixes": [
+    {
+      "name": "passive_in",
+      "infix": "in",
+      "meaning": "passive infix inserted after first consonant (e.g. tinulung -> tulung)",
+      "confidence": 0.80
+    },
+    {
+      "name": "agentive_um",
+      "infix": "um",
+      "meaning": "agentive or intensive infix inserted after first consonant",
+      "confidence": 0.75
+    },
+    {
+      "name": "repetitive_er",
+      "infix": "er",
+      "meaning": "repetitive infix",
+      "confidence": 0.70
+    },
+    {
+      "name": "repetitive_el",
+      "infix": "el",
+      "meaning": "plural or repetitive infix",
+      "confidence": 0.70
+    }
+  ],
+  "combinations": [
+    {
+      "name": "circumfix_pe_an",
+      "prefix": "pe",
+      "suffix": "an",
+      "meaning": "circumfix forming abstract nominals (pe-...-an)",
+      "confidence": 0.90
+    },
+    {
+      "name": "circumfix_te_ang",
+      "prefix": "te",
+      "suffix": "ang",
+      "meaning": "passive causative circumfix (di-...-kan)",
+      "confidence": 0.90
+    },
+    {
+      "name": "circumfix_te_in",
+      "prefix": "te",
+      "suffix": "in",
+      "meaning": "passive iterative circumfix (di-...-i)",
+      "confidence": 0.85
+    },
+    {
+      "name": "circumfix_ka_an",
+      "prefix": "ka",
+      "suffix": "an",
+      "meaning": "stative circumfix (ke-...-an)",
+      "confidence": 0.85
+    },
+    {
+      "name": "circumfix_be_an",
+      "prefix": "be",
+      "suffix": "an",
+      "meaning": "reciprocal circumfix (ber-...-an)",
+      "confidence": 0.85
+    }
+  ]
+}

@@ -1,0 +1,2 @@
+# Runtime dependencies
+# SasakNLP core is designed to be pure Python standard library for maximum portability.

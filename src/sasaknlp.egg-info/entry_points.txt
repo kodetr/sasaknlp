@@ -1,0 +1,2 @@
+[console_scripts]
+sasaknlp = sasaknlp.cli.main:main
