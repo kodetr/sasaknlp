@@ -21,3 +21,6 @@ htmlcov/
 
 # macOS
 .DS_Store
+
+# Word lock files
+~$*.docx

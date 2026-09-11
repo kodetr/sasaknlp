@@ -16,7 +16,7 @@ import shutil
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
 from docx.enum.section import WD_SECTION
 from docx.oxml import parse_xml, OxmlElement
 from docx.oxml.ns import nsdecls, qn
@@ -55,16 +55,27 @@ def set_table_borders(table, color="000000", sz="4", val="single"):
     )
     tbl_pr.append(borders)
 
-def set_section_cols(section, num_cols, space_pt=18):
-    """Cleanly set column count on a Word section without duplicate w:cols tags."""
+def set_section_cols(section, num_cols=2, space_pt=18):
+    """Set multi-column layout on a word section."""
     sectPr = section._sectPr
-    for c in sectPr.xpath('./w:cols'):
-        sectPr.remove(c)
+    for child in list(sectPr):
+        if child.tag.endswith('cols'):
+            sectPr.remove(child)
     col = OxmlElement('w:cols')
     col.set(qn('w:num'), str(num_cols))
     if num_cols > 1:
         col.set(qn('w:space'), str(int(space_pt * 20))) # 20 dxa = 1 pt
     sectPr.append(col)
+
+
+def make_eq1_omml():
+    """Generate native Word OMML for Equation 1: Dialect Confidence Score."""
+    return '''<m:oMath xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"><m:r><m:rPr><m:scr m:val="roman"/><m:sty m:val="p"/></m:rPr><m:t>Confidence</m:t></m:r><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>d</m:t></m:r></m:e></m:d><m:r><m:t> = </m:t></m:r><m:f><m:fPr><m:type m:val="bar"/></m:fPr><m:num><m:nary><m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/><m:subHide m:val="0"/><m:supHide m:val="1"/></m:naryPr><m:sub><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r><m:r><m:t>∈</m:t></m:r><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>T</m:t></m:r></m:sub><m:sup/><m:e><m:r><m:t>𝕀</m:t></m:r><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r><m:r><m:t>∈</m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>M</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>d</m:t></m:r></m:sub></m:sSub></m:e></m:d><m:r><m:t>⋅</m:t></m:r><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>ω</m:t></m:r><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e></m:d></m:e></m:nary></m:num><m:den><m:nary><m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/><m:subHide m:val="0"/><m:supHide m:val="1"/></m:naryPr><m:sub><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>d</m:t></m:r><m:r><m:t>'∈</m:t></m:r><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>D</m:t></m:r></m:sub><m:sup/><m:e><m:nary><m:naryPr><m:chr m:val="∑"/><m:limLoc m:val="undOvr"/><m:subHide m:val="0"/><m:supHide m:val="1"/></m:naryPr><m:sub><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r><m:r><m:t>∈</m:t></m:r><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>T</m:t></m:r></m:sub><m:sup/><m:e><m:r><m:t>𝕀</m:t></m:r><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r><m:r><m:t>∈</m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>M</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>d'</m:t></m:r></m:sub></m:sSub></m:e></m:d><m:r><m:t>⋅</m:t></m:r><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>ω</m:t></m:r><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e></m:d></m:e></m:nary></m:e></m:nary></m:den></m:f></m:oMath>'''
+
+
+def make_eq2_omml():
+    """Generate native Word OMML for Equation 2: Multi-Criteria Candidate Ranking Score."""
+    return '''<m:oMath xmlns:m="http://schemas.openxmlformats.org/officeDocument/2006/math"><m:r><m:rPr><m:scr m:val="roman"/><m:sty m:val="p"/></m:rPr><m:t>Score</m:t></m:r><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>c</m:t></m:r></m:e></m:d><m:r><m:t> = </m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>lex</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>S</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>lex</m:t></m:r></m:sub></m:sSub><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>c</m:t></m:r></m:e></m:d><m:r><m:t> + </m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>morph</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>S</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>morph</m:t></m:r></m:sub></m:sSub><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>c</m:t></m:r></m:e></m:d><m:r><m:t> + </m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>conf</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>S</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>conf</m:t></m:r></m:sub></m:sSub><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>c</m:t></m:r></m:e></m:d><m:r><m:t> + </m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>freq</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>S</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>freq</m:t></m:r></m:sub></m:sSub><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>c</m:t></m:r></m:e></m:d><m:r><m:t> + </m:t></m:r><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>w</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>dial</m:t></m:r></m:sub></m:sSub><m:sSub><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>S</m:t></m:r></m:e><m:sub><m:r><m:rPr><m:sty m:val="p"/></m:rPr><m:t>dial</m:t></m:r></m:sub></m:sSub><m:d><m:dPr><m:begChr m:val="("/><m:endChr m:val=")"/></m:dPr><m:e><m:r><m:rPr><m:sty m:val="i"/></m:rPr><m:t>c</m:t></m:r></m:e></m:d></m:oMath>'''
 
 
 # ==============================================================================
@@ -171,16 +182,44 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         r.font.size = Pt(10)
         return p
 
-    def add_equation(math_text, eq_num):
-        p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        p.paragraph_format.space_before = Pt(12)
-        p.paragraph_format.space_after = Pt(12)
-        r_math = p.add_run(f"    {math_text}    ({eq_num})")
-        r_math.font.name = "Times New Roman"
-        r_math.font.size = Pt(10)
-        r_math.font.italic = True
-        return p
+    def add_equation(math_text_or_type, eq_num):
+        """Insert an academic standard equation formatted as native Word Equation (OMML) with right-aligned numbering."""
+        tbl = doc.add_table(rows=1, cols=2)
+        tbl.autofit = False
+        tbl.columns[0].width = Inches(2.7)
+        tbl.columns[1].width = Inches(0.5)
+
+        for cell in tbl.rows[0].cells:
+            tcPr = cell._tc.get_or_add_tcPr()
+            tcBorders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>')
+            tcPr.append(tcBorders)
+            tcMar = parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="80" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar>')
+            tcPr.append(tcMar)
+            cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+        p_eq = tbl.rows[0].cells[0].paragraphs[0]
+        p_eq.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_eq.paragraph_format.space_before = Pt(6)
+        p_eq.paragraph_format.space_after = Pt(6)
+
+        if "Confidence" in str(math_text_or_type) or str(math_text_or_type).strip() == "1" or "confidence" in str(math_text_or_type).lower():
+            p_eq._p.append(parse_xml(make_eq1_omml()))
+        elif "Score" in str(math_text_or_type) or str(math_text_or_type).strip() == "2" or "score" in str(math_text_or_type).lower():
+            p_eq._p.append(parse_xml(make_eq2_omml()))
+        else:
+            r = p_eq.add_run(str(math_text_or_type))
+            r.font.name = "Times New Roman"
+            r.font.size = Pt(10)
+            r.font.italic = True
+
+        p_num = tbl.rows[0].cells[1].paragraphs[0]
+        p_num.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_num.paragraph_format.space_before = Pt(6)
+        p_num.paragraph_format.space_after = Pt(6)
+        r_num = p_num.add_run(f"({eq_num})")
+        r_num.font.name = "Times New Roman"
+        r_num.font.size = Pt(10)
+        return tbl
 
     def add_fig(img_rel_path, fig_no, caption_text, full_page_width=True, width_in=6.5):
         """Add a figure. If full_page_width is True, spans full page width (6.5 inches) across columns."""
@@ -513,9 +552,9 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     add_body(
         "The dialect detector module calculates dialect confidence using relative shibboleth density across geographical clusters [9], [12]:"
     )
-    add_equation("Confidence(d) = \\frac{\\sum_{w \\in T} \\mathbb{I}(w \\in M_d) \\cdot \\omega(w)}{\\sum_{d' \\in D} \\sum_{w \\in T} \\mathbb{I}(w \\in M_{d'}) \\cdot \\omega(w)}", "1")
+    add_equation("confidence", "1")
     add_body(
-        "where T represents the input tokens, Md is the set of diagnostic lexical markers for dialect d, and omega(w) denotes the lexical uniqueness weight."
+        "where T represents the input tokens, Md is the set of diagnostic lexical markers for dialect d, and ω(w) denotes the lexical uniqueness weight."
     )
 
     add_subsec_heading("3.5 Two-Pass Candidate Generation and PrefixTrie Validation")
@@ -529,7 +568,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     add_body(
         "Morphological ambiguities are resolved using a weighted scoring objective [17]:"
     )
-    add_equation("Score(c) = w_{lex} S_{lex}(c) + w_{morph} S_{morph}(c) + w_{conf} S_{conf}(c) + w_{freq} S_{freq}(c) + w_{dial} S_{dial}(c)", "2")
+    add_equation("score", "2")
     add_body(
         "with empirically optimized weights: w_lex = 0.40, w_morph = 0.25, w_conf = 0.15, w_freq = 0.10, and w_dial = 0.10."
     )
@@ -915,16 +954,44 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         r.font.size = Pt(10)
         return p
 
-    def add_equation(math_text, eq_num):
-        p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        p.paragraph_format.space_before = Pt(12)
-        p.paragraph_format.space_after = Pt(12)
-        r_math = p.add_run(f"    {math_text}    ({eq_num})")
-        r_math.font.name = "Times New Roman"
-        r_math.font.size = Pt(10)
-        r_math.font.italic = True
-        return p
+    def add_equation(math_text_or_type, eq_num):
+        """Insert an academic standard equation formatted as native Word Equation (OMML) with right-aligned numbering."""
+        tbl = doc.add_table(rows=1, cols=2)
+        tbl.autofit = False
+        tbl.columns[0].width = Inches(2.7)
+        tbl.columns[1].width = Inches(0.5)
+
+        for cell in tbl.rows[0].cells:
+            tcPr = cell._tc.get_or_add_tcPr()
+            tcBorders = parse_xml(f'<w:tcBorders {nsdecls("w")}><w:top w:val="none"/><w:left w:val="none"/><w:bottom w:val="none"/><w:right w:val="none"/></w:tcBorders>')
+            tcPr.append(tcBorders)
+            tcMar = parse_xml(f'<w:tcMar {nsdecls("w")}><w:top w:w="80" w:type="dxa"/><w:left w:w="0" w:type="dxa"/><w:bottom w:w="80" w:type="dxa"/><w:right w:w="0" w:type="dxa"/></w:tcMar>')
+            tcPr.append(tcMar)
+            cell.vertical_alignment = WD_ALIGN_VERTICAL.CENTER
+
+        p_eq = tbl.rows[0].cells[0].paragraphs[0]
+        p_eq.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_eq.paragraph_format.space_before = Pt(6)
+        p_eq.paragraph_format.space_after = Pt(6)
+
+        if "Confidence" in str(math_text_or_type) or str(math_text_or_type).strip() == "1" or "confidence" in str(math_text_or_type).lower():
+            p_eq._p.append(parse_xml(make_eq1_omml()))
+        elif "Score" in str(math_text_or_type) or str(math_text_or_type).strip() == "2" or "score" in str(math_text_or_type).lower():
+            p_eq._p.append(parse_xml(make_eq2_omml()))
+        else:
+            r = p_eq.add_run(str(math_text_or_type))
+            r.font.name = "Times New Roman"
+            r.font.size = Pt(10)
+            r.font.italic = True
+
+        p_num = tbl.rows[0].cells[1].paragraphs[0]
+        p_num.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p_num.paragraph_format.space_before = Pt(6)
+        p_num.paragraph_format.space_after = Pt(6)
+        r_num = p_num.add_run(f"({eq_num})")
+        r_num.font.name = "Times New Roman"
+        r_num.font.size = Pt(10)
+        return tbl
 
     def add_fig(img_rel_path, fig_no, caption_text, full_page_width=True, width_in=6.5):
         """Add a figure. If full_page_width is True, spans full page width (6.5 inches) across columns."""
@@ -1231,9 +1298,9 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     add_body(
         "Modul DialectDetector menghitung densitas relatif kemunculan penanda shibboleth dalam teks masukan [9], [12]:"
     )
-    add_equation("Confidence(d) = \\frac{\\sum_{w \\in T} \\mathbb{I}(w \\in M_d) \\cdot \\omega(w)}{\\sum_{d' \\in D} \\sum_{w \\in T} \\mathbb{I}(w \\in M_{d'}) \\cdot \\omega(w)}", "1")
+    add_equation("confidence", "1")
     add_body(
-        "di mana T adalah token kalimat, Md adalah himpunan penanda leksikal dialek d, dan omega(w) adalah bobot keunikan leksikal kata."
+        "di mana T adalah himpunan token kalimat masukan, Md adalah himpunan penanda leksikal diagnostik (shibboleth) untuk dialek d, dan ω(w) adalah bobot keunikan leksikal kata."
     )
 
     add_subsec_heading("3.5 Pembangkitan Kandidat Dua Tahap dan Validasi PrefixTrie")
@@ -1247,7 +1314,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     add_body(
         "Ambiguitas morfologis diselesaikan menggunakan fungsi perankingan multi-kriteria terbobot [17]:"
     )
-    add_equation("Score(c) = w_{lex} S_{lex}(c) + w_{morph} S_{morph}(c) + w_{conf} S_{conf}(c) + w_{freq} S_{freq}(c) + w_{dial} S_{dial}(c)", "2")
+    add_equation("score", "2")
     add_body(
         "dengan bobot empiris teroptimasi: w_lex = 0,40, w_morph = 0,25, w_conf = 0,15, w_freq = 0,10, dan w_dial = 0,10."
     )
