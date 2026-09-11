@@ -7,7 +7,7 @@
 [![Website: kodetr.com](https://img.shields.io/badge/website-kodetr.com-indigo)](https://kodetr.com)
 [![Python 3.9+](https://img.shields.io/badge/python-3.9+-blue.svg)](https://www.python.org/downloads/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
-[![Tests: 69 passed](https://img.shields.io/badge/tests-69%20passed-brightgreen.svg)]()
+[![Tests: 76 passed](https://img.shields.io/badge/tests-76%20passed-brightgreen.svg)]()
 
 **SasakNLP** is an open-source Natural Language Processing (NLP) and morphological processing toolkit specifically engineered for **Bahasa Sasak** (*Basa Sasak*), an Austronesian low-resource regional language spoken by approximately 3 million people on the island of Lombok, West Nusa Tenggara (NTB), Indonesia.
 
@@ -314,6 +314,7 @@ sasaknlp/
 │   ├── morphology/             # Rule engine, candidate generator, analyzer
 │   │   └── rules/              # Prefix, suffix, infix, circumfix, reduplication rules
 │   ├── stemmer/                # Dictionary validator, ranker, and SasakStemmer
+│   ├── stopwords/              # Corpus-derived Sasak stopwords (159 words) and filter
 │   ├── dialect/                # Dialect taxonomy manager and marker detector
 │   ├── evaluation/             # Metrics, error analyzer, benchmark evaluator
 │   └── cli/                    # CLI commands: stem, analyze, process, evaluate
@@ -321,6 +322,7 @@ sasaknlp/
 ├── datasets/
 │   ├── sasaklex/               # Balai Bahasa NTB dictionary (2,761 entries)
 │   ├── corpus/                 # Authentic Sasak sentences (12,591 sentences)
+│   ├── stopwords/              # Verified Sasak stopwords dataset (JSON & TXT)
 │   └── benchmark/              # Benchmark evaluation datasets (10k & 100k pairs)
 │
 ├── huggingface/
@@ -332,7 +334,7 @@ sasaknlp/
 │   ├── artikel_evaluasi_ilmiah_sasaknlp.md
 │   └── figures/                # High-resolution (300 DPI) publication charts
 │
-└── tests/                      # 69 Unit tests covering 100% of functional components
+└── tests/                      # 76 Unit tests covering 100% of functional components
 ```
 
 ---
@@ -349,7 +351,7 @@ python3 -m unittest discover -s tests -v
 pytest tests -v
 ```
 
-All 69 unit tests pass in `< 0.05s`.
+All 76 unit tests pass in `< 0.4s`.
 
 ---
 
