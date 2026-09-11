@@ -1,11 +1,16 @@
 #!/usr/bin/env python3
-"""Script to generate a publication-ready Word DOCX manuscript for SasakNLP journal with 22 verified references."""
+"""Script to generate a publication-ready Word DOCX manuscript conforming strictly to the ECTI template specifications.
+
+Journal Target: ECTI Transactions on Computer and Information Technology
+(ECTI-CIT)
+"""
 
 import os
 from docx import Document
 from docx.shared import Inches, Pt, RGBColor
 from docx.enum.text import WD_ALIGN_PARAGRAPH
-from docx.enum.table import WD_TABLE_ALIGNMENT, WD_ALIGN_VERTICAL
+from docx.enum.table import WD_TABLE_ALIGNMENT
+from docx.enum.section import WD_SECTION
 from docx.oxml import parse_xml, OxmlElement
 from docx.oxml.ns import nsdecls, qn
 
@@ -15,7 +20,7 @@ def set_cell_background(cell, hex_color):
     shd = parse_xml(f'<w:shd {nsdecls("w")} w:fill="{hex_color}"/>')
     tc_pr.append(shd)
 
-def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
+def set_cell_margins(cell, top=80, bottom=80, left=120, right=120):
     """Set inner cell padding (in dxa: 20 dxa = 1 pt)."""
     tc_pr = cell._tc.get_or_add_tcPr()
     tc_mar = parse_xml(
@@ -28,8 +33,8 @@ def set_cell_margins(cell, top=100, bottom=100, left=150, right=150):
     )
     tc_pr.append(tc_mar)
 
-def set_table_borders(table, color="CBD5E1", sz="6", val="single"):
-    """Set subtle, professional borders for a table."""
+def set_table_borders(table, color="000000", sz="4", val="single"):
+    """Set standard academic three-line borders (top, header bottom, bottom)."""
     tbl_pr = table._tbl.tblPr
     borders = parse_xml(
         f'<w:tblBorders {nsdecls("w")}>'
@@ -43,605 +48,693 @@ def set_table_borders(table, color="CBD5E1", sz="6", val="single"):
     )
     tbl_pr.append(borders)
 
-def build_docx(output_path="artikel/jurnal_sasaknlp.docx"):
+def build_ecti_docx(output_path="artikel/jurnal_sasaknlp.docx"):
     doc = Document()
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
-    # --- Page Setup (A4, 1-inch margins) ---
-    for section in doc.sections:
-        section.page_width = Inches(8.27)  # A4
-        section.page_height = Inches(11.69)
-        section.top_margin = Inches(1.0)
-        section.bottom_margin = Inches(1.0)
-        section.left_margin = Inches(1.0)
-        section.right_margin = Inches(1.0)
-        
-        # Add Header & Footer
-        header = section.header
-        hp = header.paragraphs[0]
-        hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-        hrun = hp.add_run("SasakNLP: A Dialect-Aware Morphological Processing Framework")
-        hrun.font.name = "Times New Roman"
-        hrun.font.size = Pt(8.5)
-        hrun.font.color.rgb = RGBColor(128, 128, 128)
-        
-        footer = section.footer
-        fp = footer.paragraphs[0]
-        fp.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        frun = fp.add_run("Publikasi Riset Terbuka — kodetr.com | github.com/kodetr/sasaknlp")
-        frun.font.name = "Times New Roman"
-        frun.font.size = Pt(8.5)
-        frun.font.color.rgb = RGBColor(128, 128, 128)
+    # ----------------------------------------------------
+    # SECTION 1: Single Column Header (Title & Authors)
+    # Page Setup: A4, Margins: Top 2.5cm (1.0"), Bottom 2.5cm (1.0"),
+    # Left 2.0cm (0.8"), Right 2.0cm (0.8")
+    # ----------------------------------------------------
+    s1 = doc.sections[0]
+    s1.page_width = Inches(8.27)   # A4 width (21.0 cm)
+    s1.page_height = Inches(11.69) # A4 height (29.7 cm)
+    s1.top_margin = Inches(1.0)    # 2.5 cm
+    s1.bottom_margin = Inches(1.0) # 2.5 cm
+    s1.left_margin = Inches(0.8)   # 2.0 cm
+    s1.right_margin = Inches(0.8)  # 2.0 cm
 
-    # Styles
-    normal_style = doc.styles['Normal']
-    normal_style.font.name = 'Times New Roman'
-    normal_style.font.size = Pt(11)
-    normal_style.font.color.rgb = RGBColor(33, 37, 41)
-    normal_style.paragraph_format.line_spacing = 1.15
-    normal_style.paragraph_format.space_after = Pt(6)
+    # Running Header
+    header = s1.header
+    hp = header.paragraphs[0]
+    hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+    hrun = hp.add_run("ECTI Transactions on Computer and Information Technology (ECTI-CIT)")
+    hrun.font.name = "Times New Roman"
+    hrun.font.size = Pt(8.5)
+    hrun.font.italic = True
+    hrun.font.color.rgb = RGBColor(120, 120, 120)
 
-    # --- TITLE ---
-    title_p = doc.add_paragraph()
-    title_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    title_p.paragraph_format.space_before = Pt(0)
-    title_p.paragraph_format.space_after = Pt(12)
-    run_title = title_p.add_run("SasakNLP: A Dialect-Aware Morphological Processing Framework for the Low-Resource Sasak Language")
-    run_title.font.name = 'Times New Roman'
-    run_title.font.size = Pt(17)
-    run_title.font.bold = True
-    run_title.font.color.rgb = RGBColor(15, 23, 42)
+    # Title_text style: 20 pt Bold, Spacing Before 0 pt, Spacing After 24 pt, Centered
+    p_title = doc.add_paragraph()
+    p_title.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_title.paragraph_format.space_before = Pt(0)
+    p_title.paragraph_format.space_after = Pt(24)
+    p_title.paragraph_format.line_spacing = 1.15
+    r_title = p_title.add_run("SasakNLP: A Dialect-Aware Morphological Processing Framework for the Low-Resource Sasak Language")
+    r_title.font.name = "Times New Roman"
+    r_title.font.size = Pt(20)
+    r_title.font.bold = True
 
-    # --- AUTHORS & AFFILIATIONS ---
-    author_p = doc.add_paragraph()
-    author_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    author_p.paragraph_format.space_after = Pt(4)
-    run_author = author_p.add_run("kodetr")
-    run_author.font.name = 'Times New Roman'
-    run_author.font.size = Pt(12)
-    run_author.font.bold = True
+    # Authors_name style: 12 pt Bold, Spacing Before 0 pt, Spacing After 12 pt, Centered
+    p_auth = doc.add_paragraph()
+    p_auth.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_auth.paragraph_format.space_before = Pt(0)
+    p_auth.paragraph_format.space_after = Pt(8)
+    r_auth = p_auth.add_run("kodetr")
+    r_auth.font.name = "Times New Roman"
+    r_auth.font.size = Pt(12)
+    r_auth.font.bold = True
 
-    affil_p = doc.add_paragraph()
-    affil_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    affil_p.paragraph_format.space_after = Pt(4)
-    run_affil = affil_p.add_run("Riset Komputasi Bahasa Daerah Nusantara, ")
-    run_affil.font.size = Pt(10)
-    run_affil.font.italic = True
-    run_web = affil_p.add_run("kodetr.com")
-    run_web.font.size = Pt(10)
-    run_web.font.bold = True
-    run_web.font.color.rgb = RGBColor(79, 70, 229)
+    # Authors_aff style: 10 pt Regular, Spacing Before 0 pt, Spacing After 0 pt, Centered
+    p_aff = doc.add_paragraph()
+    p_aff.alignment = WD_ALIGN_PARAGRAPH.CENTER
+    p_aff.paragraph_format.space_before = Pt(0)
+    p_aff.paragraph_format.space_after = Pt(16)
+    r_aff = p_aff.add_run("Regional Language Computational Research Group, kodetr.com\nLombok, West Nusa Tenggara, Indonesia\nCorrespondence: https://kodetr.com | Code Repository: https://github.com/kodetr/sasaknlp")
+    r_aff.font.name = "Times New Roman"
+    r_aff.font.size = Pt(10)
+    r_aff.font.italic = True
 
-    contact_p = doc.add_paragraph()
-    contact_p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-    contact_p.paragraph_format.space_after = Pt(18)
-    run_c = contact_p.add_run("Korespondensi: https://kodetr.com | Repositori GitHub: https://github.com/kodetr/sasaknlp\nPaket PyPI: pip install sasaknlp | Hugging Face Dataset: kodetr/sasak-benchmark-100k")
-    run_c.font.size = Pt(9)
-    run_c.font.color.rgb = RGBColor(100, 116, 139)
+    # ----------------------------------------------------
+    # SECTION 2: Continuous Break into Two Columns
+    # Column width ~ 3.21 inches, spacing 0.25 inch (18 pt = 360 dxa)
+    # ----------------------------------------------------
+    s2 = doc.add_section(WD_SECTION.CONTINUOUS)
+    s2.top_margin = Inches(1.0)
+    s2.bottom_margin = Inches(1.0)
+    s2.left_margin = Inches(0.8)
+    s2.right_margin = Inches(0.8)
 
-    # Helper functions for formatting
-    def add_heading_1(text):
-        h = doc.add_paragraph()
-        h.paragraph_format.space_before = Pt(16)
-        h.paragraph_format.space_after = Pt(6)
-        h.paragraph_format.keep_with_next = True
-        r = h.add_run(text)
-        r.font.name = 'Times New Roman'
-        r.font.size = Pt(13)
-        r.font.bold = True
-        r.font.color.rgb = RGBColor(15, 23, 42)
-        return h
+    sectPr = s2._sectPr
+    cols = sectPr.xpath("./w:cols")
+    if cols:
+        col = cols[0]
+    else:
+        col = OxmlElement("w:cols")
+        sectPr.append(col)
+    col.set(qn("w:num"), "2")
+    col.set(qn("w:space"), "360") # 18 pt = 0.25 in spacing between columns
 
-    def add_heading_2(text):
-        h = doc.add_paragraph()
-        h.paragraph_format.space_before = Pt(12)
-        h.paragraph_format.space_after = Pt(4)
-        h.paragraph_format.keep_with_next = True
-        r = h.add_run(text)
-        r.font.name = 'Times New Roman'
-        r.font.size = Pt(11.5)
-        r.font.bold = True
-        r.font.color.rgb = RGBColor(30, 41, 59)
-        return h
-
-    def add_caption(text):
+    # Formatting helper functions strictly following ECTI guidelines
+    def add_sec_heading(text):
+        """Section_heading: 10 pt Bold ALL CAPS, Space Before 12 pt, Space After 4 pt, Left-aligned."""
         p = doc.add_paragraph()
-        p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-        p.paragraph_format.space_before = Pt(4)
-        p.paragraph_format.space_after = Pt(12)
-        parts = text.split(".", 1)
-        r1 = p.add_run(f"{parts[0]}.")
-        r1.font.bold = True
-        r1.font.size = Pt(9.5)
-        r1.font.italic = True
-        if len(parts) > 1:
-            r2 = p.add_run(parts[1])
-            r2.font.size = Pt(9.5)
-            r2.font.italic = True
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p.paragraph_format.space_before = Pt(12)
+        p.paragraph_format.space_after = Pt(4)
+        p.paragraph_format.keep_with_next = True
+        r = p.add_run(text)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(10)
+        r.font.bold = True
+        return p
 
-    def add_image_centered(img_rel_path, width_in=6.0, caption=None):
+    def add_subsec_heading(text):
+        """Subsection_heading: 10 pt Bold Title Case, Space Before 12 pt, Space After 4 pt, Left-aligned."""
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.LEFT
+        p.paragraph_format.space_before = Pt(12)
+        p.paragraph_format.space_after = Pt(4)
+        p.paragraph_format.keep_with_next = True
+        r = p.add_run(text)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(10)
+        r.font.bold = True
+        return p
+
+    def add_body(text, indent=True):
+        """Body_text: 10 pt Regular, Justified, First-line indent 0.25 in (if indent=True), Space Before 0 pt, Space After 0 pt."""
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        p.paragraph_format.space_before = Pt(0)
+        p.paragraph_format.space_after = Pt(0)
+        p.paragraph_format.line_spacing = 1.0
+        if indent:
+            p.paragraph_format.first_line_indent = Inches(0.25)
+        else:
+            p.paragraph_format.first_line_indent = Inches(0.0)
+        r = p.add_run(text)
+        r.font.name = "Times New Roman"
+        r.font.size = Pt(10)
+        return p
+
+    def add_equation(math_text, eq_num):
+        """Equation: centered math text with equation number in parentheses at right."""
+        p = doc.add_paragraph()
+        p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+        p.paragraph_format.space_before = Pt(12)
+        p.paragraph_format.space_after = Pt(12)
+        # Tab stops could be used; simple layout:
+        r_math = p.add_run(f"    {math_text}    ({eq_num})")
+        r_math.font.name = "Times New Roman"
+        r_math.font.size = Pt(10)
+        r_math.font.italic = True
+        return p
+
+    def add_fig(img_rel_path, fig_no, caption_text, width_in=3.1):
+        """Figure: centered, caption below: 'Fig. X: ' in 10 pt Bold Italic, caption in 10 pt Italic."""
         full_p = os.path.join(base_dir, img_rel_path)
         if os.path.exists(full_p):
-            p = doc.add_paragraph()
-            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
-            p.paragraph_format.space_before = Pt(8)
-            p.paragraph_format.space_after = Pt(2)
-            p.add_run().add_picture(full_p, width=Inches(width_in))
-            if caption:
-                add_caption(caption)
-        else:
-            print(f"Peringatan: Gambar tidak ditemukan: {full_p}")
+            p_img = doc.add_paragraph()
+            p_img.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_img.paragraph_format.space_before = Pt(12)
+            p_img.paragraph_format.space_after = Pt(0)
+            p_img.add_run().add_picture(full_p, width=Inches(width_in))
 
-    def format_table(headers, data, col_widths=None, alignment=None):
+            p_cap = doc.add_paragraph()
+            p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+            p_cap.paragraph_format.space_before = Pt(6)
+            p_cap.paragraph_format.space_after = Pt(12)
+            r_num = p_cap.add_run(f"Fig. {fig_no}: ")
+            r_num.font.name = "Times New Roman"
+            r_num.font.size = Pt(10)
+            r_num.font.bold = True
+            r_num.font.italic = True
+            r_cap = p_cap.add_run(caption_text)
+            r_cap.font.name = "Times New Roman"
+            r_cap.font.size = Pt(10)
+            r_cap.font.italic = True
+        else:
+            print(f"Warning: Figure image not found: {full_p}")
+
+    def add_tbl(tbl_no, caption_text, headers, data, col_widths=None):
+        """Table: caption ABOVE: 'Table X: ' in 10 pt Bold Italic, caption in 10 pt Italic."""
+        p_cap = doc.add_paragraph()
+        p_cap.alignment = WD_ALIGN_PARAGRAPH.CENTER
+        p_cap.paragraph_format.space_before = Pt(12)
+        p_cap.paragraph_format.space_after = Pt(6)
+        r_num = p_cap.add_run(f"Table {tbl_no}: ")
+        r_num.font.name = "Times New Roman"
+        r_num.font.size = Pt(10)
+        r_num.font.bold = True
+        r_num.font.italic = True
+        r_cap = p_cap.add_run(caption_text)
+        r_cap.font.name = "Times New Roman"
+        r_cap.font.size = Pt(10)
+        r_cap.font.italic = True
+
         tbl = doc.add_table(rows=len(data) + 1, cols=len(headers))
         tbl.alignment = WD_TABLE_ALIGNMENT.CENTER
-        set_table_borders(tbl, color="CBD5E1", sz="6")
+        set_table_borders(tbl, color="000000", sz="4")
 
         # Header Row
-        hdr_cells = tbl.rows[0].cells
         for i, h in enumerate(headers):
-            hdr_cells[i].text = h
-            set_cell_background(hdr_cells[i], "F1F5F9")
-            set_cell_margins(hdr_cells[i], top=120, bottom=120, left=140, right=140)
-            p = hdr_cells[i].paragraphs[0]
-            if alignment and i < len(alignment):
-                p.alignment = alignment[i]
+            cell = tbl.rows[0].cells[i]
+            cell.text = h
+            set_cell_background(cell, "F1F5F9")
+            set_cell_margins(cell, top=90, bottom=90, left=100, right=100)
+            p = cell.paragraphs[0]
+            p.alignment = WD_ALIGN_PARAGRAPH.CENTER
             for run in p.runs:
-                run.font.name = 'Times New Roman'
+                run.font.name = "Times New Roman"
+                run.font.size = Pt(9)
                 run.font.bold = True
-                run.font.size = Pt(9.5)
-                run.font.color.rgb = RGBColor(15, 23, 42)
 
         # Data Rows
         for r_idx, row_data in enumerate(data):
-            row_cells = tbl.rows[r_idx + 1].cells
-            bg_color = "F8FAFC" if r_idx % 2 == 1 else "FFFFFF"
             for c_idx, val in enumerate(row_data):
-                row_cells[c_idx].text = str(val)
-                set_cell_background(row_cells[c_idx], bg_color)
-                set_cell_margins(row_cells[c_idx], top=90, bottom=90, left=140, right=140)
-                p = row_cells[c_idx].paragraphs[0]
-                if alignment and c_idx < len(alignment):
-                    p.alignment = alignment[c_idx]
+                cell = tbl.rows[r_idx + 1].cells[c_idx]
+                cell.text = str(val)
+                bg_col = "FAFAFA" if r_idx % 2 == 1 else "FFFFFF"
+                set_cell_background(cell, bg_col)
+                set_cell_margins(cell, top=70, bottom=70, left=100, right=100)
+                p = cell.paragraphs[0]
+                # If numeric or percentage, right-align or center
+                if str(val).endswith("%") or str(val).replace(".", "").replace(",", "").isdigit():
+                    p.alignment = WD_ALIGN_PARAGRAPH.RIGHT
+                else:
+                    p.alignment = WD_ALIGN_PARAGRAPH.LEFT
                 for run in p.runs:
-                    run.font.name = 'Times New Roman'
-                    run.font.size = Pt(9.5)
-                    run.font.color.rgb = RGBColor(30, 41, 59)
+                    run.font.name = "Times New Roman"
+                    run.font.size = Pt(8.5)
 
         if col_widths:
             for row in tbl.rows:
                 for idx, w in enumerate(col_widths):
                     row.cells[idx].width = Inches(w)
 
-        sp = doc.add_paragraph()
-        sp.paragraph_format.space_before = Pt(0)
-        sp.paragraph_format.space_after = Pt(8)
+        p_post = doc.add_paragraph()
+        p_post.paragraph_format.space_before = Pt(0)
+        p_post.paragraph_format.space_after = Pt(12)
         return tbl
 
-    # --- ABSTRACT BOX ---
-    abst_box = doc.add_table(rows=1, cols=1)
-    abst_box.alignment = WD_TABLE_ALIGNMENT.CENTER
-    set_cell_background(abst_box.rows[0].cells[0], "F8FAFC")
-    set_cell_margins(abst_box.rows[0].cells[0], top=180, bottom=180, left=220, right=220)
-    set_table_borders(abst_box, color="CBD5E1", sz="8")
-    abst_box.rows[0].cells[0].width = Inches(6.5)
-    
-    cell_p = abst_box.rows[0].cells[0].paragraphs[0]
-    cell_p.paragraph_format.space_after = Pt(6)
-    r_ab_title = cell_p.add_run("ABSTRAK\n")
-    r_ab_title.font.bold = True
-    r_ab_title.font.size = Pt(10.5)
-    
-    r_ab_body = cell_p.add_run(
-        "Bahasa Sasak (Basa Sasak) merupakan bahasa daerah berakar Austronesia yang dituturkan oleh lebih dari 3 juta "
-        "penduduk di Pulau Lombok, Nusa Tenggara Barat, Indonesia. Meskipun memiliki jumlah penutur yang signifikan, Bahasa Sasak "
-        "tergolong sebagai bahasa dengan sumber daya komputasi rendah (low-resource language) karena kelangkaan korpus teks teranotasi, "
-        "variasi dialektal yang tajam lintas wilayah geografis, serta ketiadaan pustaka pemrosesan bahasa alami (NLP) terstandar [1], [6]. "
-        "Artikel ini memperkenalkan SasakNLP, sebuah kerangka kerja pemrosesan morfologi sadar dialek (dialect-aware morphological processing "
-        "framework) yang dirancang khusus untuk standardisasi ortografi, tokenisasi reduplikasi, deteksi dialek berbasis penanda leksikal diagnostik "
-        "(shibboleths), serta lematisasi bertingkat yang divalidasi leksikon resmi Balai Bahasa Provinsi NTB [9], [10], [13].\n\n"
-        "Evaluasi empiris dilakukan secara ketat pada tolok ukur baku emas berskala besar (100.000 pasangan morfem) dan korpus autentik 12.591 kalimat. "
-        "Pada benchmark skala penuh 100.000 data, SasakNLP membukukan akurasi lematisasi sebesar 80,44% (80.438 prediksi benar), mengungguli metode "
-        "pembanding Direct Lexicon Lookup (1,01%) dan Greedy Affix Stripping (55,21%) secara signifikan berdasarkan uji statistik McNemar "
-        "(χ² = 14.962,14, p < 0,0001). Sementara itu, pada benchmark inti 10.000 data, akurasi lematisasi mencapai 93,23%. Analisis taksonomi kesalahan "
-        "membuktikan bahwa arsitektur validasi leksikon berhasil menekan overstemming hingga 2,28%, dengan tingkat understemming 15,86% pada imbuhan bertingkat "
-        "tiga lapis. Dari sudut pandang efisiensi komputasi, SasakNLP membukukan throughput 7.826 kata per detik pada pemrosesan batch 100k dan hingga "
-        "16.272 kata per detik pada benchmark standar dengan latensi rata-rata 0,044 milidetik per kata tanpa dependensi pustaka berat pihak ketiga "
-        "(zero runtime dependencies). Seluruh artefak riset dirilis secara terbuka demi replikabilitas sains [16].\n\n"
+    # ====================================================
+    # ABSTRACT & KEYWORDS
+    # ====================================================
+    p_ab_title = doc.add_paragraph()
+    p_ab_title.alignment = WD_ALIGN_PARAGRAPH.LEFT
+    p_ab_title.paragraph_format.space_before = Pt(0)
+    p_ab_title.paragraph_format.space_after = Pt(4)
+    r_abt = p_ab_title.add_run("ABSTRACT")
+    r_abt.font.name = "Times New Roman"
+    r_abt.font.size = Pt(10)
+    r_abt.font.bold = True
+
+    p_ab_body = doc.add_paragraph()
+    p_ab_body.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p_ab_body.paragraph_format.space_before = Pt(0)
+    p_ab_body.paragraph_format.space_after = Pt(12)
+    p_ab_body.paragraph_format.line_spacing = 1.0
+    r_abb = p_ab_body.add_run(
+        "Bahasa Sasak is an Austronesian regional language spoken by approximately 3 million people across Lombok Island, "
+        "West Nusa Tenggara, Indonesia. Despite its demographic vitality, it remains a digitally underrepresented low-resource "
+        "language lacking standardized computational linguistic infrastructure [1], [6]. Standard Indonesian morphological analyzers fail "
+        "when applied to Sasak due to distinct morphophonemic alternations, complex clitic attachments, and sharp cross-island "
+        "dialectal variation [9], [11], [13]. This paper presents SasakNLP, a dialect-aware morphological processing framework "
+        "engineered specifically for Sasak orthographic normalization, reduplication-aware tokenization, shibboleth-driven "
+        "dialect contextualization, and dictionary-validated multi-candidate lemmatization [10], [16], [17]. Empirical evaluation across "
+        "an extensive 100,000-pair morphological benchmark and an authentic folklore corpus of 12,591 sentences demonstrates that "
+        "SasakNLP achieves an overall lemmatization accuracy of 80.44% (80,438 correct extractions) on the full 100k stress-test "
+        "benchmark, decisively outperforming pure lexicon lookup (1.01%) and greedy affix-stripping baselines (55.21%) with strong "
+        "statistical significance (McNemar's test, χ² = 14,962.14, p < 0.0001). On the 10,000-pair core morphological benchmark, the "
+        "system achieves an accuracy of 93.23%. Error taxonomy analysis confirms that dictionary-gating restricts overstemming to 2.28%, "
+        "with understemming restricted to 15.86% primarily occurring on complex multi-layered affixations. Computationally, SasakNLP delivers "
+        "high-throughput execution at 7,826 words per second on full 100k batches and up to 16,272 words per second on standard sequences, "
+        "maintaining an average per-token latency of 0.044 ms with zero heavy machine learning framework dependencies. All source code, datasets, "
+        "and interactive web demos are publicly released under permissive open-source licenses [16]."
     )
-    r_ab_body.font.size = Pt(9.5)
-    r_ab_body.font.italic = True
-    
-    r_kw_title = cell_p.add_run("Kata Kunci: ")
-    r_kw_title.font.bold = True
-    r_kw_title.font.size = Pt(9.5)
-    r_kw = cell_p.add_run("Bahasa Sasak, Pemrosesan Bahasa Alami, Lematisasi Komputasional, Morfologi Austronesia, Dialektologi Komputasi, Low-Resource Language, Balai Bahasa NTB.\n\n")
-    r_kw.font.size = Pt(9.5)
+    r_abb.font.name = "Times New Roman"
+    r_abb.font.size = Pt(10)
 
-    # English Abstract in same box
-    r_en_title = cell_p.add_run("ABSTRACT\n")
-    r_en_title.font.bold = True
-    r_en_title.font.size = Pt(10.5)
+    p_kw = doc.add_paragraph()
+    p_kw.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+    p_kw.paragraph_format.space_before = Pt(12)
+    p_kw.paragraph_format.space_after = Pt(12)
+    p_kw.paragraph_format.line_spacing = 1.0
+    r_kwt = p_kw.add_run("Keywords: ")
+    r_kwt.font.name = "Times New Roman"
+    r_kwt.font.size = Pt(10)
+    r_kwt.font.bold = True
+    r_kwb = p_kw.add_run("Sasak Language, Natural Language Processing, Computational Morphology, Lemmatization, Low-Resource NLP, Dialectology, Open Science.")
+    r_kwb.font.name = "Times New Roman"
+    r_kwb.font.size = Pt(10)
 
-    r_en_body = cell_p.add_run(
-        "Bahasa Sasak is an Austronesian regional language spoken by approximately 3 million people across Lombok Island, West Nusa Tenggara (NTB), "
-        "Indonesia. Despite its demographic vitality, it remains a digitally underrepresented low-resource language lacking standardized computational "
-        "linguistic infrastructure [1], [6]. Standard Indonesian morphological analyzers fail when applied to Sasak due to distinct morphophonemic "
-        "alternations, complex clitic attachments, and sharp cross-island dialectal variation [9], [11], [13]. This paper presents SasakNLP, a dialect-aware "
-        "morphological processing framework engineered specifically for Sasak orthographic normalization, reduplication-aware tokenization, shibboleth-driven "
-        "dialect contextualization, and dictionary-validated multi-candidate lemmatization [10], [16], [17].\n\n"
-        "Empirical evaluation across an extensive 100,000-pair morphological benchmark and an authentic folklore corpus of 12,591 sentences demonstrates "
-        "that SasakNLP achieves an overall lemmatization accuracy of 80.44% (80,438 correct extractions) on the full 100k stress-test benchmark, decisively "
-        "outperforming pure lexicon lookup (1.01%) and greedy affix-stripping baselines (55.21%) with strong statistical significance (McNemar's test, "
-        "χ² = 14,962.14, p < 0.0001). On the 10,000-pair core morphological benchmark, the system achieves an accuracy of 93.23%. Error taxonomy analysis "
-        "confirms that dictionary-gating restricts overstemming to 2.28%, with understemming restricted to 15.86% primarily occurring on complex multi-layered "
-        "affixations. Computationally, SasakNLP delivers high-throughput execution at 7,826 words per second on full 100k batches and up to 16,272 words "
-        "per second on standard sequences, maintaining an average per-token latency of 0.044 ms with zero heavy machine learning framework dependencies. "
-        "All source code, datasets, and interactive web demos are publicly released under permissive open-source licenses [16].\n\n"
+    # ====================================================
+    # 1. INTRODUCTION
+    # ====================================================
+    add_sec_heading("1. INTRODUCTION")
+    add_body(
+        "Recent breakthroughs in Natural Language Processing (NLP) and Large Language Models (LLMs) have been overwhelmingly "
+        "concentrated on high-resource languages [1], [2]. In Indonesia, while the national language (Bahasa Indonesia) enjoys mature "
+        "computational infrastructure and pre-trained language representations [3], [4], empirical evaluations indicate that state-of-the-art "
+        "LLMs suffer catastrophic performance degradation when evaluated on indigenous regional languages and local Indonesian reasoning "
+        "tasks [5]. More than 700 indigenous regional languages across Indonesia remain critically neglected and digitally underrepresented "
+        "[1], [6]. This digital resource scarcity creates acute vocabulary mismatch and tokenization fragmentation in downstream NLP pipelines [7], "
+        "exacerbated by the wide cultural and linguistic nuances across Indonesian provinces [8]."
     )
-    r_en_body.font.size = Pt(9.5)
-    r_en_body.font.italic = True
-
-    r_en_kw_title = cell_p.add_run("Keywords: ")
-    r_en_kw_title.font.bold = True
-    r_en_kw_title.font.size = Pt(9.5)
-    r_en_kw = cell_p.add_run("Sasak Language, Natural Language Processing, Computational Morphology, Lemmatization, Low-Resource NLP, Dialectology, Open Science.")
-    r_en_kw.font.size = Pt(9.5)
-
-    doc.add_paragraph().paragraph_format.space_after = Pt(12)
-
-    # --- SECTION 1: PENDAHULUAN ---
-    add_heading_1("1. Pendahuluan (Introduction)")
-    doc.add_paragraph(
-        "Kemajuan kontemporer dalam bidang Pemrosesan Bahasa Alami (Natural Language Processing / NLP) dan Model Bahasa Skala Besar "
-        "(Large Language Models / LLM) sebagian besar terkonsentrasi pada bahasa-bahasa berdaya komputasi tinggi (high-resource languages) [1], [2]. "
-        "Di Indonesia, pemodelan komputasional berskala besar telah berkembang untuk Bahasa Indonesia standar [3], [4], namun evaluasi empiris "
-        "membuktikan bahwa LLM mutakhir masih mengalami penurunan akurasi drastis saat diuji pada domain dan bahasa lokal nusantara [5]. "
-        "Dari 700 lebih bahasa daerah di Indonesia, mayoritas besar masih tergolong sebagai bahasa dengan keterwakilan digital sangat rendah "
-        "(underrepresented low-resource languages) yang mengalami kelangkaan korpus teks teranotasi dan ketiadaan perkakas komputasi dasar [1], [6]. "
-        "Penurunan kinerja model hilir pada bahasa lokal ini sangat dipicu oleh ketidaksesuaian kosakata (vocabulary mismatch) dan variasi morfologi "
-        "yang tidak terakomodasi dalam tokenisasi standar [7], terlebih lagi setiap wilayah di Indonesia memiliki karakteristik budaya dan ragam ekspresi "
-        "lokal yang sangat heterogen lintas provinsi [8]."
+    add_body(
+        "Bahasa Sasak (Basa Sasak) is the predominant indigenous language of Lombok Island in West Nusa Tenggara, spoken by approximately "
+        "3 million native speakers [9], [10]. Categorized typologically within the Western Malayo-Polynesian branch of the Austronesian "
+        "language family, Sasak exhibits distinct grammatical and sociopragmatic characteristics [11], [12]:"
     )
-    doc.add_paragraph(
-        "Bahasa Sasak (Basa Sasak) merupakan salah satu bahasa daerah Austronesia terbesar di wilayah Indonesia bagian tengah, dituturkan oleh lebih dari "
-        "3 juta penduduk di Pulau Lombok, Provinsi Nusa Tenggara Barat [9], [10]. Secara morfologis, fonologis, dan sosiopragmatik, Bahasa Sasak memiliki "
-        "karakteristik unik yang membedakannya secara tegas dari Bahasa Indonesia maupun bahasa-bahasa Austronesia tetangganya:"
+    add_body(
+        "1) Complex Morphophonemics: Stem formation incorporates active prefixes (te-, ka-, se-, pe-), archaic passive infixes (-in-, -um-), "
+        "causative/applicative suffixes (-ang, -an, -i, -in), iterative circumfixes (pe-...-an, te-...-ang, be-...-an), and intricate nasal "
+        "substitutions (N-) [10], [13]."
     )
-    
-    b1 = doc.add_paragraph(style='List Bullet')
-    r = b1.add_run("Afiksasi Morfofonemik yang Kompleks: ")
-    r.bold = True
-    b1.add_run("Pembentukan kata turunan melibatkan prefiksasi pasif (te-), statif (ka-), ekuatif (se-), dan nominalizer (pe-/peng-); infiksasi arkais (-in-, -um-, -er-, -el-); sufiksasi kausatif dan lokatif (-ang, -an, -i, -in); serta konfiksasi gabung bertingkat (pe-...-an, te-...-ang, be-...-an) [10], [13].")
-
-    b2 = doc.add_paragraph(style='List Bullet')
-    r = b2.add_run("Klitika Pronomina dan Kesantunan Sosial: ")
-    r.bold = True
-    b2.add_run("Enklitika posesif (-ku, -m, -ne) dan penanda kesantunan sosial (honorific markers -de, -te) kerap melekat berlapis pada ujung kata (misalnya pegawianne, balende), yang mencerminkan hierarki pragmatik dan tingkat tutur masyarakat Sasak [11] serta kerap memicu pemotongan berlebihan (overstemming) atau kegagalan pengupasan (understemming) pada algoritma heuristik konvensional [13].")
-
-    b3 = doc.add_paragraph(style='List Bullet')
-    r = b3.add_run("Fragmentasi Dialektal Lintas Wilayah: ")
-    r.bold = True
-    b3.add_run("Bahasa Sasak terdistribusi ke dalam lima klaster dialek utama yang ditandai oleh penanda diagnostik leksikal (shibboleths) yang kontras, mulai dari dialek Selaparang (Menu-Meni) di Lombok Timur hingga dialek arkais Kuto-Kute di Lombok Utara [9], [12].")
-
-    doc.add_paragraph(
-        "Penelitian pemrosesan morfologi komputasional terdahulu pada bahasa daerah nusantara umumnya terkonsentrasi pada Bahasa Jawa dan Bahasa Sunda [1], [13], [14], "
-        "sedangkan telaah komputasi untuk bahasa etnik di kawasan timur Indonesia masih sangat terbatas pada induksi leksikon dwibahasa [15]. "
-        "Tinjauan literatur sistematis terkini oleh Abidin, Junaidi, dan Wamiliana [13] menegaskan bahwa ketiadaan kamus digital terstandar dan aturan morfologi formal "
-        "menjadi hambatan utama dalam pembangunan sistem lematisasi bahasa daerah."
+    add_body(
+        "2) Enclitic Compounding and Sociopragmatics: Pronominal possessive enclitics (-ku, -m, -ne) and honorific sociolinguistic particles "
+        "(-de, -te) append directly to root words, reflecting strict social strata and politeness registers [11], while frequently triggering "
+        "severe overstemming or understemming in naive heuristic parsers [13]."
     )
-    doc.add_paragraph(
-        "Untuk menjawab tantangan ilmiah tersebut, penelitian ini memperkenalkan SasakNLP, sebuah kerangka kerja pemrosesan morfologi dan NLP sadar dialek "
-        "(dialect-aware) berstandar riset yang dirancang dari nol (from scratch) dengan prinsip clean architecture, efisiensi deterministik tanpa dependensi "
-        "eksternal berat, serta integrasi langsung dengan kamus terpadu Balai Bahasa Provinsi NTB [10], [16]. Mengadopsi prinsip morfologi dua tingkat (two-level morphology) "
-        "dan pemeringkatan kandidat multi-kriteria [17], SasakNLP mengatasi batas segmentasi morfem pada bahasa berdaya komputasi rendah [18]."
+    add_body(
+        "3) Dialectal Diversity: The language is partitioned into five distinct dialect clusters separated by isoglosses and diagnostic "
+        "lexical markers (shibboleths) [9], [12]."
     )
-    doc.add_paragraph(
-        "Kontribusi utama penelitian ini dirumuskan sebagai berikut:\n"
-        "• C1. Sumber Daya Leksikal Mesin SasakLex: Digitalisasi kamus terpadu Balai Bahasa Provinsi NTB sebanyak 2.761 entri terstruktur dengan penanda kelas kata dan dialek [10], [16].\n"
-        "• C2. Kerangka Morfologi Hibrida: Integrasi pengupasan afiks bertingkat (two-pass stripping), validasi PrefixTrie berkecepatan O(L), dan fungsi perankingan multi-kriteria [13], [17].\n"
-        "• C3. Analisis Morfologi Terstruktur: Penguraian morfonemik eksplisit atas prefiks, infiks, sufiks, konfiks, klitika, dan reduplikasi beserta skor keyakinan [17], [18].\n"
-        "• C4. Arsitektur Sadar Dialek: Mekanisme deteksi densitas penanda shibboleth untuk mengontekstualisasikan leksikon masukan lintas lima dialek Pulau Lombok [9], [12].\n"
-        "• C5. Tolok Ukur Terbuka dan Keterulangan Riset: Rilis publik tolok ukur 100.000 pasangan morfem, korpus 12.591 kalimat autentik, paket PyPI (sasaknlp), dan dataset Hugging Face Hub [16]."
+    add_body(
+        "Prior computational morphology research in Indonesia has predominantly addressed Javanese and Sundanese [1], [13], [14], while "
+        "computational methods for ethnic languages in Eastern Indonesia remain largely confined to bilingual lexicon induction [15]. "
+        "Systematic literature reviews confirm that the absence of structured digital lexicons and morphological analyzers remains the primary "
+        "barrier to regional language lemmatization [13]."
+    )
+    add_body(
+        "To overcome these barriers, we present SasakNLP, an open-source, reproducible computational framework [16]. Grounded in two-level "
+        "computational morphology [17] and morphological segmentation standards [18], the primary contributions of this work are:"
+    )
+    add_body(
+        "• Contribution 1 (SasakLex Machine Resource): Digitalization and structuring of the official Balai Bahasa Provinsi NTB integrated "
+        "dictionary into 2,761 machine-readable entries [10], [16]."
+    )
+    add_body(
+        "• Contribution 2 (Hybrid Morphological Framework): A deterministic architecture combining two-pass affix stripping, O(L) dictionary "
+        "validation via PrefixTrie, and multi-criteria candidate ranking [13], [17]."
+    )
+    add_body(
+        "• Contribution 3 (Structured Morphological Analysis): Explicit morpheme segmentation identifying prefixes, infixes, suffixes, "
+        "circumfixes, clitics, and reduplication with confidence scores [17], [18]."
+    )
+    add_body(
+        "• Contribution 4 (Dialect-Aware Architecture): Configurable dialect contextualization using diagnostic shibboleth density across "
+        "the five Sasak dialect regions [9], [12]."
+    )
+    add_body(
+        "• Contribution 5 (Open Research Infrastructure): Public release of the 100,000-pair gold-standard benchmark, the 12,591-sentence "
+        "authentic corpus, the PyPI package (sasaknlp), and Hugging Face Hub datasets [16]."
     )
 
-    # --- SECTION 2: PENELITIAN TERKAIT & LANDASAN LINGUISTIK ---
-    add_heading_1("2. Penelitian Terkait dan Landasan Linguistik (Related Work & Linguistic Background)")
-    add_heading_2("2.1. Penelitian Terkait Pemrosesan Morfologi Bahasa Daerah Nusantara")
-    doc.add_paragraph(
-        "Pengembangan teknologi bahasa daerah di Indonesia menghadapi tantangan kelangkaan data anotasi (data scarcity) yang persisten [1], [2], [6]. "
-        "Inisiatif NusaCrowd [6] dan tolok ukur NusaX [7] telah berhasil memetakan puluhan bahasa daerah ke dalam tugas evaluasi klasifikasi sentimen, "
-        "sementara NusaWrites [19] membuktikan pentingnya pengumpulan teks autentik dari penutur asli untuk menghindari artefak terjemahan mesin. "
-        "Namun, pada tataran pemrosesan morfologi mendasar (token-level morphological processing), model subword berbasis byte-pair encoding (BPE) "
-        "sering memecah kata berimbuhan bahasa daerah menjadi serpihan karakter tanpa makna leksikal yang utuh [3], [14]."
+    # ====================================================
+    # 2. RELATED WORK AND LINGUISTIC FOUNDATIONS
+    # ====================================================
+    add_sec_heading("2. RELATED WORK AND LINGUISTIC FOUNDATIONS")
+    add_subsec_heading("2.1 Regional Austronesian NLP Landscape")
+    add_body(
+        "Underrepresented language technologies in Indonesia suffer from persistent data scarcity [1], [2], [6]. Collaborative initiatives "
+        "like NusaCrowd [6] and NusaX [7] have aggregated regional language resources for classification tasks, while NusaWrites [19] "
+        "underscored the paramount importance of native speaker text curation over machine translation to avoid syntactic distortion. "
+        "However, token-level morphological processing for regional languages outside Java remains sparse, largely relying on ad-hoc heuristics [13]."
     )
-    doc.add_paragraph(
-        "Pada ranah bahasa daerah di Indonesia, Wijono et al. [14] menunjukkan bahwa segmentasi kanonik berbasis karakter afiks eksplisit mampu "
-        "mempertahankan integritas morfologis pada Bahasa Jawa melampaui tokenisasi subword standar. Di sisi lain, evaluasi skema morfologi formal "
-        "seperti MorphInd membuktikan bahwa aturan leksikon terstruktur esensial untuk membatasi ruang ambiguitas gramatikal [20]. "
-        "Tinjauan literatur sistematis oleh Abidin, Junaidi, dan Wamiliana [13] menyimpulkan bahwa penggabungan kamus digital rujukan dengan aturan "
-        "afiksasi bertingkat merupakan pendekatan paling efektif untuk meminimalkan overstemming dan understemming pada bahasa berdaya komputasi rendah. "
-        "Strategi integrasi leksikon kamus terverifikasi sebagai pengontrol gerbang (dictionary validation gate) juga selaras dengan temuan induksi leksikon "
-        "bahasa etnik oleh Resiandi et al. [15] serta prinsip morfologi komputasional klasik [17]."
-    )
-
-    add_heading_2("2.2. Sistem Morfologi dan Afiksasi Bahasa Sasak")
-    doc.add_paragraph(
-        "Merujuk pada kodifikasi tata bahasa dan leksikon resmi Balai Bahasa Provinsi NTB [10], kajian sosiopragmatik kesantunan Sasak [11], serta studi morfoleksikal mutakhir [9], [12], inventaris morfem terikat Bahasa Sasak terdiri atas:\n"
-        "1. Prefiks (Awalan): te- (verba pasif: pinaq -> tepinaq 'dibuat'), ka- (statif/adjektiva: solah -> kasolah 'diperbagus'), "
-        "se- (ekuatif/kesatuan: bale -> sebale 'serumah'), pe-/peng- (pembentuk nomina: gawi -> pegawi 'pekerja'), serta morfofonemik nasal N- (tulis -> nulis, pinaq -> minaq).\n"
-        "2. Sufiks (Akhiran): -ang (kausatif/aplikatif: tulung -> tulungang 'tolongkan'), -an (lokatif/hasil: keloror -> kelororan 'aliran'), -i/-in (iteratif: sirami, kaduan).\n"
-        "3. Infiks (Sisipan): -in- (pasif arkais: tulung -> tinulung 'diberi pertolongan') dan -um- (intransitif aktif: gingsir -> gumingsir 'bergeser').\n"
-        "4. Konfiks: ka-...-an (nomina kualitas: kasolahan), pe-...-an (nomina proses: pegawian), te-...-ang (pasif aplikatif: tetulungang), be-...-an (resiprokal: betulungan).\n"
-        "5. Enklitika Pronomina dan Kesantunan: posesif (-ku, -m, -ne) serta ragam halus/krama (-de, -te) [11], misalnya baturne ('temannya'), balende ('rumah Anda').\n"
-        "6. Reduplikasi: kata ulang penuh bertanda hubung (mangan-mangan, bareng-bareng)."
+    add_body(
+        "In Indonesian regional languages, canonical affix-level segmentation has proven superior to naive subword tokenization for preserving "
+        "morphemic integrity [14]. Furthermore, formal finite-state morphological evaluations indicate that structured lexicon grounding is "
+        "indispensable for resolving grammatical ambiguity [20]. The systematic literature review by Abidin et al. [13] established that affix "
+        "stripping and lemmatization for Indonesian regional languages require domain-specific digital dictionaries and explicit morphophonemic "
+        "rules to mitigate overstemming and understemming. Resiandi et al. [15] further proved the critical role of structured dictionaries in "
+        "modeling regional vocabulary transformations. Hence, integrating a curated lexicon as an active verification gate is crucial for preserving "
+        "root integrity in low-resource setups [13], [17]."
     )
 
-    add_heading_2("2.3. Taksonomi Dialek Bahasa Sasak")
-    doc.add_paragraph(
-        "Studi dialektologi kebahasaan di Nusa Tenggara Barat [9], [10], [12] memetakan variasi geolinguistik Bahasa Sasak ke dalam lima klaster dialek utama "
-        "berdasarkan kata diagnostik pembeda (shibboleths), sebagaimana disajikan dalam Tabel 1."
+    add_subsec_heading("2.2 Morphological System of Bahasa Sasak")
+    add_body(
+        "According to official grammatical codification by Balai Bahasa Provinsi NTB [10], sociopragmatic studies [11], and contemporary dialectological "
+        "research [9], [12], Sasak bound morphemes comprise:"
+    )
+    add_body(
+        "1) Prefixes: Passive te- (tepinaq 'is made'), stative ka- (kasolah 'beautified'), equative se- (sebale 'one house'), nominalizer "
+        "pe-/peng- (pegawi 'worker'), and nasal assimilation N- (nulis, minaq)."
+    )
+    add_body(
+        "2) Suffixes: Causative/applicative -ang (tulungang 'help for someone'), locative/resultative -an (kelororan 'waterway'), iterative "
+        "-i/-in (sirami)."
+    )
+    add_body(
+        "3) Infixes: Archaic passive -in- (tinulung 'received assistance') and intransitive -um- (gumingsir 'shift')."
+    )
+    add_body(
+        "4) Circumfixes: Abstract nominal pe-...-an (pegawian 'occupation'), passive applicative te-...-ang (tetulungang), stative ka-...-an, "
+        "reciprocal be-...-an (betulungan)."
+    )
+    add_body(
+        "5) Enclitics: First person -ku, second person -m, third person -ne, and polite register markers -de, -te (baturne, balende) [11]."
+    )
+    add_body(
+        "6) Reduplication: Full reduplication with hyphens (bareng-bareng, mangan-mangan)."
     )
 
-    # Tabel 1
-    t1_headers = ["No", "Klaster Dialek", "Sebaran Wilayah Geografis", "Penanda Diagnostik (Shibboleths)", "Ciri Fonologis & Sosiolek"]
+    add_subsec_heading("2.3 Dialect Taxonomy of Bahasa Sasak")
+    add_body(
+        "Following regional dialectological studies [9], [10], [12], Bahasa Sasak is grouped into five primary dialect clusters based on "
+        "diagnostic shibboleths (Table 1)."
+    )
+
+    t1_headers = ["No", "Dialect Cluster", "Geographical Range", "Diagnostic Markers", "Phonological & Sociolinguistic Features"]
     t1_data = [
-        ["1", "Selaparang (Menu-Meni)", "Lombok Timur & Tengah bagian Timur", "menu, meni, tiyang, kaken, kaji", "Ragam krama (alus), retensi glotal /-q/, dialek sastra lontar"],
-        ["2", "Ngeno-Ngene", "Kota Mataram & Lombok Barat", "ngeno, ngene, ente, aku", "Dialek perkotaan, artikulasi vokal cepat, kontak maritim"],
-        ["3", "Mriak-Mriku", "Lombok Tengah Selatan (Praya, Pujut)", "mriak, mriku, meriq, merik", "Deiksis spasial arah (ke mari / ke sana)"],
-        ["4", "Ngeto-Ngete", "Lombok Timur Utara (Sembalun, Suela)", "ngeto, ngete", "Komunitas dataran tinggi lereng Gunung Rinjani"],
-        ["5", "Kuto-Kute", "Lombok Utara (Bayan, Tanjung)", "kuto, kute, wetu", "Retensi arkais Austronesia tua, tradisi adat Wetu Telu"],
-        ["6", "Sasak Umum (General)", "Lintas Kabupaten (Ragam Baku)", "wah, ndeq, mangan, batur", "Bahasa pergaulan antardialek di ruang publik"]
+        ["1", "Selaparang (Menu-Meni)", "East & Central-East Lombok", "menu, meni, tiyang, kaji", "Polite register (krama/alus), glottal stop retention /-q/"],
+        ["2", "Ngeno-Ngene", "Mataram & West Lombok", "ngeno, ngene, ente, aku", "Urban dialect, rapid vocalic articulation, maritime trade contact"],
+        ["3", "Mriak-Mriku", "Central-South (Praya, Pujut)", "mriak, mriku, meriq, merik", "Spatial directional deictics (towards here / towards there)"],
+        ["4", "Ngeto-Ngete", "Northeast (Sembalun, Suela)", "ngeto, ngete", "Highland agricultural communities on Mount Rinjani slopes"],
+        ["5", "Kuto-Kute", "North Lombok (Bayan, Tanjung)", "kuto, kute, wetu", "Archaic Austronesian retention, customary Wetu Telu tradition"],
+        ["6", "General Sasak", "Cross-Island Standard", "wah, ndeq, mangan, batur", "Inter-dialectal lingua franca in public and educational domains"]
     ]
-    format_table(t1_headers, t1_data, col_widths=[0.4, 1.6, 1.8, 1.4, 1.8], alignment=[WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT])
-    add_caption("Tabel 1. Taksonomi 5 Klaster Dialek Utama Bahasa Sasak di Pulau Lombok [9], [10], [12].")
+    add_tbl(1, "Taxonomy of the Five Major Sasak Dialect Clusters in Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.3, 0.8, 0.7, 0.7, 0.7])
 
-    # --- SECTION 3: METODOLOGI SISTEM SASAKNLP ---
-    add_heading_1("3. Metodologi Sistem SasakNLP (Methodology & System Architecture)")
-    doc.add_paragraph(
-        "SasakNLP mengimplementasikan arsitektur modular deterministik enam tahap yang beroperasi tanpa dependensi pustaka pembelajaran mesin eksternal:\n"
-        "1. Normalisasi Ortografi: Komposisi Unicode NFC, standardisasi hentian glotal (q / '), dan preservasi vokal beraksen (è, é) [1], [6].\n"
-        "2. Tokenisasi Sadar Reduplikasi: Mendeteksi dwilingga bertanda hubung ([Kata]-[Kata]) sebagai satu kesatuan morfem [13], [17].\n"
-        "3. Kontekstualisasi Dialek: Menghitung densitas kemunculan shibboleth menggunakan Persamaan (1) [9], [12]:\n"
-        "   Confidence(d) = [Σ w∈T I(w ∈ Md) · ω(w)] / [Σ d'∈D Σ w∈T I(w ∈ Md') · ω(w)]   (1)\n"
-        "4. Pembangkitan Kandidat Morfologi: Pengupasan bertingkat (two-pass stripping) atas klitika, konfiks, prefiks/sufiks, dan infiks divalidasi ke PrefixTrie leksikon kamus Balai Bahasa NTB [10], [17], [18].\n"
-        "5. Perankingan Kandidat Multi-Kriteria: Menyelesaikan ambiguitas dengan fungsi skor terbobot Persamaan (2) [17]:\n"
-        "   Score(c) = w_lex·S_lex + w_morph·S_morph + w_conf·S_conf + w_freq·S_freq + w_dial·S_dial   (2)\n"
-        "   dengan bobot: w_lex=0,40; w_morph=0,25; w_conf=0,15; w_freq=0,10; w_dial=0,10.\n"
-        "6. Luaran Terstruktur: Menghasilkan lema dasar, kategori afiksasi, kelas dialek, dan skor keyakinan."
+    # ====================================================
+    # 3. METHODOLOGY AND SYSTEM ARCHITECTURE
+    # ====================================================
+    add_sec_heading("3. METHODOLOGY AND SYSTEM ARCHITECTURE")
+    add_subsec_heading("3.1 System Overview")
+    add_body(
+        "SasakNLP implements a deterministic six-stage modular pipeline designed without external deep learning framework dependencies, "
+        "ensuring predictable, reproducible, and millisecond-level execution latency."
     )
 
-    # --- SECTION 4: PENGATURAN EKSPERIMENTAL ---
-    add_heading_1("4. Pengaturan Eksperimental dan Kurasi Dataset (Experimental Setup & Dataset Protocol)")
-    add_heading_2("4.1. Protokol Akuisisi dan Kurasi Dataset 3-Fase")
-    doc.add_paragraph(
-        "Proses kurasi dataset tolok ukur mengikuti protokol ilmiah 3-fase terstruktur untuk memastikan ketiadaan artefak bising (Gambar 5)."
+    add_subsec_heading("3.2 Orthographic Normalization")
+    add_body(
+        "The normalization stage enforces Unicode NFC composition, standardizes typographical variations in Sasak glottal stop graphemes "
+        "(unifying curly apostrophes ’ and backticks into canonical glottal characters q or '), and cleans non-standard ASCII artifacts while "
+        "preserving accented vowel distinctions (è, é) [1], [6]."
     )
 
-    add_image_centered("figures/fig5_dataset_acquisition_pipeline.png", width_in=6.0, caption="Gambar 5. Protokol ilmiah 3-fase: akuisisi multi-sumber cerita rakyat & kamus Balai Bahasa NTB, kurasi kualitas 5-tahap, dan pembentukan tiga artefak riset baku emas Bahasa Sasak.")
-
-    doc.add_paragraph(
-        "Artefak riset yang dipublikasikan mencakup:\n"
-        "1. Tolok Ukur Morfologi 100k (benchmark_100k.csv): 100.000 pasangan data uji morfologi terkontrol mencakup bentuk turunan, lema acuan, afiksasi, dan dialek.\n"
-        "2. Tolok Ukur Morfologi Inti 10k (benchmark_10k.csv): 10.000 pasangan morfem inti untuk pengujian lematisasi standar.\n"
-        "3. Korpus Kalimat Autentik (sasak_sentences_large.csv): 12.591 kalimat autentik (188.881 kata) dari sastra lisan, media daerah, dan korpus Balai Bahasa NTB [10], [16], [21].\n"
-        "4. Leksikon Kamus NTB (kamus_balai_bahasa_ntb.csv): 2.761 entri leksikon kamus dwibahasa terpadu Balai Bahasa Provinsi NTB [10]."
+    add_subsec_heading("3.3 Reduplication-Aware Tokenization")
+    add_body(
+        "The tokenizer detects full hyphenated reduplications ([Root]-[Root]) as unified morphological constructs, preventing incorrect "
+        "splitting of iterative verbs and repetitive adverbs into disjoint tokens [13], [17]."
     )
 
-    add_heading_2("4.2. Lingkungan Komputasi dan Keterulangan")
-    doc.add_paragraph(
-        "Pengujian dijalankan pada CPU Apple Silicon (8-Core) dan Intel Core i7 (x86_64) dengan RAM 16 GB tanpa akselerasi GPU/TPU menggunakan Python 3.10+. "
-        "Seluruh evaluasi bersifat 100% deterministik dan dapat direproduksi menggunakan skrip evaluasi terbuka pada repositori riset [16]."
+    add_subsec_heading("3.4 Diagnostic Shibboleth Dialect Contextualization")
+    add_body(
+        "The dialect detector module calculates dialect confidence using relative shibboleth density across geographical clusters [9], [12]:"
+    )
+    add_equation("Confidence(d) = \\frac{\\sum_{w \\in T} \\mathbb{I}(w \\in M_d) \\cdot \\omega(w)}{\\sum_{d' \\in D} \\sum_{w \\in T} \\mathbb{I}(w \\in M_{d'}) \\cdot \\omega(w)}", "1")
+    add_body(
+        "where T represents the input tokens, Md is the set of diagnostic lexical markers for dialect d, and omega(w) denotes the lexical uniqueness weight."
     )
 
-    # --- SECTION 5: HASIL EVALUASI EMPIRIS ---
-    add_heading_1("5. Hasil Evaluasi Empiris (Empirical Results)")
-    add_heading_2("5.1. Evaluasi Komparatif terhadap Model Acuan (Baseline Comparison)")
-    doc.add_paragraph(
-        "Pengujian komparatif dilakukan terhadap dua model acuan konvensional pada 100.000 pasangan data benchmark:\n"
-        "• Baseline 1 (Direct Lexicon Lookup): Pencocokan eksak kamus leksikon tanpa aturan afiksasi.\n"
-        "• Baseline 2 (Greedy Affix Stripping): Pemotongan afiks terpanjang tanpa validasi kamus pengontrol [13]."
+    add_subsec_heading("3.5 Two-Pass Candidate Generation and PrefixTrie Validation")
+    add_body(
+        "Unrecognized surface forms are submitted to candidate generation. Two-pass affix stripping peels enclitics, outer circumfixes, "
+        "prefixes, suffixes, and infixes. Each candidate root is verified against the 2,761-word Balai Bahasa NTB dictionary using an O(L) "
+        "PrefixTrie data structure [10], [17], [18]."
     )
 
-    # Tabel 2
-    t2_headers = ["Model / Algoritma", "Prinsip Komputasi", "Prediksi Benar (N=100k)", "Akurasi (%)", "Throughput (kata/s)", "Karakteristik Linguistik"]
+    add_subsec_heading("3.6 Multi-Criteria Candidate Ranking")
+    add_body(
+        "Morphological ambiguities are resolved using a weighted scoring objective [17]:"
+    )
+    add_equation("Score(c) = w_{lex} S_{lex}(c) + w_{morph} S_{morph}(c) + w_{conf} S_{conf}(c) + w_{freq} S_{freq}(c) + w_{dial} S_{dial}(c)", "2")
+    add_body(
+        "with empirically optimized weights: w_lex = 0.40, w_morph = 0.25, w_conf = 0.15, w_freq = 0.10, and w_dial = 0.10."
+    )
+
+    add_subsec_heading("3.7 Structured Morphological Output")
+    add_body(
+        "The final pipeline generates structured JSON-compatible tuples containing base lemmas, grammatical affix breakdown, dialect classification, "
+        "and normalized confidence scores."
+    )
+
+    # ====================================================
+    # 4. EXPERIMENTAL SETUP AND DATASET PROTOCOL
+    # ====================================================
+    add_sec_heading("4. EXPERIMENTAL SETUP AND DATASET PROTOCOL")
+    add_subsec_heading("4.1 Research Data Resources")
+    add_body(
+        "The benchmark datasets were curated via a rigorous three-phase acquisition protocol (Fig. 1):"
+    )
+    add_body(
+        "1) Benchmark 100k (benchmark_100k.csv): 100,000 controlled morphological test pairs annotated with surface words, gold-standard lemmas, "
+        "affixation categories, and dialect metadata."
+    )
+    add_body(
+        "2) Benchmark 10k (benchmark_10k.csv): 10,000 core morphological pairs representing canonical daily vocabulary."
+    )
+    add_body(
+        "3) Authentic Corpus (sasak_sentences_large.csv): 12,591 authentic sentences (188,881 tokens) compiled from oral folklore (Putri Mandalika, "
+        "Dewi Anjani, Datu Doyan Nada), regional periodicals, and Balai Bahasa NTB archival records [10], [16], [21]."
+    )
+    add_body(
+        "4) Lexicon Dictionary (kamus_balai_bahasa_ntb.csv): 2,761 verified lemma entries from Balai Bahasa Provinsi NTB [10]."
+    )
+
+    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Three-Phase Scientific Acquisition And Quality Curation Protocol For SasakNLP Benchmarks.", width_in=3.2)
+
+    add_subsec_heading("4.2 Baseline Models")
+    add_body(
+        "We evaluate SasakNLP against two standard baseline algorithms on the 100,000-sample benchmark:\n"
+        "• Baseline 1 (Direct Lexicon Lookup): Exact lexicon matching without affix stripping.\n"
+        "• Baseline 2 (Greedy Affix Stripping): Longest-match affix removal without dictionary verification [13]."
+    )
+
+    add_subsec_heading("4.3 Evaluation Metrics and Experimental Environment")
+    add_body(
+        "Evaluation metrics include exact lemmatization accuracy, throughput (words/second), per-token latency (ms), overstemming rate, "
+        "understemming rate, and out-of-vocabulary (OOV) rate. Experiments were executed on Apple Silicon (8-Core) and Intel Core i7 x86_64 "
+        "CPUs with 16 GB RAM under Python 3.10+, guaranteeing 100% deterministic reproducibility [16]."
+    )
+
+    # ====================================================
+    # 5. RESULTS
+    # ====================================================
+    add_sec_heading("5. RESULTS")
+    add_subsec_heading("5.1 Baseline Comparison on the 100,000-Sample Benchmark")
+    add_body(
+        "Experimental results across the 100,000 morphological test pairs demonstrate the decisive superiority of SasakNLP (Table 2). "
+        "Baseline 1 achieves only 1.01% accuracy due to complete failure on affixed words. Baseline 2 obtains 55.21% but suffers from severe overstemming. "
+        "SasakNLP achieves 80.44% accuracy (80,438 correct predictions)."
+    )
+
+    t2_headers = ["Model / Algorithm", "Computational Principle", "Correct (N=100k)", "Accuracy (%)", "Throughput (wps)"]
     t2_data = [
-        ["Baseline 1: Direct Lookup", "Exact Dictionary Matching", "1.006", "1,01%", "24.500", "Gagal total menangani 98,99% kata turunan berimbuhan."],
-        ["Baseline 2: Greedy Stripping", "Longest-Match Affix Stripping", "55.205", "55,21%", "18.200", "Mengalami overstemming parah pada akar kata asli."],
-        ["Proposed SasakNLP", "Dictionary-Enhanced Multi-Candidate", "80.438", "80,44%", "7.826", "Keseimbangan optimal presisi, proteksi lema, dan dekomposisi klitika."]
+        ["Baseline 1: Direct Lookup", "Exact Dictionary Matching", "1,006", "1.01%", "24,500"],
+        ["Baseline 2: Greedy Stripping", "Longest-Match Affix Stripping", "55,205", "55.21%", "18,200"],
+        ["Proposed SasakNLP", "Dictionary-Enhanced Multi-Candidate", "80,438", "80.44%", "7,826"]
     ]
-    format_table(t2_headers, t2_data, col_widths=[1.5, 1.4, 0.9, 0.8, 0.8, 1.6], alignment=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.LEFT])
-    add_caption("Tabel 2. Evaluasi Komparatif terhadap Model Acuan pada 100.000 Data Morfologi.")
+    add_tbl(2, "Comparative Lemmatization Evaluation On 100,000 Morphological Samples", t2_headers, t2_data, col_widths=[0.8, 0.9, 0.5, 0.5, 0.5])
 
-    doc.add_paragraph(
-        "Uji Signifikansi Statistik McNemar: Perbandingan berpasangan antara SasakNLP dan Baseline 2 menghasilkan b = 33.892 dan c = 8.659. "
-        "Nilai statistik uji χ² = 14.962,14 (df = 1, p < 0,0001). Keunggulan SasakNLP terbukti signifikan secara statistik pada α = 0,001."
+    add_body(
+        "McNemar's test comparing SasakNLP and Baseline 2 reveals contingency counts b = 33,892 and c = 8,659, yielding chi-squared = 14,962.14 "
+        "(df = 1, p < 0.0001). SasakNLP's performance advantage is statistically significant at alpha = 0.001."
     )
 
-    add_heading_2("5.2. Kinerja pada Benchmark Inti 10k")
-    doc.add_paragraph(
-        "Pada tolok ukur inti 10.000 pasangan morfem (benchmark_10k.csv), SasakNLP mencatatkan 9.323 prediksi benar dari 10.000 sampel uji, "
-        "yang setara dengan akurasi 93,23% dan kecepatan eksekusi 16.272 kata per detik."
+    add_subsec_heading("5.2 Performance on the Core 10k Benchmark")
+    add_body(
+        "On the 10,000-pair core morphological benchmark (benchmark_10k.csv), SasakNLP achieves 9,323 correct predictions (93.23% accuracy) "
+        "at 16,272 words per second, reflecting high precision on natural morpheme distributions without multi-layer nesting anomalies."
     )
 
-    add_heading_2("5.3. Studi Ablasi Komponen Arsitektur")
-    doc.add_paragraph(
-        "Untuk mengisolasi kontribusi masing-masing modul komputasi, dilakukan studi ablasi bertahap pada 100.000 sampel uji (Tabel 3)."
+    add_subsec_heading("5.3 Architectural Component Ablation Study")
+    add_body(
+        "To quantify the contribution of each algorithmic module, we conducted an ablation study on the 100,000-sample benchmark (Table 3). "
+        "Adding PrefixTrie dictionary gating improves accuracy by +13.24% over greedy stripping, while candidate generation and ranking provide "
+        "an additional +11.99% accuracy gain."
     )
 
-    # Tabel 3
-    t3_headers = ["Konfigurasi Model", "Aturan Afiks", "Validasi Kamus", "Generator", "Ranker", "Dialek", "Akurasi (%)", "Throughput"]
+    t3_headers = ["Configuration", "Rules", "Dict", "Gen", "Rank", "Dialect", "Acc (%)", "Throughput"]
     t3_data = [
-        ["M1: Direct Lookup", "Tidak", "Ya", "Tidak", "Tidak", "Tidak", "1,01%", "24.500 wps"],
-        ["M2: Greedy Stripping", "Ya", "Tidak", "Tidak", "Tidak", "Tidak", "55,21%", "18.200 wps"],
-        ["M3: Rules + Dict Gate", "Ya", "Ya", "Tidak", "Tidak", "Tidak", "68,45%", "14.100 wps"],
-        ["M4: Rules + Gen + First Match", "Ya", "Ya", "Ya", "Tidak", "Tidak", "74,12%", "10.350 wps"],
-        ["M5: Full Proposed SasakNLP", "Ya", "Ya", "Ya", "Ya", "Ya", "80,44%", "7.826 wps"]
+        ["M1: Direct Lookup", "No", "Yes", "No", "No", "No", "1.01%", "24,500 wps"],
+        ["M2: Greedy Stripping", "Yes", "No", "No", "No", "No", "55.21%", "18,200 wps"],
+        ["M3: Rules + Dict Gate", "Yes", "Yes", "No", "No", "No", "68.45%", "14,100 wps"],
+        ["M4: Rules + Gen + First Match", "Yes", "Yes", "Yes", "No", "No", "74.12%", "10,350 wps"],
+        ["M5: Full Proposed SasakNLP", "Yes", "Yes", "Yes", "Yes", "Yes", "80.44%", "7,826 wps"]
     ]
-    format_table(t3_headers, t3_data, col_widths=[1.8, 0.7, 0.7, 0.7, 0.7, 0.6, 0.9, 0.9], alignment=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.CENTER, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT])
-    add_caption("Tabel 3. Studi Ablasi Kontribusi Komponen Sistem SasakNLP (100.000 Data).")
+    add_tbl(3, "Ablation Study Across SasakNLP Architectural Components (100k Data)", t3_headers, t3_data, col_widths=[0.8, 0.3, 0.3, 0.3, 0.3, 0.3, 0.4, 0.5])
 
-    add_heading_2("5.4. Kinerja Berdasarkan Kategori Morfem")
-    doc.add_paragraph(
-        "Evaluasi disaggregasi morfologis (Gambar 1 dan Tabel 4) menunjukkan performa stabil pada afiks tunggal dan reduplikasi."
+    add_subsec_heading("5.4 Morpheme-Level Performance Disaggregation")
+    add_body(
+        "Performance breakdown across grammatical categories (Fig. 2 and Table 4) confirms robust handling of single affixes and reduplication. "
+        "Reduplication achieves 100.00%, passive prefixes reach 97.36%, stative prefixes reach 96.79%, and possessive clitics exceed 94.6%–96.5%."
     )
 
-    add_image_centered("figures/fig1_morphology_accuracy.png", width_in=6.0, caption="Gambar 1. Rincian akurasi aturan morfologi SasakNLP pada seluruh kelas afiksasi (diuji pada 100.000 pasangan data morfem).")
+    add_fig("figures/fig1_morphology_accuracy.png", 2, "Morphological Rule Accuracy Across Grammatical Affix Classes (100k Data).", width_in=3.2)
 
-    # Tabel 4
-    t4_headers = ["Kategori Morfologi", "Pola Morfologis", "Jumlah Sampel", "Akurasi (%)", "Karakteristik Linguistik & Penanganan"]
+    t4_headers = ["Category", "Pattern", "Samples", "Accuracy (%)", "Linguistic Characteristics"]
     t4_data = [
-        ["Reduplikasi", "root-root", "1.789", "100,00%", "Penanganan sempurna kata ulang dwilingga (mangan-mangan, bareng-bareng)."],
-        ["Prefiks Pasif", "te-", "1.783", "97,36%", "Verba pasif (tetulung, tepinaq)."],
-        ["Prefiks Statif", "ka-", "1.745", "96,79%", "Penanda keadaan (kasolah, kabeleq)."],
-        ["Prefiks Peng-", "peng-", "1.781", "96,91%", "Pembentuk nomina pelaku/alat (penggawi, pengonang)."],
-        ["Prefiks Ekuatif", "se-", "1.748", "96,22%", "Penanda kesatuan/ekuatif (sebale, sekance)."],
-        ["Klitika Posesif 1", "-ku", "1.782", "96,58%", "Enklitika orang pertama (baleku, jaranku)."],
-        ["Klitika Posesif 2", "-m", "1.778", "96,18%", "Enklitika orang kedua akrab (matam, bajum)."],
-        ["Klitika Posesif 3", "-ne", "3.571", "94,62%", "Enklitika orang ketiga (baturne, kawanne)."],
-        ["Sufiks Iteratif", "-i", "1.771", "91,53%", "Sufiks pengulangan tindakan (sirami, antoli)."],
-        ["Infiks Pasif & Kausatif", "-in-, -um-", "2.346", "89,98%", "Sisipan produktif Sasak (tinulung, gumingsir)."],
-        ["Klitika Santun", "-de, -te", "6.312", "88,39%", "Klitika ragam halus Sasak (balende, balente)."],
-        ["Konfiks Pasif Kausatif", "te-...-ang", "4.578", "96,96%", "Konfiks pasif aplikatif (tetulungang)."],
-        ["Konfiks Nomina", "pe-...-an", "5.915", "88,32%", "Pembentuk nomina abstrak (pegawian)."],
-        ["Sufiks Transitif", "-ang", "6.170", "83,70%", "Sufiks kausatif aktif (tulungang, pinaqang)."],
-        ["Sufiks Lokatif", "-an, -in", "10.545", "76,52%", "Penanda lokatif/tujuan (kaduan, siramin)."],
-        ["Konfiks Resiprokal", "be-...-an", "1.710", "65,09%", "Tindakan berbalasan (betulungan, besambatan)."]
+        ["Reduplication", "root-root", "1,789", "100.00%", "Perfect handling of full reduplication (mangan-mangan)"],
+        ["Passive Prefix", "te-", "1,783", "97.36%", "Passive verbs (tetulung, tepinaq)"],
+        ["Stative Prefix", "ka-", "1,745", "96.79%", "Stative condition markers (kasolah, kabeleq)"],
+        ["Nominal Prefix", "peng-", "1,781", "96.91%", "Agentive and instrument nominalizer (penggawi)"],
+        ["Equative Prefix", "se-", "1,748", "96.22%", "Equative and collective prefix (sebale, sekance)"],
+        ["Clitic Possessive 1", "-ku", "1,782", "96.58%", "First-person possessive enclitic (baleku, jaranku)"],
+        ["Clitic Possessive 2", "-m", "1,778", "96.18%", "Second-person familiar enclitic (matam, bajum)"],
+        ["Clitic Possessive 3", "-ne", "3,571", "94.62%", "Third-person possessive enclitic (baturne, kawanne)"],
+        ["Iterative Suffix", "-i", "1,771", "91.53%", "Iterative action suffix (sirami, antoli)"],
+        ["Infixes", "-in-, -um-", "2,346", "89.98%", "Archaic passive and intransitive infixes (tinulung)"],
+        ["Polite Clitics", "-de, -te", "6,312", "88.39%", "Honorific polite enclitics (balende, balente)"],
+        ["Circumfix Passive", "te-...-ang", "4,578", "96.96%", "Passive applicative circumfix (tetulungang)"],
+        ["Circumfix Nominal", "pe-...-an", "5,915", "88.32%", "Abstract nominalizer (pegawian)"],
+        ["Causative Suffix", "-ang", "6,170", "83.70%", "Active causative/applicative suffix (tulungang)"],
+        ["Locative Suffix", "-an, -in", "10,545", "76.52%", "Locative and resultative suffix (kaduan, siramin)"],
+        ["Reciprocal", "be-...-an", "1,710", "65.09%", "Reciprocal mutual action circumfix (betulungan)"]
     ]
-    format_table(t4_headers, t4_data, col_widths=[1.5, 1.0, 0.9, 0.9, 2.7], alignment=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.LEFT])
-    add_caption("Tabel 4. Rincian Kinerja Lematisasi per Kategori Morfem pada 100.000 Sampel Uji.")
+    add_tbl(4, "Disaggregated Performance Across Morpheme Categories On 100,000 Samples", t4_headers, t4_data, col_widths=[0.6, 0.5, 0.4, 0.5, 1.2])
 
-    add_heading_2("5.5. Evaluasi Lintas 5 Dialek Bahasa Sasak")
-    doc.add_paragraph(
-        "Evaluasi pada lima klaster dialek mengonfirmasi ketahanan leksikal model di seluruh Pulau Lombok (Gambar 2 dan Tabel 5)."
+    add_subsec_heading("5.5 Cross-Dialect Evaluation")
+    add_body(
+        "Cross-dialect evaluation across the five Sasak dialect regions (Fig. 3 and Table 5) confirms strong generalization across Lombok Island."
     )
 
-    add_image_centered("figures/fig2_dialect_performance.png", width_in=6.0, caption="Gambar 2. Perbandingan performa lematisasi SasakNLP lintas lima klaster dialek utama Bahasa Sasak.")
+    add_fig("figures/fig2_dialect_performance.png", 3, "Cross-Dialect Lemmatization Accuracy Across Five Major Sasak Dialect Clusters.", width_in=3.2)
 
-    # Tabel 5
-    t5_headers = ["Wilayah Penutur", "Nama Dialek Sasak", "Jumlah Sampel", "Akurasi (%)", "Karakteristik Vokal & Fonem Utama"]
+    t5_headers = ["Region", "Dialect Cluster", "Samples", "Accuracy (%)", "Primary Vocalic & Phonemic Features"]
     t5_data = [
-        ["Lombok Barat & Mataram", "Sasak Umum (General)", "43.254", "85,73%", "Sesuai ragam baku kamus Balai Bahasa NTB."],
-        ["Lombok Utara", "Kuto-Kute", "10.475", "80,31%", "Vokal akhir /-e/ dan /-o/ (kuto, kute), retensi arkais."],
-        ["Lombok Selatan", "Merikuq-Merikaq", "10.535", "79,79%", "Vokal /-a/ dan /-u/ dengan hentian glotal /-q/."],
-        ["Lombok Tengah", "Meno-Mene", "23.023", "77,04%", "Vokal /-e/, dialek dengan jumlah penutur terbanyak."],
-        ["Lombok Timur", "Ngeno-Ngene", "12.713", "69,24%", "Variasi sengau vokal /-e/ dan konsonan velar /-k/."]
+        ["Mataram / West Lombok", "General Sasak", "43,254", "85.73%", "Aligns with official Balai Bahasa NTB standard lexicon"],
+        ["North Lombok", "Kuto-Kute", "10,475", "80.31%", "Final vowels /-e/ and /-o/ (kuto, kute), archaic retention"],
+        ["South Lombok", "Merikuq-Merikaq", "10,535", "79.79%", "Vowels /-a/ and /-u/ with persistent glottal stop /-q/"],
+        ["Central Lombok", "Meno-Mene", "23,023", "77.04%", "Characteristic vowel /-e/, largest speaker population"],
+        ["East Lombok", "Ngeno-Ngene", "12,713", "69.24%", "Nasal vocalic shifts and final velar consonant /-k/"]
     ]
-    format_table(t5_headers, t5_data, col_widths=[1.6, 1.5, 0.9, 0.9, 2.1], alignment=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.LEFT])
-    add_caption("Tabel 5. Performa Lematisasi Lintas 5 Klaster Dialek Utama Sasak (100.000 Data).")
+    add_tbl(5, "Lemmatization Performance Across Five Major Sasak Dialect Clusters (100k Data)", t5_headers, t5_data, col_widths=[0.6, 0.6, 0.4, 0.5, 1.1])
 
-    add_heading_2("5.6. Efisiensi Komputasi dan Latensi Eksekusi")
-    doc.add_paragraph(
-        "Pengukuran komputasi membuktikan bahwa SasakNLP beroperasi dengan kecepatan tinggi dan skalabilitas linier (Gambar 4):\n"
-        "• Throughput: Memproses 7.826 kata/detik pada batch 100k dan 16.272 kata/detik pada benchmark 10k.\n"
-        "• Latensi Rata-Rata: 0,044 milidetik per token kata.\n"
-        "• Kompleksitas Waktu: Skalabilitas linier O(N) terhadap panjang kalimat.\n"
-        "• Dependensi Pustaka: Zero runtime dependencies, murni pustaka standar Python."
+    add_subsec_heading("5.6 Computational Scalability and Runtime Latency")
+    add_body(
+        "Computational profiling indicates linear O(N) scaling (Fig. 4). Throughput reaches 7,826 words/second on 100k batches and 16,272 words/second "
+        "on 10k benchmarks, with average per-token latency of 0.044 ms."
     )
 
-    add_image_centered("figures/fig4_pipeline_benchmark.png", width_in=6.0, caption="Gambar 4. Kinerja komputasi SasakNLP: throughput kata per detik (kiri) dan profil latensi per kalimat berdasarkan jumlah token (kanan).")
+    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Computational Scalability And Latency Profile Of SasakNLP Across Token Lengths.", width_in=3.2)
 
-    add_heading_2("5.7. Evaluasi Ekstrinsik: Kompresi Ruang Fitur Kosakata")
-    doc.add_paragraph(
-        "Pada evaluasi hilir, lematisasi SasakNLP berhasil mereduksi dimensi kosakata korpus teks autentik dari 5.913 kata unik menjadi 4.022 lema dasar "
-        "(kompresi ruang fitur sebesar 31,98%, Tabel 6), memangkas sparsity matriks representasi vektor teks untuk efisiensi tugas klasifikasi dan temu balik informasi [13], [22]."
+    add_subsec_heading("5.7 Extrinsic Feature Space Dimensionality Reduction")
+    add_body(
+        "In downstream evaluation, applying SasakNLP lemmatization compressed the vocabulary feature space of the authentic corpus from 5,913 unique "
+        "surface tokens to 4,022 base lemmas (31.98% dimensional reduction, Table 6), directly reducing matrix sparsity for downstream classification "
+        "and retrieval pipelines [13], [22]."
     )
 
-    # Tabel 6
-    t6_headers = ["Parameter Korpus / Dataset", "Jumlah Bentuk Permukaan", "Jumlah Lema Dasar", "Rasio Reduksi Dimensi", "Dampak pada Pemodelan NLP Hilir"]
+    t6_headers = ["Corpus / Dataset Parameter", "Unique Surface Tokens", "Base Root Lemmas", "Dimensional Reduction Ratio", "Impact on Downstream NLP Pipelines"]
     t6_data = [
-        ["Benchmark Morfologi (100k)", "100.000 bentuk unik", "1.790 lema", "98,21%", "Mengurangi beban komparasi leksikal hingga 55× lipat."],
-        ["Korpus Teks Riil (189k token)", "5.913 kata unik", "4.022 lema", "31,98%", "Memangkas sparsity matriks representasi teks sebesar 32%."]
+        ["Benchmark Morfologi (100k)", "100,000 unique forms", "1,790 root lemmas", "98.21%", "Reduces lexical lookup search space by 55×"],
+        ["Authentic Corpus (189k tokens)", "5,913 unique words", "4,022 root lemmas", "31.98%", "Reduces feature matrix sparsity by 32%"]
     ]
-    format_table(t6_headers, t6_data, col_widths=[1.5, 1.1, 1.0, 1.0, 1.9], alignment=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.LEFT])
-    add_caption("Tabel 6. Evaluasi Reduksi Ruang Fitur Kosakata pada Dataset Riset.")
+    add_tbl(6, "Evaluation Of Vocabulary Feature Space Compression On Research Datasets", t6_headers, t6_data, col_widths=[0.8, 0.6, 0.5, 0.5, 0.8])
 
-    # --- SECTION 6: PEMBAHASAN & ANALISIS TAKSONOMI KESALAHAN ---
-    add_heading_1("6. Pembahasan dan Analisis Taksonomi Kesalahan (Discussion & Error Analysis)")
-    add_heading_2("6.1. Analisis Taksonomi Kesalahan (Error Taxonomy)")
-    doc.add_paragraph(
-        "Diagnosis komprehensif atas kegagalan morfologis dipetakan pada Tabel 7 dan Gambar 3."
+    # ====================================================
+    # 6. DISCUSSION AND ERROR ANALYSIS
+    # ====================================================
+    add_sec_heading("6. DISCUSSION AND ERROR ANALYSIS")
+    add_subsec_heading("6.1 Error Taxonomy and Failure Mode Analysis")
+    add_body(
+        "A comprehensive diagnostic evaluation on the 100,000-sample benchmark classifies failure modes into four categories (Fig. 5, Table 7)."
     )
 
-    add_image_centered("figures/fig3_error_taxonomy.png", width_in=6.0, caption="Gambar 3. Distribusi taksonomi kesalahan lematisasi (panel kiri) dan matriks diagnosis kegagalan linguistik (panel kanan).")
+    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribution Of Lemmatization Error Taxonomy (Left) And Failure Mode Diagnostic Matrix (Right).", width_in=3.2)
 
-    # Tabel 7
-    t7_headers = ["Klasifikasi Kesalahan", "Definisi Komputasional", "Contoh Masukan -> Prediksi", "Frekuensi", "Persentase", "Akar Masalah Linguistik"]
+    t7_headers = ["Classification", "Computational Definition", "Example Input -> Pred", "Count", "Pct (%)", "Root Linguistic Cause"]
     t7_data = [
-        ["Prediksi Benar", "Lema prediksi identik lema kamus.", "tepinaq -> pinaq", "80.438", "80,44%", "Aturan afiksasi dan leksikon cocok tepat."],
-        ["Understemming", "Panjang lema prediksi > lema acuan.", "pegawianne -> pegawian (gawi)", "15.856", "15,86%", "Imbuhan bertingkat 3 lapis belum tuntas terkelupas."],
-        ["Overstemming", "Huruf akar kata asli terpotong.", "jaran -> jar (sufiks -an)", "2.279", "2,28%", "Huruf akhir akar kata menyerupai morfem terikat."],
-        ["Incorrect Lemma", "Panjang sama, karakter berbeda.", "mangan -> pangan (mangan)", "1.427", "1,43%", "Ambiguitas alternasi nasal (m -> p vs m -> m)."],
-        ["Out-of-Vocabulary", "Lema tidak ada dalam leksikon.", "Kata serapan / neologisme", "0", "0,00%", "Seluruh lema benchmark berbasis leksikon rujukan."]
+        ["Correct", "Predicted lemma matches gold lemma", "tepinaq -> pinaq", "80,438", "80.44%", "Exact match in rules and lexicon"],
+        ["Understemming", "Predicted lemma length > gold lemma", "pegawianne -> pegawian (gawi)", "15,856", "15.86%", "Triple-layer nesting not stripped in pass one"],
+        ["Overstemming", "Root character mistakenly removed", "jaran -> jar (-an stripped)", "2,279", "2.28%", "Root ending resembles bound suffix"],
+        ["Incorrect Lemma", "Equal length, mismatched characters", "mangan -> pangan (mangan)", "1,427", "1.43%", "Nasal alternation ambiguity (m -> p vs m -> m)"],
+        ["OOV Error", "Root absent from machine lexicon", "Loanwords / neologisms", "0", "0.00%", "All benchmark roots covered by dictionary"]
     ]
-    format_table(t7_headers, t7_data, col_widths=[1.2, 1.4, 1.4, 0.7, 0.7, 1.5], alignment=[WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.LEFT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.RIGHT, WD_ALIGN_PARAGRAPH.LEFT])
-    add_caption("Tabel 7. Analisis Taksonomi Kesalahan pada 100.000 Data Uji.")
+    add_tbl(7, "Error Taxonomy Analysis On 100,000 Morphological Benchmark Samples", t7_headers, t7_data, col_widths=[0.6, 0.7, 0.7, 0.4, 0.3, 0.5])
 
-    add_heading_2("6.2. Mengapa SasakNLP Bekerja Efektif")
-    doc.add_paragraph(
-        "Keunggulan performa SasakNLP bersumber dari integrasi PrefixTrie sebagai gerbang validasi kamus leksikon [10], [17]. Pada pendekatan greedy stripping murni (Baseline 2), "
-        "kata seperti jaran ('kuda') secara keliru dipotong menjadi jar karena akhiran -an terdeteksi sebagai sufiks lokatif. Dalam SasakNLP, kata jaran dicocokkan "
-        "langsung ke leksikon kamus Balai Bahasa NTB pada lintasan pertama, sehingga pemotongan keliru dapat dicegah (zero unnecessary stripping)."
+    add_subsec_heading("6.2 Algorithmic Strengths of Dictionary-Gated Parsing")
+    add_body(
+        "SasakNLP's high precision stems from PrefixTrie dictionary gating [10], [17]. In naive greedy stripping (Baseline 2), roots ending in -an "
+        "(such as jaran 'horse') are truncated to jar. In SasakNLP, jaran matches the verified lexicon on pass one, preventing unnecessary truncation."
     )
 
-    add_heading_2("6.3. Analisis Kesenjangan Kinerja 100k vs 10k")
-    doc.add_paragraph(
-        "Perbedaan akurasi antara benchmark 100k (80,44%) dan benchmark 10k (93,23%) mencerminkan perbedaan kompleksitas linguistik. Benchmark 100k berfungsi sebagai "
-        "stress-test yang sengaja memasukkan kombinasi imbuhan berlapis tiga (misalnya konfiks pe-...-an yang ditambah enklitika -ne dan prefiks te-), di mana algoritma "
-        "two-pass terkadang berhenti sebelum lema dasar terdalam tercapai (understemming 15,86%). Sementara pada benchmark 10k, sebaran afiksasi mencerminkan frekuensi "
-        "penggunaan alami dalam tuturan sehari-hari."
+    add_subsec_heading("6.3 Complexity Discrepancy between Benchmarks")
+    add_body(
+        "The accuracy difference between the 100k benchmark (80.44%) and the 10k core benchmark (93.23%) reflects morphological complexity. The 100k "
+        "benchmark functions as an exhaustive stress-test with triple-layer nested affixations (e.g., pe-...-an with -ne and te-), whereas the 10k core "
+        "benchmark mirrors natural daily distribution."
     )
 
-    add_heading_2("6.4. Implikasi bagi Ekosistem NLP Bahasa Daerah")
-    doc.add_paragraph(
-        "Temuan ini membuktikan bahwa bahasa daerah berdaya komputasi rendah di Indonesia dapat ditangani secara efektif melalui rekayasa representasi morfologi "
-        "berbasis leksikon kamus resmi daerah tanpa harus bergantung pada infrastruktur komputasi GPU berskala besar [1], [6], [13]."
+    add_subsec_heading("6.4 Implications for Underrepresented Indigenous NLP")
+    add_body(
+        "These results demonstrate that underrepresented regional languages in Indonesia can achieve robust morphological processing through "
+        "dictionary-grounded rule architectures without expensive GPU infrastructure [1], [6], [13]."
     )
 
-    # --- SECTION 7: KETERBATASAN PENELITIAN ---
-    add_heading_1("7. Keterbatasan Penelitian (Limitations)")
-    doc.add_paragraph(
-        "Sebagai pertanggungjawaban ilmiah yang transparan, naskah ini menguraikan batasan riset saat ini:\n"
-        "1. Ketergantungan Kosakata Terkontrol: Evaluasi skala 100.000 data dilakukan pada kombinasi morfem teratur berbasis lema kamus terdaftar. Evaluasi pada teks media sosial tak berstruktur yang memuat neologisme slang kontemporer masih memerlukan penelitian lanjutan.\n"
-        "2. Keseimbangan Korpus Dialek: Sebaran korpus kalimat autentik saat ini masih didominasi oleh dialek Sasak Umum dan Lombok Timur, merefleksikan ketersediaan dokumen literatur daerah yang terdokumentasi.\n"
-        "3. Ketiadaan Konteks Sintaksis Kalimat: Sistem lematisasi saat ini beroperasi pada tingkat kata/token berbasis leksikon tanpa memanfaatkan model penanda kelas kata (Part-of-Speech Tagger) tingkat kalimat."
+    # ====================================================
+    # 7. LIMITATIONS
+    # ====================================================
+    add_sec_heading("7. LIMITATIONS")
+    add_body(
+        "We transparently document three primary limitations of this study:\n"
+        "1) Controlled Vocabulary Scope: The 100k benchmark evaluates systematic morpheme combinations grounded in verified dictionary lemmas. Open social "
+        "media text with contemporary slang neologisms requires ongoing lexicon expansion.\n"
+        "2) Dialect Corpus Balance: Authentic folklore sentences are currently skewed toward General and East Lombok dialects due to historical textual availability.\n"
+        "3) Absence of Syntactic Context: The current pipeline operates at word and token levels without sentence-level Part-of-Speech tagging context."
     )
 
-    # --- SECTION 8: KESIMPULAN & RISET MASA DEPAN ---
-    add_heading_1("8. Kesimpulan dan Agenda Riset Masa Depan (Conclusion & Future Directions)")
-    doc.add_paragraph(
-        "Penelitian ini berhasil merancang, mengimplementasikan, dan mengevaluasi SasakNLP, sebuah kerangka kerja pemrosesan morfologi dan NLP sadar dialek "
-        "pertama untuk Bahasa Sasak. Berbasis pengujian 100.000 pasangan data uji terverifikasi, SasakNLP mencapai akurasi lematisasi 80,44% pada benchmark penuh "
-        "dan 93,23% pada benchmark inti 10k, menekan overstemming hingga 2,28%, serta membukukan throughput tinggi 7.826–16.272 kata/detik dengan latensi "
-        "0,044 ms/kata tanpa dependensi pustaka berat eksternal."
+    # ====================================================
+    # 8. CONCLUSION AND FUTURE DIRECTIONS
+    # ====================================================
+    add_sec_heading("8. CONCLUSION AND FUTURE DIRECTIONS")
+    add_body(
+        "This paper presented SasakNLP, the first dialect-aware morphological framework for Bahasa Sasak. Evaluated across 100,000 benchmark pairs, "
+        "SasakNLP achieves 80.44% accuracy on the full stress-test benchmark and 93.23% on the core 10k benchmark, restricting overstemming to 2.28%, "
+        "with throughput exceeding 7,800–16,000 words/second and 0.044 ms latency."
     )
-    doc.add_paragraph(
-        "Agenda riset masa depan mencakup: (1) Integrasi model sequence-to-sequence probabilistik ringan (ByT5 / Char-BiLSTM) untuk menangani kata slang di luar kamus (OOV neologisms), "
-        "(2) Pembangunan korpus beranotasi Part-of-Speech (POS) dan Dependency Treebank Bahasa Sasak pertama, serta "
-        "(3) Pelatihan model penerjemahan mesin saraf (Neural Machine Translation) dwiarah Sasak-Indonesia [1], [2], [6]."
-    )
-
-    # --- DATA AVAILABILITY ---
-    add_heading_1("Pernyataan Ketersediaan Data dan Perangkat Lunak (Data Availability)")
-    doc.add_paragraph(
-        "Demi keterbukaan sains (open science) dan keterulangan riset (reproducibility), seluruh artefak riset dapat diakses secara bebas:\n"
-        "• Paket Resmi PyPI: https://pypi.org/project/sasaknlp/ (pip install sasaknlp)\n"
-        "• Repositori Kode Sumber GitHub: https://github.com/kodetr/sasaknlp\n"
-        "• Dataset Resmi Hugging Face: https://huggingface.co/datasets/kodetr/sasak-benchmark-100k\n"
-        "• Demonstrasi Interaktif Web Space: https://huggingface.co/spaces/kodetr/sasaknlp-demo\n"
-        "• Website Peneliti: https://kodetr.com"
+    add_body(
+        "Future directions include: 1) Integrating lightweight sequence-to-sequence models (ByT5 / Char-BiLSTM) for OOV neologism handling, "
+        "2) Constructing the first annotated Sasak Dependency Treebank, and 3) Training bidirectional Sasak-Indonesian Neural Machine Translation models [1], [2], [6]."
     )
 
-    # --- ACKNOWLEDGMENTS ---
-    add_heading_1("Ucapan Terima Kasih (Acknowledgments)")
-    doc.add_paragraph(
-        "Penulis menyampaikan apresiasi dan terima kasih kepada para penutur asli dan pegiat bahasa Sasak di Pulau Lombok, "
-        "peneliti dialektologi terdahulu, serta Balai Bahasa Provinsi Nusa Tenggara Barat atas dedikasi dalam penyusunan "
-        "kamus dwibahasa Sasak-Indonesia yang menjadi landasan leksikal bagi pengembangan teknologi komputasi ini."
+    # ====================================================
+    # ACKNOWLEDGMENT
+    # ====================================================
+    add_sec_heading("ACKNOWLEDGMENT")
+    add_body(
+        "The author expresses sincere gratitude to the native speakers and cultural custodians across Lombok Island, previous dialectological researchers, "
+        "and Balai Bahasa Provinsi Nusa Tenggara Barat for standardizing the Sasak-Indonesian dictionary that provided the foundational lexical ground truth."
     )
 
-    # --- REFERENCES (22 100% REAL & VERIFIED 2021-2026) ---
-    add_heading_1("Daftar Pustaka (References)")
+    # ====================================================
+    # REFERENCES (10 pt, hanging indent 0.25", 22 verified citations)
+    # ====================================================
+    add_sec_heading("REFERENCES")
     refs = [
         "[1] A. F. Aji, G. I. Winata, F. Koto, S. Cahyawijaya, A. Romadhony, R. Mahendra, K. Kurniawan, D. Moeljadi, R. E. Prasojo, T. Baldwin, J. H. Lau, and S. Ruder, \"One Country, 700+ Languages: NLP Challenges for Underrepresented Languages and Dialects in Indonesia,\" in Proceedings of the 60th Annual Meeting of the Association for Computational Linguistics (Volume 1: Long Papers), 2022, pp. 722--745. doi: 10.18653/v1/2022.acl-long.498.",
         "[2] S. Ranathunga, E.-S. A. Lee, M. P. Skenduli, R. Shekhar, M. Alam, and R. Kaur, \"Neural Machine Translation for Low-Resource Languages: A Survey,\" ACM Computing Surveys, vol. 55, no. 11, pp. 229:1--229:37, 2023. doi: 10.1145/3567592.",
@@ -666,16 +759,21 @@ def build_docx(output_path="artikel/jurnal_sasaknlp.docx"):
         "[21] L. N. Setra, Rondiyah, A. Kurniawaty, and R. Gayatri, \"Distribusi Pemakaian Kata Mamiq dalam Korpus Bahasa Sasak: Naskah Cilinaya dan Majalah Tambori,\" MABASAN: Jurnal Ilmiah Bahasa dan Sastra, vol. 17, no. 2, pp. 293--308, 2023. doi: 10.62107/mab.v17i2.814.",
         "[22] A. Romadhony, S. Al Faraby, R. Rismala, U. N. Wisesti, and A. Arifianto, \"Sentiment Analysis on a Large Indonesian Product Review Dataset,\" Journal of Information Systems Engineering and Business Intelligence (JISEBI), vol. 10, no. 1, pp. 167--178, 2024. doi: 10.20473/jisebi.10.1.167-178."
     ]
+
     for r in refs:
         p_ref = doc.add_paragraph()
-        p_ref.paragraph_format.left_indent = Inches(0.3)
-        p_ref.paragraph_format.first_line_indent = Inches(-0.3)
-        p_ref.paragraph_format.space_after = Pt(4)
+        p_ref.alignment = WD_ALIGN_PARAGRAPH.JUSTIFY
+        p_ref.paragraph_format.left_indent = Inches(0.25)
+        p_ref.paragraph_format.first_line_indent = Inches(-0.25)
+        p_ref.paragraph_format.space_before = Pt(0)
+        p_ref.paragraph_format.space_after = Pt(3)
+        p_ref.paragraph_format.line_spacing = 1.0
         run_ref = p_ref.add_run(r)
-        run_ref.font.size = Pt(9.5)
+        run_ref.font.name = "Times New Roman"
+        run_ref.font.size = Pt(10)
 
     doc.save(output_path)
-    print(f"✅ Dokumen berhasil dibuat: {output_path}")
+    print(f"✅ ECTI-CIT Compliant Manuscript successfully generated: {output_path}")
 
 if __name__ == "__main__":
-    build_docx("artikel/jurnal_sasaknlp.docx")
+    build_ecti_docx("artikel/jurnal_sasaknlp.docx")
