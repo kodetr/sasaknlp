@@ -1,4 +1,4 @@
-# SasakNLP: A Dialect-Aware Morphological Processing Framework for the Low-Resource Sasak Language
+# SasakNLP: A Hybrid Framework for Morphological Processing of the Low-Resource Sasak Language
 
 **Author**: **kodetr**  
 **Affiliation**: Regional Language Computational Research Group, [kodetr.com](https://kodetr.com), Lombok, West Nusa Tenggara, Indonesia  
@@ -63,12 +63,11 @@ Following regional dialectological studies [9], [10], [12], Bahasa Sasak is grou
 
 | No | Dialect Cluster | Geographical Range | Diagnostic Markers (*Shibboleths*) | Phonological & Sociolinguistic Features |
 | :---: | :--- | :--- | :--- | :--- |
-| **1** | **Selaparang (Menu-Meni)** | East & Central-East Lombok | `menu`, `meni`, `tiyang`, `kaji` | Polite register (*krama/alus*), glottal stop retention /-q/ |
+| **1** | **Meno-Mene (Selaparang)** | East & Central Lombok | `menu`, `meni`, `tiyang`, `kaji` | Polite register (*krama/alus*), glottal stop retention /-q/, characteristic vowel /-e/ |
 | **2** | **Ngeno-Ngene** | Mataram & West Lombok | `ngeno`, `ngene`, `ente`, `aku` | Urban dialect, rapid vocalic articulation, maritime trade contact |
-| **3** | **Mriak-Mriku** | Central-South (Praya, Pujut) | `mriak`, `mriku`, `meriq`, `merik` | Spatial directional deictics (*towards here / towards there*) |
-| **4** | **Ngeto-Ngete** | Northeast (Sembalun, Suela) | `ngeto`, `ngete` | Highland agricultural communities on Mount Rinjani slopes |
-| **5** | **Kuto-Kute** | North Lombok (Bayan, Tanjung) | `kuto`, `kute`, `wetu` | Archaic Austronesian retention, customary *Wetu Telu* tradition |
-| **6** | **General Sasak** | Cross-Island Standard | `wah`, `ndeq`, `mangan`, `batur` | Inter-dialectal lingua franca in public and educational domains |
+| **3** | **Merikuq-Merikaq (Mriak-Mriku)** | Central-South (Praya, Pujut) | `mriak`, `mriku`, `meriq`, `merik` | Spatial directional deictics (*towards here / towards there*), vowels /-a/ and /-u/ |
+| **4** | **Kuto-Kute (Ngeto-Ngete)** | North & Northeast Lombok (Bayan, Sembalun) | `kuto`, `kute`, `ngeto`, `wetu` | Archaic Austronesian retention, customary *Wetu Telu* tradition, highland communities |
+| **5** | **General Standard Sasak** | Cross-Island Standard | `wah`, `ndeq`, `mangan`, `batur` | Inter-dialectal lingua franca in public domains, aligns with Balai Bahasa NTB lexicon |
 
 ---
 
@@ -201,9 +200,16 @@ Experimental results across the 100,000 morphological test pairs demonstrate the
 | **Proposed SasakNLP** | *Dictionary-Enhanced Multi-Candidate* | **80,438** | **80.44%** | **7,826** | Optimal balance of precision, root protection, and clitic handling. |
 
 > **McNemar's Statistical Significance Test**:  
-> Paired evaluation between SasakNLP and Baseline 2 yields contingency values $b = 33,892$ (SasakNLP correct, Baseline incorrect) and $c = 8,659$ (SasakNLP incorrect, Baseline correct).  
-> Test statistic: **$\chi^2 = 14,962.14$** ($df = 1, p < 0.0001$).  
-> The performance advantage of SasakNLP is **statistically significant** at $\alpha = 0.001$.
+> Paired evaluation between SasakNLP and Baseline 2 yields the full $2 \times 2$ contingency table across all $N = 100,000$ test items:  
+>  
+> | | Baseline 2 Correct | Baseline 2 Incorrect | Total |  
+> | :--- | :---: | :---: | :---: |  
+> | **SasakNLP Correct** | $a = 46,546$ | $b = 33,892$ | 80,438 |  
+> | **SasakNLP Incorrect** | $c = 8,659$ | $d = 10,903$ | 19,562 |  
+> | **Total** | 55,205 | 44,795 | 100,000 |  
+>  
+> Test statistic with continuity correction: **$\chi^2 = \frac{(|b - c| - 1)^2}{b + c} = \frac{(|33,892 - 8,659| - 1)^2}{33,892 + 8,659} = \frac{25,232^2}{42,551} = 14,962.14$** ($df = 1, p < 0.0001$).  
+> The performance advantage of SasakNLP over the baseline is **statistically significant** at $\alpha = 0.001$.
 
 ### 5.2. Performance on the Core 10k Benchmark
 On the 10,000-pair core morphological benchmark (`benchmark_10k.csv`), SasakNLP achieves **9,323 correct predictions** (**93.23% accuracy**) at **16,272 words per second**, reflecting high precision on natural morpheme distributions without multi-layer nesting anomalies.
@@ -229,7 +235,7 @@ Performance breakdown across grammatical categories (Fig. 2 and Table 4) confirm
 ![Morphological Rule Accuracy](figures/fig1_morphology_accuracy.png)
 *<b>Fig. 2:</b> Morphological rule accuracy across grammatical affix classes (100k data).*
 
-**Table 4. Disaggregated Performance Across Morpheme Categories on 100,000 Samples**
+**Table 4. Disaggregated Performance Across 16 Major Representative Morpheme Categories ($N = 55,324$) on the 100,000-Sample Benchmark**
 
 | Category | Pattern | Samples | Accuracy (%) | Linguistic Characteristics & Handling |
 | :--- | :--- | :---: | :---: | :--- |
@@ -250,6 +256,8 @@ Performance breakdown across grammatical categories (Fig. 2 and Table 4) confirm
 | **Locative Suffix** | `-an`, `-in` | 10,545 | **76.52%** | Locative and resultative suffix (*kaduan*, *siramin*). |
 | **Reciprocal** | `be-...-an` | 1,710 | **65.09%** | Reciprocal mutual action circumfix (*betulungan*). |
 
+*Note: The 16 categories displayed in Table 4 represent canonical major single-affix and primary circumfix formations ($N = 55,324$). The remaining 44,676 samples in the 100,000-pair benchmark comprise complex multi-tier nested combinations, compounding, and dialectal derivations documented in the supplementary dataset repository.*
+
 ### 5.5. Cross-Dialect Evaluation Across Five Regions
 
 Cross-dialect evaluation across the five Sasak dialect regions (Fig. 3 and Table 5) confirms strong generalization across Lombok Island.
@@ -261,10 +269,10 @@ Cross-dialect evaluation across the five Sasak dialect regions (Fig. 3 and Table
 
 | Region | Dialect Cluster | Samples | Accuracy (%) | Primary Vocalic & Phonemic Features |
 | :--- | :--- | :---: | :---: | :--- |
-| **Mataram / West Lombok** | **General Sasak** | 43,254 | **85.73%** | Aligns with official Balai Bahasa NTB standard lexicon. |
-| **North Lombok** | **Kuto-Kute** | 10,475 | **80.31%** | Final vowels /-e/ and /-o/ (*kuto*, *kute*), archaic retention. |
-| **South Lombok** | **Merikuq-Merikaq** | 10,535 | **79.79%** | Vowels /-a/ and /-u/ with persistent glottal stop /-q/. |
-| **Central Lombok** | **Meno-Mene** | 23,023 | **77.04%** | Characteristic vowel /-e/, largest speaker population. |
+| **Mataram / West Lombok** | **General Standard Sasak** | 43,254 | **85.73%** | Aligns with official Balai Bahasa NTB standard lexicon. |
+| **North Lombok** | **Kuto-Kute (Ngeto-Ngete)** | 10,475 | **80.31%** | Final vowels /-e/ and /-o/ (*kuto*, *kute*), archaic retention. |
+| **South Lombok** | **Merikuq-Merikaq (Mriak-Mriku)** | 10,535 | **79.79%** | Vowels /-a/ and /-u/ with persistent glottal stop /-q/. |
+| **Central Lombok** | **Meno-Mene (Selaparang)** | 23,023 | **77.04%** | Characteristic vowel /-e/, largest speaker population. |
 | **East Lombok** | **Ngeno-Ngene** | 12,713 | **69.24%** | Nasal vocalic shifts and final velar consonant /-k/. |
 
 ### 5.6. Computational Scalability and Runtime Latency

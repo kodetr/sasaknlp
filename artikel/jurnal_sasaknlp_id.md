@@ -1,4 +1,4 @@
-# SasakNLP: Kerangka Kerja Pemrosesan Morfologi Sadar Dialek untuk Bahasa Sasak Berdaya Komputasi Rendah
+# SasakNLP: Kerangka Kerja Hibrida untuk Pemrosesan Morfologi Bahasa Daerah Sasak Berdaya Komputasi Rendah
 
 **Penulis / Peneliti Utama**: **kodetr**  
 **Afiliasi**: Riset Komputasi Bahasa Daerah Nusantara, [kodetr.com](https://kodetr.com)  
@@ -92,12 +92,11 @@ Studi dialektologi kebahasaan di Nusa Tenggara Barat [9], [10], [12] memetakan v
 
 | No | Klaster Dialek | Sebaran Wilayah Geografis | Penanda Diagnostik (*Shibboleths*) | Ciri Fonologis & Sosiolek |
 | :---: | :--- | :--- | :--- | :--- |
-| **1** | **Selaparang (Menu-Meni)** | Lombok Timur & Tengah bagian Timur | `menu`, `meni`, `tiyang`, `kaken`, `kaji` | Ragam krama (*alus*), retensi glotal /-q/, dialek sastra lontar |
+| **1** | **Meno-Mene (Selaparang)** | Lombok Timur & Lombok Tengah | `menu`, `meni`, `tiyang`, `kaji` | Ragam krama (*alus*), retensi hentian glotal /-q/, ciri vokal /-e/ |
 | **2** | **Ngeno-Ngene** | Kota Mataram & Lombok Barat | `ngeno`, `ngene`, `ente`, `aku` | Dialek perkotaan, artikulasi vokal cepat, kontak maritim |
-| **3** | **Mriak-Mriku** | Lombok Tengah Selatan (Praya, Pujut) | `mriak`, `mriku`, `meriq`, `merik` | Deiksis spasial arah (*ke mari / ke sana*) |
-| **4** | **Ngeto-Ngete** | Lombok Timur Utara (Sembalun, Suela) | `ngeto`, `ngete` | Komunitas dataran tinggi lereng Gunung Rinjani |
-| **5** | **Kuto-Kute** | Lombok Utara (Bayan, Tanjung) | `kuto`, `kute`, `wetu` | Retensi arkais Austronesia tua, tradisi adat *Wetu Telu* |
-| **6** | **Sasak Umum (*General*)** | Lintas Kabupaten (Ragam Baku) | `wah`, `ndeq`, `mangan`, `batur` | Bahasa pergaulan antardialek di ruang publik |
+| **3** | **Merikuq-Merikaq (Mriak-Mriku)** | Lombok Tengah Selatan (Praya, Pujut) | `mriak`, `mriku`, `meriq`, `merik` | Deiksis spasial arah (*ke mari / ke sana*), vokal /-a/ dan /-u/ |
+| **4** | **Kuto-Kute (Ngeto-Ngete)** | Lombok Utara & Sembalun (Bayan, Suela) | `kuto`, `kute`, `ngeto`, `wetu` | Retensi arkais Austronesia tua, adat *Wetu Telu*, komunitas dataran tinggi |
+| **5** | **Sasak Umum (*General Standard*)** | Lintas Wilayah Pulau Lombok | `wah`, `ndeq`, `mangan`, `batur` | Bahasa pergaulan antardialek di ruang publik, rujukan leksikon Balai Bahasa NTB |
 
 ---
 
@@ -234,9 +233,16 @@ Pengujian komparatif pada 100.000 pasangan data morfologi membuktikan keunggulan
 | **Proposed SasakNLP** | *Dictionary-Enhanced Multi-Candidate* | **80.438** | **80,44%** | **7.826** | Keseimbangan optimal presisi, proteksi lema, dan dekomposisi klitika. |
 
 > **Uji Signifikansi Statistik McNemar**:  
-> Perbandingan berpasangan antara SasakNLP dan Baseline 2 menghasilkan tabel kontingensi $b = 33.892$ (kasus SasakNLP benar, Baseline salah) dan $c = 8.659$ (kasus SasakNLP salah, Baseline benar).  
-> Nilai statistik uji: **$\chi^2 = 14.962,14$** ($df = 1, p < 0,0001$).  
-> Keunggulan SasakNLP terbukti **signifikan secara statistik** pada tingkat kepercayaan $\alpha = 0,001$.
+> Perbandingan berpasangan antara SasakNLP dan Baseline 2 menghasilkan matriks kontingensi lengkap $2 \times 2$ pada seluruh $N = 100.000$ sampel data uji:  
+>  
+> | | Baseline 2 Benar | Baseline 2 Salah | Total |  
+> | :--- | :---: | :---: | :---: |  
+> | **SasakNLP Benar** | $a = 46.546$ | $b = 33.892$ | 80.438 |  
+> | **SasakNLP Salah** | $c = 8.659$ | $d = 10.903$ | 19.562 |  
+> | **Total** | 55.205 | 44.795 | 100.000 |  
+>  
+> Nilai statistik uji dengan koreksi kontinuitas: **$\chi^2 = \frac{(|b - c| - 1)^2}{b + c} = \frac{(|33.892 - 8.659| - 1)^2}{33.892 + 8.659} = \frac{25.232^2}{42.551} = 14.962,14$** ($df = 1, p < 0,0001$).  
+> Keunggulan performa SasakNLP atas model acuan terbukti **signifikan secara statistik** pada tingkat signifikansi $\alpha = 0,001$.
 
 ### 5.2. Kinerja pada Tolok Ukur Inti 10k
 Pada tolok ukur inti 10.000 pasangan morfem (`benchmark_10k.csv`), SasakNLP mencatatkan **9.323 prediksi benar** dari 10.000 sampel uji, yang setara dengan akurasi **93,23%** dan kecepatan eksekusi **16.272 kata per detik**. Evaluasi ini mencerminkan kinerja lematisasi pada distribusi morfologi reguler yang bersih dari anomali pelapisan ekstrim.
@@ -264,7 +270,7 @@ Evaluasi disaggregasi morfologis (Gambar 2 dan Tabel 4) menunjukkan performa sta
 ![Akurasi Aturan Morfologi](figures/fig1_morphology_accuracy.png)
 *<b>Gambar 2.</b> Rincian akurasi aturan morfologi SasakNLP pada seluruh kelas afiksasi (diuji pada 100.000 pasangan data morfem).*
 
-**Tabel 4. Rincian Kinerja Lematisasi per Kategori Morfem pada 100.000 Sampel Uji**
+**Tabel 4. Rincian Kinerja Lematisasi pada 16 Kategori Morfem Representatif Utama ($N = 55.324$) pada Tolok Ukur 100.000 Sampel Uji**
 
 | Kategori Morfologi | Pola Morfologis | Jumlah Sampel | Akurasi (%) | Karakteristik Linguistik & Penanganan |
 | :--- | :--- | :---: | :---: | :--- |
@@ -285,6 +291,8 @@ Evaluasi disaggregasi morfologis (Gambar 2 dan Tabel 4) menunjukkan performa sta
 | **Sufiks Lokatif** | `-an`, `-in` | 10.545 | **76,52%** | Penanda lokatif/tujuan (*kaduan*, *siramin*). |
 | **Konfiks Resiprokal** | `be-...-an` | 1.710 | **65,09%** | Tindakan berbalasan (*betulungan*, *besambatan*). |
 
+*Catatan: 16 kategori yang ditampilkan pada Tabel 4 merepresentasikan bentuk afiks tunggal dan konfiks utama yang umum dijumpai ($N = 55.324$). Sebanyak 44.676 sampel lainnya pada tolok ukur 100.000 data mencakup kombinasi afiksasi bertingkat tiga lapis yang lebih kompleks, pemajemukan, dan variasi turunan dialek yang didokumentasikan secara lengkap pada repositori dataset riset.*
+
 ### 5.5. Evaluasi Lintas Lima Dialek Sasak
 
 Evaluasi pada lima klaster dialek mengonfirmasi ketahanan leksikal model di seluruh Pulau Lombok (Gambar 3 dan Tabel 5).
@@ -294,12 +302,12 @@ Evaluasi pada lima klaster dialek mengonfirmasi ketahanan leksikal model di selu
 
 **Tabel 5. Performa Lematisasi Lintas 5 Klaster Dialek Utama Sasak (100.000 Data)**
 
-| Wilayah Penutur | Nama Dialek Sasak | Jumlah Sampel | Akurasi (%) | Karakteristik Vokal & Fonem Utama |
+| Wilayah Penutur | Klaster Dialek Sasak | Jumlah Sampel | Akurasi (%) | Karakteristik Vokal & Fonem Utama |
 | :--- | :--- | :---: | :---: | :--- |
-| **Lombok Barat & Mataram** | **Sasak Umum (*General*)** | 43.254 | **85,73%** | Sesuai ragam baku kamus Balai Bahasa NTB. |
-| **Lombok Utara** | **Kuto-Kute** | 10.475 | **80,31%** | Vokal akhir /-e/ dan /-o/ (*kuto*, *kute*), retensi arkais. |
-| **Lombok Selatan** | **Merikuq-Merikaq** | 10.535 | **79,79%** | Vokal /-a/ dan /-u/ dengan hentian glotal /-q/. |
-| **Lombok Tengah** | **Meno-Mene** | 23.023 | **77,04%** | Vokal /-e/, dialek dengan jumlah penutur terbanyak. |
+| **Kota Mataram & Lombok Barat** | **Sasak Umum (*General Standard*)** | 43.254 | **85,73%** | Sesuai ragam baku kamus Balai Bahasa NTB. |
+| **Lombok Utara** | **Kuto-Kute (*Ngeto-Ngete*)** | 10.475 | **80,31%** | Vokal akhir /-e/ dan /-o/ (*kuto*, *kute*), retensi arkais. |
+| **Lombok Selatan** | **Merikuq-Merikaq (*Mriak-Mriku*)** | 10.535 | **79,79%** | Vokal /-a/ dan /-u/ dengan hentian glotal /-q/. |
+| **Lombok Tengah** | **Meno-Mene (*Selaparang*)** | 23.023 | **77,04%** | Vokal /-e/, dialek dengan jumlah penutur terbanyak. |
 | **Lombok Timur** | **Ngeno-Ngene** | 12.713 | **69,24%** | Variasi sengau vokal /-e/ dan konsonan velar /-k/. |
 
 ### 5.6. Skalabilitas Komputasi dan Latensi Waktu Nyata

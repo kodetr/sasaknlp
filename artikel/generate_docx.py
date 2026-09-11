@@ -81,7 +81,7 @@ def make_eq2_omml():
 # ==============================================================================
 # 1. ENGLISH VERSION BUILDER (ECTI-CIT SUBMISSION FORMAT)
 # ==============================================================================
-def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
+def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx", is_anonymous=False):
     doc = Document()
     base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -98,7 +98,8 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     header = s1.header
     hp = header.paragraphs[0]
     hp.alignment = WD_ALIGN_PARAGRAPH.RIGHT
-    hrun = hp.add_run("ECTI Transactions on Computer and Information Technology (ECTI-CIT)")
+    hdr_title = "ECTI Transactions on Computer and Information Technology (ECTI-CIT)" if not is_anonymous else "ECTI Transactions on Computer and Information Technology (Anonymous Submission)"
+    hrun = hp.add_run(hdr_title)
     hrun.font.name = "Times New Roman"
     hrun.font.size = Pt(8.5)
     hrun.font.italic = True
@@ -110,7 +111,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     p_title.paragraph_format.space_before = Pt(0)
     p_title.paragraph_format.space_after = Pt(24)
     p_title.paragraph_format.line_spacing = 1.15
-    r_title = p_title.add_run("SasakNLP: A Dialect-Aware Morphological Processing Framework for the Low-Resource Sasak Language")
+    r_title = p_title.add_run("SasakNLP: A Hybrid Framework for Morphological Processing of the Low-Resource Sasak Language")
     r_title.font.name = "Times New Roman"
     r_title.font.size = Pt(20)
     r_title.font.bold = True
@@ -120,7 +121,8 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     p_auth.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_auth.paragraph_format.space_before = Pt(0)
     p_auth.paragraph_format.space_after = Pt(8)
-    r_auth = p_auth.add_run("kodetr")
+    auth_str = "kodetr" if not is_anonymous else "[ANONYMOUS AUTHOR(S)]"
+    r_auth = p_auth.add_run(auth_str)
     r_auth.font.name = "Times New Roman"
     r_auth.font.size = Pt(12)
     r_auth.font.bold = True
@@ -130,7 +132,11 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     p_aff.alignment = WD_ALIGN_PARAGRAPH.CENTER
     p_aff.paragraph_format.space_before = Pt(0)
     p_aff.paragraph_format.space_after = Pt(16)
-    r_aff = p_aff.add_run("Regional Language Computational Research Group, kodetr.com\nLombok, West Nusa Tenggara, Indonesia\nCorrespondence: https://kodetr.com | Code Repository: https://github.com/kodetr/sasaknlp")
+    if is_anonymous:
+        aff_str = "[AFFILIATION WITHHELD FOR DOUBLE-BLIND PEER REVIEW]\nLombok, West Nusa Tenggara, Indonesia\nCorrespondence and Repository Withheld During Review"
+    else:
+        aff_str = "Regional Language Computational Research Group, kodetr.com\nLombok, West Nusa Tenggara, Indonesia\nCorrespondence: https://kodetr.com | Code Repository: https://github.com/kodetr/sasaknlp"
+    r_aff = p_aff.add_run(aff_str)
     r_aff.font.name = "Times New Roman"
     r_aff.font.size = Pt(10)
     r_aff.font.italic = True
@@ -518,12 +524,11 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     # TABLE 1: Full-Page Width (6.5 inches)
     t1_headers = ["No", "Dialect Cluster", "Geographical Range", "Diagnostic Markers", "Phonological & Sociolinguistic Features"]
     t1_data = [
-        ["1", "Selaparang (Menu-Meni)", "East & Central-East Lombok", "menu, meni, tiyang, kaji", "Polite register (krama/alus), glottal stop retention /-q/, lontar manuscripts"],
+        ["1", "Meno-Mene (Selaparang)", "East & Central Lombok", "menu, meni, tiyang, kaji", "Polite register (krama/alus), glottal stop retention /-q/, characteristic vowel /-e/"],
         ["2", "Ngeno-Ngene", "Mataram & West Lombok", "ngeno, ngene, ente, aku", "Urban dialect, rapid vocalic articulation, maritime trade contact"],
-        ["3", "Mriak-Mriku", "Central-South (Praya, Pujut)", "mriak, mriku, meriq, merik", "Spatial directional deictics (towards here / towards there)"],
-        ["4", "Ngeto-Ngete", "Northeast (Sembalun, Suela)", "ngeto, ngete", "Highland agricultural communities on Mount Rinjani slopes"],
-        ["5", "Kuto-Kute", "North Lombok (Bayan, Tanjung)", "kuto, kute, wetu", "Archaic Austronesian retention, customary Wetu Telu tradition"],
-        ["6", "General Sasak", "Cross-Island Standard", "wah, ndeq, mangan, batur", "Inter-dialectal lingua franca in public and educational domains"]
+        ["3", "Merikuq-Merikaq (Mriak-Mriku)", "Central-South (Praya, Pujut)", "mriak, mriku, meriq, merik", "Spatial directional deictics (towards here / towards there), vowels /-a/ and /-u/"],
+        ["4", "Kuto-Kute (Ngeto-Ngete)", "North & Northeast Lombok (Bayan, Sembalun)", "kuto, kute, ngeto, wetu", "Archaic Austronesian retention, customary Wetu Telu tradition, highland communities"],
+        ["5", "General Standard Sasak", "Cross-Island Standard", "wah, ndeq, mangan, batur", "Inter-dialectal lingua franca in public domains, aligns with Balai Bahasa NTB lexicon"]
     ]
     add_tbl(1, "Taxonomy of the Five Major Sasak Dialect Clusters in Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.4, 1.4, 1.4, 1.3, 2.0], full_page_width=True)
 
@@ -583,25 +588,17 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     add_sec_heading("4. EXPERIMENTAL SETUP AND DATASET PROTOCOL")
     add_subsec_heading("4.1 Research Data Resources")
     add_body(
-        "The benchmark datasets were curated via a rigorous three-phase acquisition protocol (Fig. 1):"
-    )
-    add_body(
+        "The benchmark datasets were curated via a rigorous three-phase acquisition protocol (Fig. 1):\n"
         "1) Benchmark 100k (benchmark_100k.csv): 100,000 controlled morphological test pairs annotated with surface words, gold-standard lemmas, "
-        "affixation categories, and dialect metadata."
-    )
-    add_body(
-        "2) Benchmark 10k (benchmark_10k.csv): 10,000 core morphological pairs representing canonical daily vocabulary."
-    )
-    add_body(
+        "affixation categories, and dialect metadata.\n"
+        "2) Benchmark 10k (benchmark_10k.csv): 10,000 core morphological pairs representing canonical daily vocabulary.\n"
         "3) Authentic Corpus (sasak_sentences_large.csv): 12,591 authentic sentences (188,881 tokens) compiled from oral folklore (Putri Mandalika, "
-        "Dewi Anjani, Datu Doyan Nada), regional periodicals, and Balai Bahasa NTB archival records [10], [16], [21]."
-    )
-    add_body(
+        "Dewi Anjani, Datu Doyan Nada), regional periodicals, and Balai Bahasa NTB archival records [10], [16], [21].\n"
         "4) Lexicon Dictionary (kamus_balai_bahasa_ntb.csv): 2,761 verified lemma entries from Balai Bahasa Provinsi NTB [10]."
     )
 
     # FIGURE 1: Full-Page Width (6.5 inches)
-    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Three-Phase Scientific Acquisition And Quality Curation Protocol For SasakNLP Benchmarks.", full_page_width=True, width_in=6.5)
+    add_fig("figures/fig5_dataset_acquisition_pipeline.png", 1, "Three-Phase Scientific Acquisition and Quality Curation Protocol for SasakNLP Research Artifacts.", full_page_width=True, width_in=6.5)
 
     add_subsec_heading("4.2 Baseline Models")
     add_body(
@@ -612,18 +609,18 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
 
     add_subsec_heading("4.3 Evaluation Metrics and Experimental Environment")
     add_body(
-        "Evaluation metrics include exact lemmatization accuracy, throughput (words/second), per-token latency (ms), overstemming rate, "
-        "understemming rate, and out-of-vocabulary (OOV) rate. Experiments were executed on Apple Silicon (8-Core) and Intel Core i7 x86_64 "
-        "CPUs with 16 GB RAM under Python 3.10+, guaranteeing 100% deterministic reproducibility [16]."
+        "Evaluation metrics include exact lemmatization accuracy, throughput (words/second), per-token latency (ms), overstemming rate, understemming rate, "
+        "and out-of-vocabulary (OOV) rate. Experiments were executed on Apple Silicon (8-Core) and Intel Core i7 x86_64 CPUs with 16 GB RAM under Python 3.10+, "
+        "guaranteeing 100% deterministic reproducibility."
     )
 
-    # 5. RESULTS
-    add_sec_heading("5. RESULTS")
+    # 5. EXPERIMENTAL RESULTS
+    add_sec_heading("5. EXPERIMENTAL RESULTS")
     add_subsec_heading("5.1 Baseline Comparison on the 100,000-Sample Benchmark")
     add_body(
-        "Experimental results across the 100,000 morphological test pairs demonstrate the decisive superiority of SasakNLP (Table 2). "
-        "Baseline 1 achieves only 1.01% accuracy due to complete failure on affixed words. Baseline 2 obtains 55.21% but suffers from severe overstemming. "
-        "SasakNLP achieves 80.44% accuracy (80,438 correct predictions)."
+        "Experimental results across the 100,000 morphological test pairs demonstrate the decisive superiority of SasakNLP (Table 2). Baseline 1 achieves "
+        "only 1.01% accuracy due to complete failure on affixed words. Baseline 2 obtains 55.21% but suffers from severe overstemming. SasakNLP achieves "
+        "80.44% accuracy (80,438 correct predictions)."
     )
 
     # TABLE 2: Full-Page Width (6.5 inches)
@@ -636,8 +633,11 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     add_tbl(2, "Comparative Lemmatization Evaluation On 100,000 Morphological Samples", t2_headers, t2_data, col_widths=[1.7, 1.8, 1.0, 0.9, 1.1], full_page_width=True)
 
     add_body(
-        "McNemar's test comparing SasakNLP and Baseline 2 reveals contingency counts b = 33,892 and c = 8,659, yielding chi-squared = 14,962.14 "
-        "(df = 1, p < 0.0001). SasakNLP's performance advantage is statistically significant at alpha = 0.001."
+        "McNemar's paired statistical test comparing SasakNLP and Baseline 2 yields contingency matrix: "
+        "a = 46,546 (both correct), b = 33,892 (SasakNLP correct, Baseline 2 incorrect), "
+        "c = 8,659 (SasakNLP incorrect, Baseline 2 correct), and d = 10,903 (both incorrect). "
+        "The test statistic is chi-squared = 14,962.14 (df = 1, p < 0.0001), confirming that "
+        "SasakNLP's performance advantage is statistically significant at alpha = 0.001."
     )
 
     add_subsec_heading("5.2 Performance on the Core 10k Benchmark")
@@ -693,7 +693,13 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         ["Locative Suffix", "-an, -in", "10,545", "76.52%", "Locative and resultative suffix (kaduan, siramin)"],
         ["Reciprocal", "be-...-an", "1,710", "65.09%", "Reciprocal mutual action circumfix (betulungan)"]
     ]
-    add_tbl(4, "Disaggregated Performance Across Morpheme Categories On 100,000 Samples", t4_headers, t4_data, col_widths=[1.4, 0.9, 0.8, 0.9, 2.5], full_page_width=True)
+    add_tbl(4, "Disaggregated Performance Across 16 Major Representative Morpheme Categories (N = 55,324) on the 100,000-Sample Benchmark", t4_headers, t4_data, col_widths=[1.4, 0.9, 0.8, 0.9, 2.5], full_page_width=True)
+    add_body(
+        "Note: The 16 categories displayed in Table 4 represent canonical major single-affix and primary circumfix formations (N = 55,324). "
+        "The remaining 44,676 samples in the 100,000-pair benchmark comprise complex multi-tier nested combinations, compounding, and dialectal "
+        "derivations documented in the supplementary dataset repository.",
+        indent=False
+    )
 
     add_subsec_heading("5.5 Cross-Dialect Evaluation")
     add_body(
@@ -706,10 +712,10 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     # TABLE 5: Full-Page Width (6.5 inches)
     t5_headers = ["Region", "Dialect Cluster", "Samples", "Accuracy (%)", "Primary Vocalic & Phonemic Features"]
     t5_data = [
-        ["Mataram / West Lombok", "General Sasak", "43,254", "85.73%", "Aligns with official Balai Bahasa NTB standard lexicon"],
-        ["North Lombok", "Kuto-Kute", "10,475", "80.31%", "Final vowels /-e/ and /-o/ (kuto, kute), archaic retention"],
-        ["South Lombok", "Merikuq-Merikaq", "10,535", "79.79%", "Vowels /-a/ and /-u/ with persistent glottal stop /-q/"],
-        ["Central Lombok", "Meno-Mene", "23,023", "77.04%", "Characteristic vowel /-e/, largest speaker population"],
+        ["Mataram / West Lombok", "General Standard Sasak", "43,254", "85.73%", "Aligns with official Balai Bahasa NTB standard lexicon"],
+        ["North Lombok", "Kuto-Kute (Ngeto-Ngete)", "10,475", "80.31%", "Final vowels /-e/ and /-o/ (kuto, kute), archaic retention"],
+        ["South Lombok", "Merikuq-Merikaq (Mriak-Mriku)", "10,535", "79.79%", "Vowels /-a/ and /-u/ with persistent glottal stop /-q/"],
+        ["Central Lombok", "Meno-Mene (Selaparang)", "23,023", "77.04%", "Characteristic vowel /-e/, largest speaker population"],
         ["East Lombok", "Ngeno-Ngene", "12,713", "69.24%", "Nasal vocalic shifts and final velar consonant /-k/"]
     ]
     add_tbl(5, "Lemmatization Performance Across Five Major Sasak Dialect Clusters (100k Data)", t5_headers, t5_data, col_widths=[1.3, 1.3, 0.8, 0.9, 2.2], full_page_width=True)
@@ -721,7 +727,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     )
 
     # FIGURE 4: Full-Page Width (6.5 inches)
-    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Computational Scalability And Latency Profile Of SasakNLP Across Token Lengths.", full_page_width=True, width_in=6.5)
+    add_fig("figures/fig4_pipeline_benchmark.png", 4, "Computational Scalability and Latency Profile of SasakNLP Across Token Lengths.", full_page_width=True, width_in=6.5)
 
     add_subsec_heading("5.7 Extrinsic Feature Space Dimensionality Reduction")
     add_body(
@@ -731,12 +737,12 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     )
 
     # TABLE 6: Full-Page Width (6.5 inches)
-    t6_headers = ["Corpus / Dataset Parameter", "Unique Surface Tokens", "Base Root Lemmas", "Dimensional Reduction Ratio", "Impact on Downstream NLP Pipelines"]
+    t6_headers = ["Corpus / Dataset Parameter", "Unique Surface Tokens", "Base Root Lemmas", "Dimensional Reduction Ratio", "Impact on Downstream NLP"]
     t6_data = [
-        ["Benchmark Morfologi (100k)", "100,000 unique forms", "1,790 root lemmas", "98.21%", "Reduces lexical lookup search space by 55×"],
+        ["Benchmark Morfologi (100k)", "100,000 unique forms", "1,790 root lemmas", "98.21%", "Reduces lexical lookup search space by 55x"],
         ["Authentic Corpus (189k tokens)", "5,913 unique words", "4,022 root lemmas", "31.98%", "Reduces feature matrix sparsity by 32%"]
     ]
-    add_tbl(6, "Evaluation Of Vocabulary Feature Space Compression On Research Datasets", t6_headers, t6_data, col_widths=[1.6, 1.1, 1.1, 0.9, 1.8], full_page_width=True)
+    add_tbl(6, "Evaluation of Vocabulary Feature Space Compression on Research Datasets", t6_headers, t6_data, col_widths=[1.6, 1.3, 1.2, 1.1, 1.3], full_page_width=True)
 
     # 6. DISCUSSION AND ERROR ANALYSIS
     add_sec_heading("6. DISCUSSION AND ERROR ANALYSIS")
@@ -746,18 +752,18 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     )
 
     # FIGURE 5: Full-Page Width (6.5 inches)
-    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribution Of Lemmatization Error Taxonomy (Left) And Failure Mode Diagnostic Matrix (Right).", full_page_width=True, width_in=6.5)
+    add_fig("figures/fig3_error_taxonomy.png", 5, "Distribution of Lemmatization Error Taxonomy (left) and Failure Mode Diagnostic Matrix (right).", full_page_width=True, width_in=6.5)
 
     # TABLE 7: Full-Page Width (6.5 inches)
     t7_headers = ["Classification", "Computational Definition", "Example Input -> Pred", "Count", "Pct (%)", "Root Linguistic Cause"]
     t7_data = [
         ["Correct", "Predicted lemma matches gold lemma", "tepinaq -> pinaq", "80,438", "80.44%", "Exact match in rules and lexicon"],
-        ["Understemming", "Predicted lemma length > gold lemma", "pegawianne -> pegawian (gawi)", "15,856", "15.86%", "Triple-layer nesting not stripped in pass one"],
+        ["Understemming", "Predicted lemma length > gold lemma", "pegawianne -> pegawian", "15,856", "15.86%", "Triple-layer nesting (circumfix + clitic) not fully stripped"],
         ["Overstemming", "Root character mistakenly removed", "jaran -> jar (-an stripped)", "2,279", "2.28%", "Root ending resembles bound suffix"],
-        ["Incorrect Lemma", "Equal length, mismatched characters", "mangan -> pangan (mangan)", "1,427", "1.43%", "Nasal alternation ambiguity (m -> p vs m -> m)"],
+        ["Incorrect Lemma", "Equal length, mismatched characters", "mangan -> pangan", "1,427", "1.43%", "Nasal alternation ambiguity (m -> p vs m -> m)"],
         ["OOV Error", "Root absent from machine lexicon", "Loanwords / neologisms", "0", "0.00%", "All benchmark roots covered by dictionary"]
     ]
-    add_tbl(7, "Error Taxonomy Analysis On 100,000 Morphological Benchmark Samples", t7_headers, t7_data, col_widths=[1.1, 1.4, 1.3, 0.7, 0.6, 1.4], full_page_width=True)
+    add_tbl(7, "Error Taxonomy Analysis on 100,000 Morphological Benchmark Samples", t7_headers, t7_data, col_widths=[1.2, 1.5, 1.2, 0.7, 0.7, 1.2], full_page_width=True)
 
     add_subsec_heading("6.2 Algorithmic Strengths of Dictionary-Gated Parsing")
     add_body(
@@ -767,9 +773,9 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
 
     add_subsec_heading("6.3 Complexity Discrepancy between Benchmarks")
     add_body(
-        "The accuracy difference between the 100k benchmark (80.44%) and the 10k core benchmark (93.23%) reflects morphological complexity. The 100k "
-        "benchmark functions as an exhaustive stress-test with triple-layer nested affixations (e.g., pe-...-an with -ne and te-), whereas the 10k core "
-        "benchmark mirrors natural daily distribution."
+        "The accuracy difference between the 100k benchmark (80.44%) and the 10k core benchmark (93.23%) reflects morphological complexity. "
+        "The 100k benchmark functions as an exhaustive stress-test with triple-layer nested affixations (e.g., pe-...-an with -ne and te-), "
+        "whereas the 10k core benchmark mirrors natural daily distribution."
     )
 
     add_subsec_heading("6.4 Implications for Underrepresented Indigenous NLP")
@@ -782,8 +788,8 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     add_sec_heading("7. LIMITATIONS")
     add_body(
         "We transparently document three primary limitations of this study:\n"
-        "1) Controlled Vocabulary Scope: The 100k benchmark evaluates systematic morpheme combinations grounded in verified dictionary lemmas. Open social "
-        "media text with contemporary slang neologisms requires ongoing lexicon expansion.\n"
+        "1) Controlled Vocabulary Scope: The 100k benchmark evaluates systematic morpheme combinations grounded in verified dictionary lemmas. "
+        "Open social media text with contemporary slang neologisms requires ongoing lexicon expansion.\n"
         "2) Dialect Corpus Balance: Authentic folklore sentences are currently skewed toward General and East Lombok dialects due to historical textual availability.\n"
         "3) Absence of Syntactic Context: The current pipeline operates at word and token levels without sentence-level Part-of-Speech tagging context."
     )
@@ -791,7 +797,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
     # 8. CONCLUSION AND FUTURE DIRECTIONS
     add_sec_heading("8. CONCLUSION AND FUTURE DIRECTIONS")
     add_body(
-        "This paper presented SasakNLP, the first dialect-aware morphological framework for Bahasa Sasak. Evaluated across 100,000 benchmark pairs, "
+        "This paper presented SasakNLP, a hybrid morphological framework for Bahasa Sasak. Evaluated across 100,000 benchmark pairs, "
         "SasakNLP achieves 80.44% accuracy on the full stress-test benchmark and 93.23% on the core 10k benchmark, restricting overstemming to 2.28%, "
         "with throughput exceeding 7,800–16,000 words/second and 0.044 ms latency."
     )
@@ -800,12 +806,30 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "2) Constructing the first annotated Sasak Dependency Treebank, and 3) Training bidirectional Sasak-Indonesian Neural Machine Translation models [1], [2], [6]."
     )
 
+    # DATA AND CODE AVAILABILITY
+    add_sec_heading("DATA AND CODE AVAILABILITY")
+    if is_anonymous:
+        add_body(
+            "The complete source code, curated lexical resources, 100k benchmark pairs, and reproducibility execution scripts are withheld to "
+            "preserve author anonymity during the double-blind peer review process. All research artifacts will be released publicly under open-source "
+            "licenses upon manuscript acceptance."
+        )
+    else:
+        add_body(
+            "To ensure scientific transparency and research reproducibility, all software, data, and models are publicly accessible: "
+            "Official PyPI Package (pip install sasaknlp), GitHub Repository (https://github.com/kodetr/sasaknlp), and "
+            "Hugging Face Datasets (https://huggingface.co/datasets/kodetr/sasak-benchmark-100k)."
+        )
+
     # ACKNOWLEDGMENT
     add_sec_heading("ACKNOWLEDGMENT")
-    add_body(
-        "The author expresses sincere gratitude to the native speakers and cultural custodians across Lombok Island, previous dialectological researchers, "
-        "and Balai Bahasa Provinsi Nusa Tenggara Barat for standardizing the Sasak-Indonesian dictionary that provided the foundational lexical ground truth."
-    )
+    if is_anonymous:
+        add_body("[ACKNOWLEDGMENTS WITHHELD DURING DOUBLE-BLIND REVIEW]")
+    else:
+        add_body(
+            "The author expresses sincere gratitude to the native speakers and cultural custodians across Lombok Island, previous dialectological researchers, "
+            "and Balai Bahasa Provinsi Nusa Tenggara Barat for standardizing the Sasak-Indonesian dictionary that provided the foundational lexical ground truth."
+        )
 
     # REFERENCES
     add_sec_heading("REFERENCES")
@@ -825,7 +849,7 @@ def build_ecti_docx_en(output_path="artikel/jurnal_sasaknlp_en.docx"):
         "[13] Z. Abidin, A. Junaidi, and Wamiliana, \"Text Stemming and Lemmatization of Regional Languages in Indonesia: A Systematic Literature Review,\" Journal of Information Systems Engineering and Business Intelligence (JISEBI), vol. 10, no. 2, pp. 217--231, 2024. doi: 10.20473/jisebi.10.2.217-231.",
         "[14] S. H. Wijono, M. R. Alhamidi, M. H. Hilman, and W. Jatmiko, \"Canonical Segmentation Using Affix Characters as a Unit on Transformer for Javanese Language,\" in Proceedings of the 2021 6th International Workshop on Big Data and Information Security (IWBIS), 2021, pp. 67--72. doi: 10.1109/IWBIS53353.2021.9631839.",
         "[15] K. Resiandi, Y. Murakami, and A. H. Nasution, \"Neural Network-Based Bilingual Lexicon Induction for Indonesian Ethnic Languages,\" Applied Sciences, vol. 13, no. 15, p. 8666, 2023. doi: 10.3390/app13158666.",
-        "[16] kodetr, \"SasakNLP: A Dialect-Aware Morphological Processing Framework and 100k Benchmark for the Low-Resource Sasak Language,\" PyPI, GitHub, and Hugging Face Datasets, 2026. [Online]. Available: https://github.com/kodetr/sasaknlp.",
+        "[16] [Reference to Author's Previous Software Artifact Withheld for Double-Blind Review], 2026." if is_anonymous else "[16] kodetr, \"SasakNLP: A Hybrid Framework and 100k Benchmark for the Low-Resource Sasak Language,\" PyPI, GitHub, and Hugging Face Datasets, 2026. [Online]. Available: https://github.com/kodetr/sasaknlp.",
         "[17] D. Jurafsky and J. H. Martin, Speech and Language Processing: An Introduction to Natural Language Processing, Computational Linguistics, and Speech Recognition, 3rd ed. Upper Saddle River, NJ: Prentice Hall, 2024.",
         "[18] K. Batsuren, G. Bella, A. Arora, V. Martinovic, K. Gorman, Z. Žabokrtský, A. Ganbold, Š. Dohnalová, M. Ševčíková, K. Pelegrinová, F. Giunchiglia, R. Cotterell, and E. Vylomova, \"The SIGMORPHON 2022 Shared Task on Morpheme Segmentation,\" in Proceedings of the 19th SIGMORPHON Workshop on Computational Research in Phonetics, Phonology, and Morphology, 2022, pp. 103--116. doi: 10.18653/v1/2022.sigmorphon-1.11.",
         "[19] S. Cahyawijaya, H. Lovenia, F. Koto, D. Adhista, E. Dave, S. Oktavianti, S. Akbar, J. Lee, N. Shadieq, T. W. Cenggoro, H. Linuwih, B. Wilie, G. Muridan, G. Winata, D. Moeljadi, A. F. Aji, A. Purwarianti, and P. Fung, \"NusaWrites: Constructing High-Quality Corpora for Underrepresented and Extremely Low-Resource Languages,\" in Proceedings of the 13th International Joint Conference on Natural Language Processing and the 3rd Conference of the Asia-Pacific Chapter of the Association for Computational Linguistics (Volume 1: Long Papers), 2023, pp. 921--945. doi: 10.18653/v1/2023.ijcnlp-main.60.",
@@ -882,7 +906,7 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     p_title.paragraph_format.space_before = Pt(0)
     p_title.paragraph_format.space_after = Pt(24)
     p_title.paragraph_format.line_spacing = 1.15
-    r_title = p_title.add_run("SasakNLP: Kerangka Kerja Pemrosesan Morfologi Sadar Dialek untuk Bahasa Sasak Berdaya Komputasi Rendah")
+    r_title = p_title.add_run("SasakNLP: Kerangka Kerja Hibrida untuk Pemrosesan Morfologi Bahasa Daerah Sasak Berdaya Komputasi Rendah")
     r_title.font.name = "Times New Roman"
     r_title.font.size = Pt(20)
     r_title.font.bold = True
@@ -1265,12 +1289,11 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     # TABEL 1: Full-Page Width (6.5 inches)
     t1_headers = ["No", "Klaster Dialek", "Sebaran Wilayah Geografis", "Penanda Diagnostik (Shibboleths)", "Ciri Fonologis & Sosiolek"]
     t1_data = [
-        ["1", "Selaparang (Menu-Meni)", "Lombok Timur & Tengah Timur", "menu, meni, tiyang, kaji", "Ragam krama (alus), retensi glotal /-q/, sastra lontar"],
+        ["1", "Meno-Mene (Selaparang)", "Lombok Timur & Lombok Tengah", "menu, meni, tiyang, kaji", "Ragam krama (alus), retensi hentian glotal /-q/, ciri vokal /-e/"],
         ["2", "Ngeno-Ngene", "Kota Mataram & Lombok Barat", "ngeno, ngene, ente, aku", "Dialek perkotaan, artikulasi vokal cepat, kontak maritim"],
-        ["3", "Mriak-Mriku", "Lombok Tengah Selatan (Praya, Pujut)", "mriak, mriku, meriq, merik", "Deiksis spasial arah (ke mari / ke sana)"],
-        ["4", "Ngeto-Ngete", "Lombok Timur Utara (Sembalun, Suela)", "ngeto, ngete", "Komunitas dataran tinggi lereng Gunung Rinjani"],
-        ["5", "Kuto-Kute", "Lombok Utara (Bayan, Tanjung)", "kuto, kute, wetu", "Retensi arkais Austronesia tua, tradisi adat Wetu Telu"],
-        ["6", "Sasak Umum (General)", "Lintas Kabupaten (Ragam Baku)", "wah, ndeq, mangan, batur", "Bahasa pergaulan antardialek di ruang publik"]
+        ["3", "Merikuq-Merikaq (Mriak-Mriku)", "Lombok Tengah Selatan (Praya, Pujut)", "mriak, mriku, meriq, merik", "Deiksis spasial arah (ke mari / ke sana), vokal /-a/ dan /-u/"],
+        ["4", "Kuto-Kute (Ngeto-Ngete)", "Lombok Utara & Sembalun (Bayan, Suela)", "kuto, kute, ngeto, wetu", "Retensi arkais Austronesia tua, tradisi adat Wetu Telu, komunitas dataran tinggi"],
+        ["5", "Sasak Umum (General Standard)", "Lintas Wilayah Pulau Lombok", "wah, ndeq, mangan, batur", "Bahasa pergaulan antardialek di ruang publik, rujukan leksikon Balai Bahasa NTB"]
     ]
     add_tbl(1, "Taksonomi 5 Klaster Dialek Utama Bahasa Sasak di Pulau Lombok [9], [10], [12]", t1_headers, t1_data, col_widths=[0.4, 1.4, 1.4, 1.3, 2.0], full_page_width=True)
 
@@ -1369,8 +1392,11 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     add_tbl(2, "Evaluasi Komparatif terhadap Model Acuan pada 100.000 Sampel Morfologi", t2_headers, t2_data, col_widths=[1.7, 1.8, 1.0, 0.9, 1.1], full_page_width=True)
 
     add_body(
-        "Uji McNemar menghasilkan b = 33.892 dan c = 8.659, dengan statistik uji chi-squared = 14.962,14 (df = 1, p < 0,0001). "
-        "Keunggulan SasakNLP terbukti signifikan secara statistik pada alpha = 0,001."
+        "Uji berpasangan McNemar antara SasakNLP dan Baseline 2 menghasilkan matriks kontinjensi: "
+        "a = 46.546 (keduanya benar), b = 33.892 (SasakNLP benar, Baseline 2 salah), "
+        "c = 8.659 (SasakNLP salah, Baseline 2 benar), dan d = 10.903 (keduanya salah). "
+        "Statistik uji chi-squared = 14.962,14 (df = 1, p < 0,0001), membuktikan keunggulan "
+        "SasakNLP signifikan secara statistik pada alpha = 0,001."
     )
 
     add_subsec_heading("5.2 Kinerja pada Tolok Ukur Inti 10k")
@@ -1425,7 +1451,13 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         ["Sufiks Lokatif", "-an, -in", "10.545", "76,52%", "Penanda lokatif/tujuan (kaduan, siramin)"],
         ["Konfiks Resiprokal", "be-...-an", "1.710", "65,09%", "Tindakan berbalasan (betulungan, besambatan)"]
     ]
-    add_tbl(4, "Rincian Kinerja Lematisasi per Kategori Morfem pada 100.000 Sampel Uji", t4_headers, t4_data, col_widths=[1.4, 0.9, 0.8, 0.9, 2.5], full_page_width=True)
+    add_tbl(4, "Rincian Kinerja Lematisasi pada 16 Kategori Morfem Representatif Utama (N = 55.324) pada Tolok Ukur 100.000 Sampel Uji", t4_headers, t4_data, col_widths=[1.4, 0.9, 0.8, 0.9, 2.5], full_page_width=True)
+    add_body(
+        "Catatan: 16 kategori yang ditampilkan pada Tabel 4 merepresentasikan bentuk afiks tunggal dan konfiks utama yang umum dijumpai (N = 55.324). "
+        "Sebanyak 44.676 sampel lainnya pada tolok ukur 100.000 data mencakup kombinasi afiksasi bertingkat tiga lapis yang lebih kompleks, pemajemukan, "
+        "dan variasi turunan dialek yang didokumentasikan secara lengkap pada repositori dataset riset.",
+        indent=False
+    )
 
     add_subsec_heading("5.5 Evaluasi Lintas Lima Dialek Sasak")
     add_body(
@@ -1436,12 +1468,12 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
     add_fig("figures/fig2_dialect_performance.png", 3, "Perbandingan Performa Lematisasi SasakNLP Lintas Lima Klaster Dialek Utama Bahasa Sasak.", full_page_width=True, width_in=6.5)
 
     # TABEL 5: Full-Page Width (6.5 inches)
-    t5_headers = ["Wilayah Penutur", "Nama Dialek Sasak", "Jumlah", "Akurasi (%)", "Ciri Fonologis & Fonem Utama"]
+    t5_headers = ["Wilayah Penutur", "Klaster Dialek Sasak", "Jumlah", "Akurasi (%)", "Ciri Fonologis & Fonem Utama"]
     t5_data = [
-        ["Lombok Barat & Mataram", "Sasak Umum (General)", "43.254", "85,73%", "Sesuai ragam baku kamus Balai Bahasa NTB"],
-        ["Lombok Utara", "Kuto-Kute", "10.475", "80,31%", "Vokal akhir /-e/ dan /-o/ (kuto, kute), retensi arkais"],
-        ["Lombok Selatan", "Merikuq-Merikaq", "10.535", "79,79%", "Vokal /-a/ dan /-u/ dengan hentian glotal /-q/"],
-        ["Lombok Tengah", "Meno-Mene", "23.023", "77,04%", "Vokal /-e/, dialek dengan penutur terbanyak"],
+        ["Kota Mataram & Lombok Barat", "Sasak Umum (General Standard)", "43.254", "85,73%", "Sesuai ragam baku kamus Balai Bahasa NTB"],
+        ["Lombok Utara", "Kuto-Kute (Ngeto-Ngete)", "10.475", "80,31%", "Vokal akhir /-e/ dan /-o/ (kuto, kute), retensi arkais"],
+        ["Lombok Selatan", "Merikuq-Merikaq (Mriak-Mriku)", "10.535", "79,79%", "Vokal /-a/ dan /-u/ dengan hentian glotal /-q/"],
+        ["Lombok Tengah", "Meno-Mene (Selaparang)", "23.023", "77,04%", "Vokal /-e/, dialek dengan penutur terbanyak"],
         ["Lombok Timur", "Ngeno-Ngene", "12.713", "69,24%", "Variasi vokal sengau dan konsonan velar /-k/"]
     ]
     add_tbl(5, "Performa Lematisasi Lintas 5 Klaster Dialek Utama Sasak (100k Data)", t5_headers, t5_data, col_widths=[1.3, 1.3, 0.8, 0.9, 2.2], full_page_width=True)
@@ -1531,6 +1563,14 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
         "2) Pembangunan korpus beranotasi Sasak Dependency Treebank pertama, dan 3) Pelatihan model penerjemahan mesin saraf (NMT) dwiarah Sasak-Indonesia [1], [2], [6]."
     )
 
+    # KETERSEDIAAN DATA DAN KODE
+    add_sec_heading("KETERSEDIAAN DATA DAN KODE")
+    add_body(
+        "Demi menjamin transparansi ilmiah dan replikabilitas riset, seluruh perangkat lunak, dataset tolok ukur, dan modul pendukung dapat diakses secara publik: "
+        "Paket Resmi PyPI (pip install sasaknlp), Repositori GitHub (https://github.com/kodetr/sasaknlp), dan "
+        "Dataset Hugging Face (https://huggingface.co/datasets/kodetr/sasak-benchmark-100k)."
+    )
+
     # UCAPAN TERIMA KASIH
     add_sec_heading("UCAPAN TERIMA KASIH")
     add_body(
@@ -1584,15 +1624,20 @@ def build_ecti_docx_id(output_path="artikel/jurnal_sasaknlp_id.docx"):
 if __name__ == "__main__":
     base_dir = os.path.dirname(os.path.abspath(__file__))
     
-    # 1. Generate English ECTI-CIT Manuscript
+    # 1. Generate English ECTI-CIT Camera-Ready Manuscript
     en_path = os.path.join(base_dir, "jurnal_sasaknlp_en.docx")
-    build_ecti_docx_en(en_path)
+    build_ecti_docx_en(en_path, is_anonymous=False)
     
+    # 2. Generate English ECTI-CIT Double-Blind Anonymous Manuscript
+    anon_path = os.path.join(base_dir, "jurnal_sasaknlp_anonymous.docx")
+    build_ecti_docx_en(anon_path, is_anonymous=True)
+    print(f"✅ Anonymous Double-Blind Manuscript generated: {anon_path}")
+
     # Also keep default jurnal_sasaknlp.docx pointing to the English ECTI paper
     default_path = os.path.join(base_dir, "jurnal_sasaknlp.docx")
     shutil.copyfile(en_path, default_path)
     print(f"✅ Default ECTI Manuscript updated: {default_path}")
 
-    # 2. Generate Indonesian Academic Manuscript
+    # 3. Generate Indonesian Academic Manuscript
     id_path = os.path.join(base_dir, "jurnal_sasaknlp_id.docx")
     build_ecti_docx_id(id_path)

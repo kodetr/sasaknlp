@@ -22,7 +22,7 @@
 
 \begin{document}
 
-\title{SasakNLP: A Dialect-Aware Morphological Processing Framework for the Low-Resource Sasak Language}
+\title{SasakNLP: A Hybrid Framework for Morphological Processing of the Low-Resource Sasak Language}
 
 \author{\IEEEauthorblockN{kodetr}
 \IEEEauthorblockA{\textit{Regional Language Computational Research Group} \\
@@ -92,12 +92,11 @@ Following regional dialectological studies \cite{hakim2023, balaibahasa2022, hak
 \begin{tabular}{|c|l|l|l|}
 \hline
 \textbf{No} & \textbf{Dialect Cluster} & \textbf{Geographical Range} & \textbf{Diagnostic Markers} \\ \hline
-1 & Selaparang (Menu-Meni) & East \& Central-East Lombok & \texttt{menu}, \texttt{meni}, \texttt{tiyang}, \texttt{kaji} \\ \hline
+1 & Meno-Mene (Selaparang) & East \& Central Lombok & \texttt{menu}, \texttt{meni}, \texttt{tiyang}, \texttt{kaji} \\ \hline
 2 & Ngeno-Ngene            & Mataram \& West Lombok      & \texttt{ngeno}, \texttt{ngene}, \texttt{ente}, \texttt{aku} \\ \hline
-3 & Mriak-Mriku            & Central-South (Praya)       & \texttt{mriak}, \texttt{mriku}, \texttt{meriq} \\ \hline
-4 & Ngeto-Ngete            & Northeast (Sembalun)        & \texttt{ngeto}, \texttt{ngete} \\ \hline
-5 & Kuto-Kute              & North Lombok (Bayan)        & \texttt{kuto}, \texttt{kute}, \texttt{wetu} \\ \hline
-6 & General Sasak          & Cross-Island Standard       & \texttt{wah}, \texttt{ndeq}, \texttt{mangan}, \texttt{batur} \\ \hline
+3 & Merikuq-Merikaq (Mriak-Mriku) & Central-South (Praya, Pujut) & \texttt{mriak}, \texttt{mriku}, \texttt{meriq} \\ \hline
+4 & Kuto-Kute (Ngeto-Ngete)       & North \& Northeast Lombok & \texttt{kuto}, \texttt{kute}, \texttt{ngeto} \\ \hline
+5 & General Standard Sasak & Cross-Island Standard       & \texttt{wah}, \texttt{ndeq}, \texttt{mangan}, \texttt{batur} \\ \hline
 \end{tabular}
 \end{table}
 
@@ -162,7 +161,7 @@ Baseline 2: Greedy Stripping  & 55,205 & 55.21\% & 18,200 \\ \hline
 \end{tabular}
 \end{table}
 
-\textbf{Statistical Significance}: McNemar's test comparing SasakNLP and Baseline 2 yields contingency counts $b = 33,892$ and $c = 8,659$, resulting in $\chi^2 = 14,962.14$ ($df = 1, p < 0.0001$). SasakNLP's superiority is statistically significant at $\alpha = 0.001$.
+\textbf{Statistical Significance}: McNemar's paired test comparing SasakNLP and Baseline 2 across all $N = 100,000$ test items yields the contingency matrix: $a = 46,546$ (both correct), $b = 33,892$ (SasakNLP correct, Baseline 2 incorrect), $c = 8,659$ (SasakNLP incorrect, Baseline 2 correct), and $d = 10,903$ (both incorrect). The test statistic with continuity correction is $\chi^2 = \frac{(|b - c| - 1)^2}{b + c} = 14,962.14$ ($df = 1, p < 0.0001$), confirming that SasakNLP's performance superiority is statistically significant at $\alpha = 0.001$.
 
 \subsection{Performance on Core 10k Benchmark}
 On the 10,000-pair core morphological benchmark (\texttt{benchmark\_10k.csv}), SasakNLP correctly extracted 9,323 lemmas, achieving an accuracy of \textbf{93.23\%} with an operational throughput of \textbf{16,272 words per second}.
@@ -196,7 +195,7 @@ Fig. \ref{fig:morph_acc} and Table \ref{tab:morpheme_acc} detail accuracy across
 \end{figure}
 
 \begin{table}[htbp]
-\caption{Disaggregated Performance across Morpheme Categories (100k Data)}
+\caption{Disaggregated Performance across 16 Major Representative Morpheme Categories ($N = 55,324$) on the 100,000-Sample Benchmark}
 \label{tab:morpheme_acc}
 \centering
 \begin{tabular}{|l|l|c|c|}
@@ -215,6 +214,9 @@ Causative Suffix  & \texttt{-ang}          & 6,170  & \textbf{83.70\%}  \\ \hlin
 Locative Suffix   & \texttt{-an}, \texttt{-in} & 10,545 & \textbf{76.52\%} \\ \hline
 Reciprocal        & \texttt{be-...-an}     & 1,710  & \textbf{65.09\%}  \\ \hline
 \end{tabular}
+\vspace{2pt}
+
+\noindent\footnotesize{\textit{Note:} The 16 categories displayed in Table \ref{tab:morpheme_acc} represent canonical major single-affix and primary circumfix formations ($N = 55,324$). The remaining 44,676 samples in the 100,000-pair benchmark comprise complex multi-tier nested combinations, compounding, and dialectal derivations documented in the supplementary repository.}
 \end{table}
 
 \subsection{Cross-Dialect Evaluation}
@@ -234,10 +236,10 @@ Evaluation across the five Sasak dialect regions (Fig. \ref{fig:dialect_perf}, T
 \begin{tabular}{|l|l|c|c|}
 \hline
 \textbf{Region} & \textbf{Dialect Cluster} & \textbf{Samples} & \textbf{Accuracy (\%)} \\ \hline
-Mataram / West Lombok & Sasak Umum (General) & 43,254 & \textbf{85.73\%} \\ \hline
-North Lombok          & Kuto-Kute            & 10,475 & \textbf{80.31\%} \\ \hline
-South Lombok          & Merikuq-Merikaq      & 10,535 & \textbf{79.79\%} \\ \hline
-Central Lombok        & Meno-Mene            & 23,023 & \textbf{77.04\%} \\ \hline
+Mataram / West Lombok & General Standard Sasak & 43,254 & \textbf{85.73\%} \\ \hline
+North Lombok          & Kuto-Kute (Ngeto-Ngete) & 10,475 & \textbf{80.31\%} \\ \hline
+South Lombok          & Merikuq-Merikaq (Mriak-Mriku) & 10,535 & \textbf{79.79\%} \\ \hline
+Central Lombok        & Meno-Mene (Selaparang) & 23,023 & \textbf{77.04\%} \\ \hline
 East Lombok           & Ngeno-Ngene          & 12,713 & \textbf{69.24\%} \\ \hline
 \end{tabular}
 \end{table}
