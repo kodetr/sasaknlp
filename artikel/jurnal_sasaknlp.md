@@ -1,4 +1,4 @@
-# SasakNLP: Research-Grade Morphological Processing and Dialect-Aware Natural Language Processing Framework for Low-Resource Bahasa Sasak
+# SasakNLP: A Dialect-Aware Morphological Processing Framework for the Low-Resource Sasak Language
 
 **Penulis / Peneliti Utama**: **kodetr**  
 **Afiliasi**: Riset Komputasi Bahasa Daerah Nusantara, [kodetr.com](https://kodetr.com)  
