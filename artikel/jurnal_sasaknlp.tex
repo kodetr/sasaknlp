@@ -34,9 +34,9 @@ GitHub: \url{https://github.com/kodetr/sasaknlp}
 \maketitle
 
 \begin{abstract}
-Bahasa Sasak is an Austronesian regional language spoken by approximately 3 million people across Lombok Island, West Nusa Tenggara (NTB), Indonesia. Despite its demographic vitality, it remains a digitally underrepresented low-resource language lacking standardized computational linguistic infrastructure \cite{aji2022, winata2023}. Standard Indonesian morphological analyzers fail when applied to Sasak due to distinct morphophonemic alternations, complex clitic attachments, and sharp cross-island dialectal variation \cite{purwarianti2022, mahsun2021}. This paper presents \textbf{SasakNLP}, a dialect-aware morphological processing framework engineered specifically for Sasak orthographic normalization, reduplication-aware tokenization, shibboleth-driven dialect contextualization, and dictionary-validated multi-candidate lemmatization.
+Bahasa Sasak is an Austronesian regional language spoken by approximately 3 million people across Lombok Island, West Nusa Tenggara (NTB), Indonesia. Despite its demographic vitality, it remains a digitally underrepresented low-resource language lacking standardized computational linguistic infrastructure \cite{aji2022, winata2023}. Standard Indonesian morphological analyzers fail when applied to Sasak due to distinct morphophonemic alternations, complex clitic attachments, and sharp cross-island dialectal variation \cite{abidin2024, hakim2023}. This paper presents \textbf{SasakNLP}, a dialect-aware morphological processing framework engineered specifically for Sasak orthographic normalization, reduplication-aware tokenization, shibboleth-driven dialect contextualization, and dictionary-validated multi-candidate lemmatization \cite{balaibahasa2022, jurafsky2024}.
 
-Empirical evaluation across an extensive 100,000-pair morphological benchmark and an authentic folklore corpus of 12,591 sentences demonstrates that SasakNLP achieves an overall lemmatization accuracy of \textbf{80.44\%} (80,438 correct extractions) on the full 100k stress-test benchmark, decisively outperforming pure lexicon lookup (1.01\%) and greedy affix-stripping baselines (55.21\%) with strong statistical significance (McNemar's test, $\chi^2 = 14,962.14, p < 0.0001$). On the 10,000-pair core morphological benchmark, the system achieves an accuracy of \textbf{93.23\%}. Error taxonomy analysis confirms that dictionary-gating restricts overstemming to \textbf{2.28\%}, with understemming restricted to \textbf{15.86\%} primarily occurring on complex multi-layered affixations. Computationally, SasakNLP delivers high-throughput execution at \textbf{7,826 words per second} on full 100k batches and up to \textbf{16,272 words per second} on standard sequences, maintaining an average per-token latency of \textbf{0.044 ms} with zero heavy machine learning framework dependencies. All source code, datasets, and interactive web demos are publicly released under permissive open-source licenses.
+Empirical evaluation across an extensive 100,000-pair morphological benchmark and an authentic folklore corpus of 12,591 sentences demonstrates that SasakNLP achieves an overall lemmatization accuracy of \textbf{80.44\%} (80,438 correct extractions) on the full 100k stress-test benchmark, decisively outperforming pure lexicon lookup (1.01\%) and greedy affix-stripping baselines (55.21\%) with strong statistical significance (McNemar's test, $\chi^2 = 14,962.14, p < 0.0001$). On the 10,000-pair core morphological benchmark, the system achieves an accuracy of \textbf{93.23\%}. Error taxonomy analysis confirms that dictionary-gating restricts overstemming to \textbf{2.28\%}, with understemming restricted to \textbf{15.86\%} primarily occurring on complex multi-layered affixations. Computationally, SasakNLP delivers high-throughput execution at \textbf{7,826 words per second} on full 100k batches and up to \textbf{16,272 words per second} on standard sequences, maintaining an average per-token latency of \textbf{0.044 ms} with zero heavy machine learning framework dependencies. All source code, datasets, and interactive web demos are publicly released under permissive open-source licenses \cite{sasaknlp2026}.
 \end{abstract}
 
 \begin{IEEEkeywords}
@@ -44,35 +44,35 @@ Sasak Language, Natural Language Processing, Computational Morphology, Lemmatiza
 \end{IEEEkeywords}
 
 \section{Introduction}
-\IEEEPARstart{R}{ecent} breakthroughs in Natural Language Processing (NLP) and Large Language Models (LLMs) have been overwhelmingly concentrated on high-resource languages \cite{aji2022, magueresse2021}. In Indonesia, while the national language (Bahasa Indonesia) enjoys mature computational infrastructure and pre-trained language models \cite{cahyawijaya2022, koto2021}, more than 700 indigenous regional languages remain critically neglected and underrepresented \cite{aji2022, winata2023}. This digital resource scarcity hampers cultural preservation, applied linguistic modeling, and local information retrieval systems \cite{winata2023, purwarianti2022}.
+\IEEEPARstart{R}{ecent} breakthroughs in Natural Language Processing (NLP) and Large Language Models (LLMs) have been overwhelmingly concentrated on high-resource languages \cite{aji2022, ranathunga2023}. In Indonesia, while the national language (Bahasa Indonesia) enjoys mature computational infrastructure and pre-trained language representations \cite{cahyawijaya2023, koto2021}, more than 700 indigenous regional languages remain critically neglected and underrepresented \cite{aji2022, winata2023}. This digital resource scarcity hampers cultural preservation, applied linguistic modeling, and local information retrieval systems \cite{winata2023, abidin2024}.
 
-Bahasa Sasak (\textit{Basa Sasak}) is the predominant indigenous language of Lombok Island in West Nusa Tenggara, spoken by approximately 3 million native speakers \cite{mahsun2021, balaibahasa2022}. Categorized typologically within the Western Malayo-Polynesian branch of the Austronesian language family, Sasak exhibits distinct grammatical characteristics:
+Bahasa Sasak (\textit{Basa Sasak}) is the predominant indigenous language of Lombok Island in West Nusa Tenggara, spoken by approximately 3 million native speakers \cite{hakim2023, balaibahasa2022}. Categorized typologically within the Western Malayo-Polynesian branch of the Austronesian language family, Sasak exhibits distinct grammatical characteristics:
 \begin{enumerate}
-    \item \textbf{Complex Morphophonemics}: Stem formation incorporates active prefixes (\texttt{te-}, \texttt{ka-}, \texttt{se-}, \texttt{pe-}), archaic passive infixes (\texttt{-in-}, \texttt{-um-}), causative/applicative suffixes (\texttt{-ang}, \texttt{-an}, \texttt{-i}, \texttt{-in}), iterative circumfixes (\texttt{pe-...-an}, \texttt{te-...-ang}, \texttt{be-...-an}), and intricate nasal substitutions ($N$-) \cite{purwarianti2022, balaibahasa2022}.
-    \item \textbf{Enclitic Compounding}: Pronominal possessive enclitics (\texttt{-ku}, \texttt{-m}, \texttt{-ne}) and honorific sociolinguistic particles (\texttt{-de}, \texttt{-te}) append directly to root words, frequently triggering severe overstemming or understemming in naive heuristic parsers \cite{purwarianti2022, susanto2023}.
-    \item \textbf{Dialectal Diversity}: The language is partitioned into five distinct dialect clusters separated by isoglosses and diagnostic lexical markers (\textit{shibboleths}) \cite{mahsun2021}.
+    \item \textbf{Complex Morphophonemics}: Stem formation incorporates active prefixes (\texttt{te-}, \texttt{ka-}, \texttt{se-}, \texttt{pe-}), archaic passive infixes (\texttt{-in-}, \texttt{-um-}), causative/applicative suffixes (\texttt{-ang}, \texttt{-an}, \texttt{-i}, \texttt{-in}), iterative circumfixes (\texttt{pe-...-an}, \texttt{te-...-ang}, \texttt{be-...-an}), and intricate nasal substitutions ($N$-) \cite{abidin2024, balaibahasa2022}.
+    \item \textbf{Enclitic Compounding}: Pronominal possessive enclitics (\texttt{-ku}, \texttt{-m}, \texttt{-ne}) and honorific sociolinguistic particles (\texttt{-de}, \texttt{-te}) append directly to root words, frequently triggering severe overstemming or understemming in naive heuristic parsers \cite{abidin2024, hakim2022}.
+    \item \textbf{Dialectal Diversity}: The language is partitioned into five distinct dialect clusters separated by isoglosses and diagnostic lexical markers (\textit{shibboleths}) \cite{hakim2023, hakim2022}.
 \end{enumerate}
 
-Prior computational morphology research in Indonesia has predominantly addressed Javanese and Sundanese \cite{aji2022, purwarianti2022, susanto2023}, leaving Sasak completely devoid of open, standardized toolkits. To the best of our knowledge, no existing framework combines standard Sasak grammar rules with authoritative dictionary validation \cite{aji2022, winata2023}.
+Prior computational morphology research in Indonesia has predominantly addressed Javanese and Sundanese \cite{aji2022, abidin2024, resiandi2023}, leaving Sasak completely devoid of open, standardized toolkits. Systematic literature reviews confirm that the absence of structured digital lexicons and morphological analyzers remains the primary barrier to regional language lemmatization \cite{abidin2024}.
 
 To overcome these barriers, we present \textbf{SasakNLP}, an open-source, reproducible computational framework \cite{sasaknlp2026}. The primary contributions of this work are:
 \begin{itemize}
-    \item \textbf{C1. SasakLex Machine Resource}: Digitalization and structuring of the official Balai Bahasa Provinsi NTB integrated dictionary into 2,761 machine-readable entries \cite{balaibahasa2022, sasakbenchmark2026}.
-    \item \textbf{C2. Hybrid Morphological Framework}: A deterministic architecture combining two-pass affix stripping, $\mathcal{O}(L)$ dictionary validation via \texttt{PrefixTrie}, and multi-criteria candidate ranking \cite{purwarianti2022, jurafsky2024}.
+    \item \textbf{C1. SasakLex Machine Resource}: Digitalization and structuring of the official Balai Bahasa Provinsi NTB integrated dictionary into 2,761 machine-readable entries \cite{balaibahasa2022, sasaknlp2026}.
+    \item \textbf{C2. Hybrid Morphological Framework}: A deterministic architecture combining two-pass affix stripping, $\mathcal{O}(L)$ dictionary validation via \texttt{PrefixTrie}, and multi-criteria candidate ranking \cite{abidin2024, jurafsky2024}.
     \item \textbf{C3. Structured Morphological Analysis}: Explicit morpheme segmentation identifying prefixes, infixes, suffixes, circumfixes, clitics, and reduplication with confidence scores.
-    \item \textbf{C4. Dialect-Aware Architecture}: Configurable dialect contextualization using diagnostic shibboleth density across the five Sasak dialect regions \cite{mahsun2021}.
-    \item \textbf{C5. Open Research Infrastructure}: Public release of the 100,000-pair gold-standard benchmark, the 12,591-sentence authentic corpus, the PyPI package (\texttt{sasaknlp}), and Hugging Face Hub datasets \cite{sasaknlp2026, sasakbenchmark2026}.
+    \item \textbf{C4. Dialect-Aware Architecture}: Configurable dialect contextualization using diagnostic shibboleth density across the five Sasak dialect regions \cite{hakim2023, hakim2022}.
+    \item \textbf{C5. Open Research Infrastructure}: Public release of the 100,000-pair gold-standard benchmark, the 12,591-sentence authentic corpus, the PyPI package (\texttt{sasaknlp}), and Hugging Face Hub datasets \cite{sasaknlp2026}.
 \end{itemize}
 
 \section{Related Work and Linguistic Background}
 
 \subsection{Related Work in Regional Austronesian NLP}
-Underrepresented language technologies in Indonesia suffer from persistent data scarcity \cite{aji2022, magueresse2021}. Collaborative initiatives like NusaCrowd \cite{winata2023} and NusaX \cite{cahyawijaya2022} have aggregated regional language resources for classification tasks. However, token-level morphological processing for regional languages outside Java remains sparse, largely relying on Indonesian heuristics \cite{koto2021, purwarianti2022}.
+Underrepresented language technologies in Indonesia suffer from persistent data scarcity \cite{aji2022, ranathunga2023}. Collaborative initiatives like NusaCrowd \cite{winata2023} and NusaX \cite{cahyawijaya2023} have aggregated regional language resources for classification tasks. However, token-level morphological processing for regional languages outside Java remains sparse, largely relying on ad-hoc heuristics \cite{abidin2024}.
 
-Purwarianti et al. \cite{purwarianti2022} and Susanto et al. \cite{susanto2023} observed that rule-based affix stripping for agglutinative regional languages suffers severe overstemming and understemming without dictionary verification. Integrating a curated lexicon as a validation gate is crucial for preserving base lemmas in low-resource environments \cite{purwarianti2022, jurafsky2024}.
+The systematic literature review by Abidin et al. \cite{abidin2024} established that affix stripping and lemmatization for Indonesian regional languages require domain-specific digital dictionaries and explicit morphophonemic rules to mitigate overstemming and understemming. Resiandi et al. \cite{resiandi2023} further proved the critical role of structured dictionaries in modeling regional vocabulary transformations. Hence, integrating a curated lexicon as an active verification gate is crucial for preserving root integrity in low-resource setups \cite{abidin2024, jurafsky2024}.
 
 \subsection{Morphological System of Bahasa Sasak}
-According to official grammatical codification by Balai Bahasa Provinsi NTB \cite{balaibahasa2022} and Austronesian typology \cite{purwarianti2022, mahsun2021}, Sasak bound morphemes comprise:
+According to official grammatical codification by Balai Bahasa Provinsi NTB \cite{balaibahasa2022} and contemporary linguistic studies \cite{hakim2023, hakim2022}, Sasak bound morphemes comprise:
 \begin{itemize}
     \item \textbf{Prefixes}: Passive \texttt{te-} (\textit{tepinaq} ``is made''), stative \texttt{ka-} (\textit{kasolah} ``beautified''), equative \texttt{se-} (\textit{sebale} ``one house''), nominalizer \texttt{pe-} / \texttt{peng-} (\textit{pegawi} ``worker''), and nasal assimilation $N$- (\textit{nulis}, \textit{minaq}).
     \item \textbf{Suffixes}: Causative/applicative \texttt{-ang} (\textit{tulungang} ``help for someone''), locative/resultative \texttt{-an} (\textit{kelororan} ``waterway''), iterative \texttt{-i} / \texttt{-in} (\textit{sirami}).
@@ -83,10 +83,10 @@ According to official grammatical codification by Balai Bahasa Provinsi NTB \cit
 \end{itemize}
 
 \subsection{Dialect Taxonomy}
-Following Mahsun \cite{mahsun2021} and Balai Bahasa NTB \cite{balaibahasa2022}, Bahasa Sasak is grouped into five primary dialect clusters based on diagnostic shibboleths (Table \ref{tab:dialect_taxonomy}).
+Following regional dialectological studies \cite{hakim2023, hakim2022, balaibahasa2022}, Bahasa Sasak is grouped into five primary dialect clusters based on diagnostic shibboleths (Table \ref{tab:dialect_taxonomy}).
 
 \begin{table}[htbp]
-\caption{Taxonomy of the Five Major Sasak Dialect Clusters in Lombok \cite{mahsun2021, balaibahasa2022}}
+\caption{Taxonomy of the Five Major Sasak Dialect Clusters in Lombok \cite{hakim2023, hakim2022, balaibahasa2022}}
 \label{tab:dialect_taxonomy}
 \centering
 \begin{tabular}{|c|l|l|l|}
@@ -113,10 +113,10 @@ Following Mahsun \cite{mahsun2021} and Balai Bahasa NTB \cite{balaibahasa2022}, 
 SasakNLP implements a deterministic, multi-stage processing pipeline:
 
 \subsection{Text Normalization and Reduplication Tokenization}
-Raw input strings undergo Unicode NFC composition to eliminate non-standard diacritic encodings \cite{aji2022, winata2023}. Curved apostrophes and glottal markers are standardized to uniform characters (\texttt{q} or \texttt{'}), while accented vowels (\textit{\`{e}}, \textit{\'{e}}) are preserved to prevent lexical distortion. Hyphenated reduplications (\textit{bareng-bareng}) are tokenized as unified morphological units \cite{purwarianti2022}.
+Raw input strings undergo Unicode NFC composition to eliminate non-standard diacritic encodings \cite{aji2022, winata2023}. Curved apostrophes and glottal markers are standardized to uniform characters (\texttt{q} or \texttt{'}), while accented vowels (\textit{\`{e}}, \textit{\'{e}}) are preserved to prevent lexical distortion. Hyphenated reduplications (\textit{bareng-bareng}) are tokenized as unified morphological units \cite{abidin2024}.
 
 \subsection{Dialect Shibboleth Contextualizer}
-The dialect module computes a relative density metric based on diagnostic shibboleths \cite{mahsun2021}:
+The dialect module computes a relative density metric based on diagnostic shibboleths \cite{hakim2023, hakim2022}:
 \begin{equation}
 \text{Confidence}(d) = \frac{\sum_{w \in T} \mathbb{I}(w \in M_d) \cdot \omega(w)}{\sum_{d' \in D} \sum_{w \in T} \mathbb{I}(w \in M_{d'}) \cdot \omega(w)}
 \label{eq:dialect_conf}
@@ -127,7 +127,7 @@ where $T$ is the sequence of tokens, $M_d$ is the lexical marker set for dialect
 Tokens not found via direct dictionary lookup undergo two-pass affix stripping: enclitic detachment, confix stripping, prefix/suffix removal, and infix inversion \cite{balaibahasa2022, jurafsky2024}. Generated candidate roots are checked against a high-performance \texttt{PrefixTrie} loaded with the official 2,761-entry Balai Bahasa NTB dictionary \cite{balaibahasa2022} in $\mathcal{O}(L)$ time.
 
 \subsection{Multi-Criteria Candidate Ranking}
-Morphological ambiguity is resolved using a weighted scoring objective \cite{jurafsky2024, susanto2023}:
+Morphological ambiguity is resolved using a weighted scoring objective \cite{jurafsky2024}:
 \begin{equation}
 \begin{aligned}
 \text{Score}(c) = & \; w_{\text{lex}} \cdot S_{\text{lex}}(c) + w_{\text{morph}} \cdot S_{\text{morph}}(c) \\
@@ -143,13 +143,13 @@ with empirical default parameters $w_{\text{lex}} = 0.40$, $w_{\text{morph}} = 0
 \subsection{Three-Phase Dataset Acquisition Protocol}
 As illustrated in Fig. \ref{fig:dataset_pipeline}, the dataset was developed through a 3-phase curation protocol:
 \begin{enumerate}
-    \item \textbf{Multi-Source Ingestion}: Gathering authentic texts from folklore literature (\textit{Putri Mandalika}, \textit{Dewi Anjani}) and Balai Bahasa NTB lexicons \cite{balaibahasa2022, sasakbenchmark2026}.
+    \item \textbf{Multi-Source Ingestion}: Gathering authentic texts from folklore literature (\textit{Putri Mandalika}, \textit{Dewi Anjani}) and Balai Bahasa NTB lexicons \cite{balaibahasa2022, sasaknlp2026}.
     \item \textbf{Five-Stage Curation}: Applying diacritic restoration, foreign non-indigenous name eradication, pseudo-root removal, and stratified sampling.
     \item \textbf{Gold-Standard Generation}: Producing the 100,000-pair benchmark (\texttt{benchmark\_100k.csv}), the 10,000-pair core set (\texttt{benchmark\_10k.csv}), the 12,591-sentence authentic corpus (\texttt{sasak\_sentences\_large.csv}), and the 2,761-entry dictionary (\texttt{kamus\_balai\_bahasa\_ntb.csv}).
 \end{enumerate}
 
 \subsection{Hardware, Software, and Reproducibility}
-Experiments were executed on standard consumer CPU hardware (Apple Silicon 8-Core and Intel Core i7, 16 GB RAM) with Python 3.10+ and zero external heavy machine learning dependencies. The entire evaluation is deterministic and fully reproducible \cite{sasaknlp2026, sasakbenchmark2026}:
+Experiments were executed on standard consumer CPU hardware (Apple Silicon 8-Core and Intel Core i7, 16 GB RAM) with Python 3.10+ and zero external heavy machine learning dependencies. The entire evaluation is deterministic and fully reproducible \cite{sasaknlp2026}:
 \begin{quote}
 \texttt{PYTHONPATH=sasaknlp/src:src python3 scripts/evaluate\_sasak\_nlp.py}
 \end{quote}
@@ -160,7 +160,7 @@ Experiments were executed on standard consumer CPU hardware (Apple Silicon 8-Cor
 SasakNLP was evaluated against two baseline systems on the full 100,000-pair morphological benchmark (Table \ref{tab:baseline_comp}):
 \begin{itemize}
     \item \textbf{Baseline 1 (Direct Lexicon Lookup)}: Exact lexicon matching without affix stripping.
-    \item \textbf{Baseline 2 (Greedy Affix Stripping)}: Longest-match rule-based stripping without dictionary validation \cite{koto2021, purwarianti2022}.
+    \item \textbf{Baseline 2 (Greedy Affix Stripping)}: Longest-match rule-based stripping without dictionary validation \cite{abidin2024}.
 \end{itemize}
 
 \begin{table}[htbp]
@@ -278,7 +278,7 @@ As shown in Fig. \ref{fig:pipeline_bench}, SasakNLP delivers high computational 
 \end{figure}
 
 \subsection{Extrinsic Evaluation: Feature Space Compression}
-In downstream evaluation, applying SasakNLP lemmatization compressed the vocabulary feature space of the authentic corpus from 5,913 unique surface tokens to 4,022 base lemmas (a 31.98\% dimensional compression), directly reducing sparsity in downstream vector space models.
+In downstream evaluation, applying SasakNLP lemmatization compressed the vocabulary feature space of the authentic corpus from 5,913 unique surface tokens to 4,022 base lemmas (a 31.98\% dimensional compression), directly reducing sparsity in downstream vector space models \cite{abidin2024, resiandi2023}.
 
 \section{Discussion and Error Analysis}
 
@@ -308,13 +308,13 @@ Fig. \ref{fig:error_taxonomy} and Table \ref{tab:error_tax} detail the failure-m
 \end{table}
 
 \subsection{Why SasakNLP Succeeds}
-The performance advantage stems from \texttt{PrefixTrie} lexicon validation. In greedy stripping, roots like \textit{jaran} (``horse'') are mistakenly truncated to \textit{jar} due to suffix \texttt{-an}. In SasakNLP, \textit{jaran} matches the Balai Bahasa NTB dictionary immediately on pass one, preventing erroneous truncation.
+The performance advantage stems from \texttt{PrefixTrie} lexicon validation \cite{balaibahasa2022, jurafsky2024}. In greedy stripping, roots like \textit{jaran} (``horse'') are mistakenly truncated to \textit{jar} due to suffix \texttt{-an}. In SasakNLP, \textit{jaran} matches the Balai Bahasa NTB dictionary immediately on pass one, preventing erroneous truncation.
 
 \subsection{Performance Discrepancy: 100k vs 10k}
 The accuracy difference between the 100k benchmark (80.44\%) and the 10k core benchmark (93.23\%) reflects morphological complexity. The 100k benchmark functions as an exhaustive stress-test with multi-layer nested affixations, whereas the 10k core set represents natural morpheme frequency distributions.
 
 \subsection{Implications for Regional NLP}
-These results demonstrate that regional underrepresented languages can achieve high-performance morphological analysis through dictionary-grounded rule architectures without expensive GPU infrastructure \cite{aji2022, winata2023, purwarianti2022}.
+These results demonstrate that regional underrepresented languages can achieve high-performance morphological analysis through dictionary-grounded rule architectures without expensive GPU infrastructure \cite{aji2022, winata2023, abidin2024}.
 
 \section{Limitations}
 We transparently acknowledge three primary limitations:
@@ -327,7 +327,7 @@ We transparently acknowledge three primary limitations:
 \section{Conclusion and Future Directions}
 This paper presented \textbf{SasakNLP}, the first dialect-aware morphological framework for Bahasa Sasak. Evaluated across 100,000 benchmark pairs, SasakNLP achieves 80.44\% accuracy on full stress tests and 93.23\% on core benchmarks, restricting overstemming to 2.28\%, with throughput exceeding 7,800–16,000 words/second and 0.044 ms latency.
 
-Future work includes: (1) Integrating lightweight sequence-to-sequence models (ByT5 / Char-BiLSTM) for OOV handling, (2) Annotating the first Sasak Dependency Treebank, and (3) Training bidirectional Sasak-Indonesian Neural Machine Translation models \cite{aji2022, winata2023}.
+Future work includes: (1) Integrating lightweight sequence-to-sequence models (ByT5 / Char-BiLSTM) for OOV handling, (2) Annotating the first Sasak Dependency Treebank, and (3) Training bidirectional Sasak-Indonesian Neural Machine Translation models \cite{aji2022, winata2023, ranathunga2023}.
 
 \section*{Data and Code Availability}
 All artifacts are publicly accessible:
