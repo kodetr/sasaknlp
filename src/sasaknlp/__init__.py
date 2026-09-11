@@ -4,7 +4,7 @@ An open-source NLP and morphological processing toolkit for the low-resource
 Sasak language of Lombok, Indonesia.
 """
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __author__ = "kodetr"
 
 from sasaknlp.core.config import NormalizerConfig, PipelineConfig, RankingWeights
