@@ -1,58 +1,69 @@
 #!/usr/bin/env python3
 """Generate publication-quality diagram of the 100k Dataset Acquisition and Curation Pipeline.
 
-Complies with Scopus Q1/Q2 journal standards (Elsevier, IEEE, ACM):
-- High resolution: 300 DPI
-- Clean typography: Helvetica / Arial
-- Clear left-to-right & top-to-bottom visual hierarchy
-- Professional academic palette with distinct card containers
-- Precise empirical counts and metrics at every stage
-- Zero line collisions: generous margins, strict text bounds, and clean arrow spacing
+Optimized for:
+- Crystal-clear typography and high-contrast styling (publication-grade for IEEE / ECTI-CIT)
+- Perfectly calculated coordinates with zero collisions and generous padding
+- Distinct visual cards with prominent empirical metrics
+- Clean orthogonal flowchart paths
 """
 
 from pathlib import Path
 import matplotlib.pyplot as plt
 import matplotlib.patches as patches
 
-output_dir = Path("docs/figures")
-output_dir.mkdir(parents=True, exist_ok=True)
-
-# Canvas dimensions: 16.0 x 10.2 inches @ 300 DPI
-fig, ax = plt.subplots(figsize=(16.0, 10.2), dpi=300)
+# Canvas configuration: 15.5 x 10.5 inches @ 300 DPI (sharp 4650 x 3150 resolution)
+fig, ax = plt.subplots(figsize=(15.5, 10.5), dpi=300)
 ax.set_xlim(0, 100)
 ax.set_ylim(0, 100)
 ax.axis("off")
 
-# Set global font family
+# Typography
 plt.rcParams["font.sans-serif"] = ["Helvetica", "Arial", "DejaVu Sans"]
 plt.rcParams["font.family"] = "sans-serif"
 
-# Academic Color Palette (Scopus Q1 / Nature / Elsevier standard)
-c_bg = "#f8fafc"          # Soft slate background
-c_title = "#0f172a"       # Slate 900
-c_subtitle = "#475569"    # Slate 600
+# Academic Color Palette
+c_title = "#0f172a"
+c_subtitle = "#334155"
 
-c_src_hdr = "#1e3a8a"     # Dark Blue
-c_src_bg = "#eff6ff"      # Light Blue tint
+# Phase 1: Sources (Navy / Royal Blue)
+c_src_hdr = "#1e40af"
+c_src_bg = "#eff6ff"
 c_src_border = "#93c5fd"
 
-c_p1_hdr = "#0369a1"      # Blue 700 (Ingestion)
-c_p2_hdr = "#0891b2"      # Cyan 700 (Normalization)
-c_p3_hdr = "#b91c1c"      # Red 700 (Filtering / Purge)
-c_p4_hdr = "#c2410c"      # Orange 700 (Root Extraction)
-c_p5_hdr = "#15803d"      # Green 700 (Benchmark Generation)
+# Phase 2: Pipeline Stages
+c_p1_hdr = "#0284c7"  # Sky Blue (Normalization)
+c_p1_bg = "#f0f9ff"
+c_p1_border = "#7dd3fc"
 
-c_art_hdr = "#0f766e"     # Teal 700 (Output Artifacts)
-c_art_bg = "#f0fdfa"      # Light Teal tint
+c_p2_hdr = "#dc2626"  # Crimson (Heuristic Purge)
+c_p2_bg = "#fef2f2"
+c_p2_border = "#fca5a5"
+
+c_p3_hdr = "#d97706"  # Amber / Bronze (Root Extraction)
+c_p3_bg = "#fffbeb"
+c_p3_border = "#fcd34d"
+
+c_p4_hdr = "#7c3aed"  # Violet / Purple (Permutation)
+c_p4_bg = "#f5f3ff"
+c_p4_border = "#c4b5fd"
+
+c_p5_hdr = "#059669"  # Emerald (QA & Dialect Stratification)
+c_p5_bg = "#ecfdf5"
+c_p5_border = "#6ee7b7"
+
+# Phase 3: Research Artifacts (Deep Teal)
+c_art_hdr = "#0f766e"
+c_art_bg = "#f0fdfa"
 c_art_border = "#5eead4"
 
 
-def draw_header_card(ax, x, y, w, h, stage_num, title, items, header_color, body_bg="#ffffff", border_color="#cbd5e1", line_spacing=3.0):
-    """Draw a professional scientific card container with generous internal padding."""
-    # Drop shadow
+def draw_card(ax, x, y, w, h, badge, title, items, hdr_color, body_bg="#ffffff", border_color="#cbd5e1", line_spacing=2.5):
+    """Draw an elegant scientific card container with distinct header and clear typography."""
+    # Subtle drop shadow
     shadow = patches.FancyBboxPatch(
-        (x + 0.25, y - 0.35), w, h,
-        boxstyle="round,pad=0.0,rounding_size=1.0",
+        (x + 0.35, y - 0.4), w, h,
+        boxstyle="round,pad=0.0,rounding_size=1.2",
         facecolor="#000000",
         edgecolor="none",
         alpha=0.06,
@@ -63,10 +74,10 @@ def draw_header_card(ax, x, y, w, h, stage_num, title, items, header_color, body
     # Main Card Body
     body = patches.FancyBboxPatch(
         (x, y), w, h,
-        boxstyle="round,pad=0.0,rounding_size=1.0",
+        boxstyle="round,pad=0.0,rounding_size=1.2",
         facecolor=body_bg,
         edgecolor=border_color,
-        linewidth=1.1,
+        linewidth=1.4,
         zorder=2
     )
     ax.add_patch(body)
@@ -75,38 +86,38 @@ def draw_header_card(ax, x, y, w, h, stage_num, title, items, header_color, body
     hdr_h = 4.2
     hdr = patches.FancyBboxPatch(
         (x, y + h - hdr_h), w, hdr_h,
-        boxstyle="round,pad=0.0,rounding_size=1.0",
-        facecolor=header_color,
-        edgecolor=header_color,
+        boxstyle="round,pad=0.0,rounding_size=1.2",
+        facecolor=hdr_color,
+        edgecolor=hdr_color,
         linewidth=0.5,
         zorder=3
     )
     ax.add_patch(hdr)
-    
-    # Square bottom of header to merge seamlessly with body
+
+    # Merge bottom corners of header with card body
     rect_fill = patches.Rectangle(
-        (x, y + h - hdr_h), w, 1.2,
-        facecolor=header_color,
+        (x, y + h - hdr_h), w, 1.6,
+        facecolor=hdr_color,
         edgecolor="none",
         zorder=3
     )
     ax.add_patch(rect_fill)
 
-    # Stage Badge & Header Title
-    if stage_num:
+    # Badge & Title Text
+    if badge:
         ax.text(
-            x + 1.1, y + h - hdr_h/2,
-            stage_num,
+            x + 1.2, y + h - hdr_h/2,
+            badge,
             ha="left", va="center",
-            fontsize=7.2, fontweight="bold",
-            color="#fef08a",  # Soft yellow highlight
+            fontsize=8.8, fontweight="bold",
+            color="#fef08a",  # Light yellow accent
             zorder=4
         )
         ax.text(
-            x + w/2 + 1.4, y + h - hdr_h/2,
+            x + w/2 + 1.8, y + h - hdr_h/2,
             title,
             ha="center", va="center",
-            fontsize=8.4, fontweight="bold",
+            fontsize=10.2, fontweight="bold",
             color="#ffffff",
             zorder=4
         )
@@ -115,321 +126,376 @@ def draw_header_card(ax, x, y, w, h, stage_num, title, items, header_color, body
             x + w/2, y + h - hdr_h/2,
             title,
             ha="center", va="center",
-            fontsize=8.6, fontweight="bold",
+            fontsize=10.4, fontweight="bold",
             color="#ffffff",
             zorder=4
         )
 
-    # Body Bullet Points - precisely positioned with guaranteed bottom clearance
+    # Body Items (Generous spacing and clear hierarchy)
     text_y = y + h - hdr_h - 1.8
-    for line in items:
-        if line.startswith("•"):
+    for item in items:
+        if item.startswith("[OK]") or item.startswith("[Yield]") or item.startswith("[Verified]"):
+            # Metric / Status Pill Badge (Placed safely at bottom with clear margin)
+            pill_h = 2.4
+            pill_y = y + 0.9
+            tag_box = patches.FancyBboxPatch(
+                (x + 1.2, pill_y), w - 2.4, pill_h,
+                boxstyle="round,pad=0.0,rounding_size=0.6",
+                facecolor=hdr_color,
+                edgecolor=hdr_color,
+                linewidth=0.8,
+                alpha=0.15,
+                zorder=3
+            )
+            ax.add_patch(tag_box)
             ax.text(
-                x + 1.2, text_y,
-                line,
-                ha="left", va="top",
-                fontsize=7.3, fontweight="normal",
-                color="#1e293b",
+                x + w/2, pill_y + pill_h / 2,
+                item,
+                ha="center", va="center",
+                fontsize=8.8, fontweight="bold",
+                color=hdr_color,
                 zorder=4
             )
-            text_y -= line_spacing
-        elif line.startswith("[OK]") or line.startswith("[Yield]") or line.startswith("[Verified]"):
+        elif item.startswith("•"):
             ax.text(
                 x + 1.2, text_y,
-                line,
+                item,
                 ha="left", va="top",
-                fontsize=7.4, fontweight="bold",
-                color=header_color,
+                fontsize=9.0, fontweight="normal",
+                color="#0f172a",
                 zorder=4
             )
             text_y -= line_spacing
         else:
-            # Sub-bullet / indented note
+            # Sub-item / indented description
             ax.text(
-                x + 1.2, text_y,
-                line,
+                x + 2.4, text_y,
+                item,
                 ha="left", va="top",
-                fontsize=7.0, fontweight="normal",
-                color="#475569",
+                fontsize=8.4, fontweight="normal",
+                color="#334155",
                 zorder=4
             )
-            text_y -= (line_spacing - 0.2)
+            text_y -= (line_spacing - 0.3)
 
 
-def draw_arrow(ax, x1, y1, x2, y2, label="", color="#334155", lw=1.5):
-    """Draw a clean publication-grade connecting arrow that strictly respects card boundaries."""
+def draw_arrow(ax, x1, y1, x2, y2, label="", color="#334155", lw=1.8):
+    """Draw a clean, bold connecting arrow with high-contrast label."""
     ax.annotate(
         "", xy=(x2, y2), xytext=(x1, y1),
         arrowprops=dict(
             arrowstyle="-|>",
             color=color,
             lw=lw,
-            mutation_scale=13,
+            mutation_scale=14,
             shrinkA=0,
             shrinkB=0
         ),
-        zorder=5
+        zorder=6
     )
     if label:
         mid_x = (x1 + x2) / 2
         mid_y = (y1 + y2) / 2
         ax.text(
-            mid_x, mid_y + 0.9,
+            mid_x, mid_y,
             label,
             ha="center", va="center",
-            fontsize=7.0, fontweight="bold",
-            color="#1e293b",
-            bbox=dict(boxstyle="round,pad=0.25", facecolor="#ffffff", edgecolor="#94a3b8", lw=0.8),
-            zorder=6
+            fontsize=8.2, fontweight="bold",
+            color="#0f172a",
+            bbox=dict(boxstyle="round,pad=0.35", facecolor="#ffffff", edgecolor="#64748b", lw=1.0),
+            zorder=7
         )
 
 
 # ====================================================================
-# TITLE BLOCK (Standard Scopus Q1/Q2 Heading)
+# TITLE BLOCK
 # ====================================================================
 ax.text(
-    50, 97.4,
-    "Standardized End-to-End Dataset Acquisition, Curation, and Benchmark Construction Pipeline",
+    50, 97.6,
+    "Standardized Three-Phase Dataset Acquisition, Curation, and Benchmark Pipeline",
     ha="center", va="center",
-    fontsize=13.0, fontweight="bold",
+    fontsize=15.0, fontweight="bold",
     color=c_title
 )
 ax.text(
-    50, 94.6,
-    "Protocol for 100,000 Verified Morphological Pairs in Low-Resource Sasak Regional NLP (SasakNLP Standard)",
+    50, 95.0,
+    "End-to-End Scientific Protocol for 100,000 Verified Morphological Pairs in Low-Resource Sasak Regional NLP",
     ha="center", va="center",
-    fontsize=9.0, fontstyle="italic",
+    fontsize=10.2, fontstyle="italic",
     color=c_subtitle
 )
 
 # Divider Line
-ax.plot([3, 97], [92.6, 92.6], color="#cbd5e1", lw=1.2, zorder=1)
+ax.plot([2.0, 98.0], [93.4, 93.4], color="#94a3b8", lw=1.4, zorder=1)
+
 
 # ====================================================================
-# SECTION 1: RAW MULTI-SOURCE INGESTION (Top Row: y = 74.5 to 89.3)
+# SECTION 1: RAW MULTI-SOURCE INGESTION (Top Row: y = 73.2 to 88.8)
 # ====================================================================
+# Section Title Banner
+sec1_badge = patches.FancyBboxPatch(
+    (2.0, 89.8), 46.0, 2.8,
+    boxstyle="round,pad=0.0,rounding_size=0.6",
+    facecolor="#dbeafe", edgecolor=c_src_hdr, lw=1.0, zorder=2
+)
+ax.add_patch(sec1_badge)
 ax.text(
-    3.0, 90.8,
-    "STEP 1: MULTI-SOURCE CORPUS & LEXICAL INGESTION",
+    3.6, 91.2,
+    "PHASE 1: MULTI-SOURCE CORPUS & LEXICAL INGESTION",
     ha="left", va="center",
-    fontsize=8.5, fontweight="bold",
-    color=c_src_hdr
+    fontsize=9.4, fontweight="bold",
+    color=c_src_hdr, zorder=3
 )
 
-draw_header_card(
-    ax, x=3.0, y=74.5, w=30.0, h=14.8,
-    stage_num="", title="Source A: Balai Bahasa NTB",
+draw_card(
+    ax, x=2.0, y=73.2, w=30.6, h=15.6,
+    badge="", title="Source A: Balai Bahasa NTB",
     items=[
-        "• Digitalisasi Kamus Terpadu Sasambo",
-        "• 2,761 entri leksikal resmi berdefinisi",
-        "• Anotasi dialek: Kuto-Kute, Merikuq, dll."
+        "• Kamus Terpadu Sasambo (Official)",
+        "• 2,761 Verified Dictionary Entries",
+        "• Standard Part-of-Speech & Dialect Tags",
+        "[Verified] Official State Language Archive"
     ],
-    header_color=c_src_hdr, body_bg=c_src_bg, border_color=c_src_border,
-    line_spacing=3.2
+    hdr_color=c_src_hdr, body_bg=c_src_bg, border_color=c_src_border,
+    line_spacing=2.4
 )
 
-draw_header_card(
-    ax, x=35.0, y=74.5, w=30.0, h=14.8,
-    stage_num="", title="Source B: Authentic Literary Corpus",
+draw_card(
+    ax, x=34.7, y=73.2, w=30.6, h=15.6,
+    badge="", title="Source B: Authentic Literary Corpus",
     items=[
-        "• 12,591 kalimat autentik teks cerita rakyat",
-        "• Legenda: Mandalika, Datu Doyan Nada",
-        "• Konteks percakapan & literatur Sasak"
+        "• 12,591 Folk Literature Sentences",
+        "• Folklore: Putri Mandalika, Dewi Anjani",
+        "• 188,881 Tokens of Authentic Context",
+        "[Verified] High-Vitality Native Folklore"
     ],
-    header_color=c_src_hdr, body_bg=c_src_bg, border_color=c_src_border,
-    line_spacing=3.2
+    hdr_color=c_src_hdr, body_bg=c_src_bg, border_color=c_src_border,
+    line_spacing=2.4
 )
 
-draw_header_card(
-    ax, x=67.0, y=74.5, w=30.0, h=14.8,
-    stage_num="", title="Source C: Field Informants & Sastra",
+draw_card(
+    ax, x=67.4, y=73.2, w=30.6, h=15.6,
+    badge="", title="Source C: Dialectal Informants",
     items=[
-        "• Penutur jati 5 kawasan geolinguistik",
-        "• Transkripsi lisan & tembang tradisional",
-        "• Korpus morfonologi dialektal Lombok"
+        "• Native Speakers from 5 Dialect Regions",
+        "• Traditional Oral Literature & Lontar",
+        "• Distinct Regional Shibboleth Markers",
+        "[Verified] Broad Cross-Island Coverage"
     ],
-    header_color=c_src_hdr, body_bg=c_src_bg, border_color=c_src_border,
-    line_spacing=3.2
+    hdr_color=c_src_hdr, body_bg=c_src_bg, border_color=c_src_border,
+    line_spacing=2.4
 )
 
-# Ingestion Convergence Arrows (Clean gap below cards at y = 74.5)
-draw_arrow(ax, 18.0, 73.6, 18.0, 69.5)
-draw_arrow(ax, 50.0, 73.6, 50.0, 69.5)
-draw_arrow(ax, 82.0, 73.6, 82.0, 69.5)
+# Consolidation arrows from Source Cards down to Bus at y = 70.2
+draw_arrow(ax, 17.3, 73.2, 17.3, 70.2, lw=1.6)
+draw_arrow(ax, 50.0, 73.2, 50.0, 70.2, lw=1.6)
+draw_arrow(ax, 82.7, 73.2, 82.7, 70.2, lw=1.6)
 
-# Horizontal consolidation bar
-ax.plot([18.0, 82.0], [69.5, 69.5], color="#334155", lw=1.5, zorder=4)
-draw_arrow(ax, 50.0, 69.5, 50.0, 64.2, label="Multi-Source Corpus Convergence")
+# Orthogonal Ingestion Bus: runs horizontally at y = 70.2 from x = 82.7 left to x = 10.8
+ax.plot([10.8, 82.7], [70.2, 70.2], color="#334155", lw=2.0, zorder=5)
+
+# Feeder arrow: runs straight down from bus (10.8, 70.2) into Stage 1 top at (10.8, 63.6)
+draw_arrow(ax, 10.8, 70.2, 10.8, 63.6, label="Data Ingestion", color="#1e40af", lw=2.0)
+
 
 # ====================================================================
-# SECTION 2: FIVE-STAGE QUALITY CURATION PIPELINE (y = 29.5 to 61.3)
+# SECTION 2: FIVE-STAGE QUALITY CURATION PIPELINE (y = 30.8 to 63.6)
 # ====================================================================
+# Section Title Banner (Placed comfortably at x = 23.0 to 98.0, clear of the feeder at x = 10.8)
+sec2_badge = patches.FancyBboxPatch(
+    (23.0, 65.4), 66.0, 2.8,
+    boxstyle="round,pad=0.0,rounding_size=0.6",
+    facecolor="#f1f5f9", edgecolor="#334155", lw=1.0, zorder=2
+)
+ax.add_patch(sec2_badge)
 ax.text(
-    3.0, 62.5,
-    "STEP 2: FIVE-STAGE QUALITY CURATION & MORPHOLOGICAL PIPELINE",
+    25.0, 66.8,
+    "PHASE 2: FIVE-STAGE SCIENTIFIC QUALITY CURATION & MORPHOLOGICAL PIPELINE",
     ha="left", va="center",
-    fontsize=8.5, fontweight="bold",
-    color="#0f172a"
+    fontsize=9.4, fontweight="bold",
+    color="#0f172a", zorder=3
 )
 
-# Stage 1: Orthography & Diacritics
-draw_header_card(
-    ax, x=2.0, y=29.5, w=17.6, h=31.8,
-    stage_num="PHASE 1", title="Normalization",
+# Stage 1: Normalization (x = 2.0 to 19.6, center = 10.8)
+draw_card(
+    ax, x=2.0, y=30.8, w=17.6, h=32.8,
+    badge="STAGE 1", title="Normalization",
     items=[
-        "• Unicode NFC Normalization",
-        "• Normalisasi aksen diakritik:",
-        "  (képéng, kèpèng -> kepeng)",
-        "• Preservasi glotal Sasak:",
-        "  apostrof (') & stop glotal (-q)",
-        "• Whitespace & case folding",
-        "[OK] 100% Karakter Baku"
+        "• Unicode NFC Standard",
+        "• Glottal Grapheme Fixing:",
+        "  Apostrophes (’/`) -> (') & (q)",
+        "• Diacritic Preservation:",
+        "  (képéng -> kepeng)",
+        "• Whitespace & Case Folding",
+        "[OK] 100% Normalized Text"
     ],
-    header_color=c_p1_hdr, line_spacing=3.0
+    hdr_color=c_p1_hdr, body_bg=c_p1_bg, border_color=c_p1_border,
+    line_spacing=3.2
 )
 
-# Arrow 1 -> 2
-draw_arrow(ax, 19.8, 45.4, 21.2, 45.4)
+# Transition 1 -> 2
+draw_arrow(ax, 19.6, 47.2, 21.6, 47.2, lw=2.2)
 
-# Stage 2: Noise & Entity Purge
-draw_header_card(
-    ax, x=21.4, y=29.5, w=17.6, h=31.8,
-    stage_num="PHASE 2", title="Heuristic Purge",
+# Stage 2: Heuristic Purge (x = 21.6 to 39.2, center = 30.4)
+draw_card(
+    ax, x=21.6, y=30.8, w=17.6, h=32.8,
+    badge="STAGE 2", title="Heuristic Purge",
     items=[
-        "• Eliminasi 3,450 nama asing:",
-        "  Blacklist entitas biblika",
+        "• 3,450 Foreign Names Purged:",
+        "  Biblical blacklist entities",
         "  (nahason, abihud, zadok)",
-        "• Filter kode kamus (hls, pjt)",
-        "• Hapus non-vokal (zzz, nca)",
-        "• Singkirkan fragmen cacat",
-        "[OK] Bebas Entitas Rusak"
+        "• Dictionary Code Stripping",
+        "• Non-Phonotactic Filter",
+        "• Defective Fragment Cleanup",
+        "[OK] Zero Corpus Artifacts"
     ],
-    header_color=c_p3_hdr, line_spacing=3.0
+    hdr_color=c_p2_hdr, body_bg=c_p2_bg, border_color=c_p2_border,
+    line_spacing=3.2
 )
 
-# Arrow 2 -> 3
-draw_arrow(ax, 39.2, 45.4, 40.6, 45.4)
+# Transition 2 -> 3
+draw_arrow(ax, 39.2, 47.2, 41.2, 47.2, lw=2.2)
 
-# Stage 3: Root Extraction
-draw_header_card(
-    ax, x=40.8, y=29.5, w=17.6, h=31.8,
-    stage_num="PHASE 3", title="Root Extraction",
+# Stage 3: Root Extraction (x = 41.2 to 58.8, center = 50.0)
+draw_card(
+    ax, x=41.2, y=30.8, w=17.6, h=32.8,
+    badge="STAGE 3", title="Root Extraction",
     items=[
-        "• Dekomposisi afiks bertingkat",
-        "• Proteksi akar sah (jaran, etc.)",
-        "• Validasi fonotaktik Sasak:",
-        "  Panjang >= 3 & bersuara vokal",
-        "• Sinkronisasi leksikon resmi",
-        "[Yield] 1,790 Lema Dasar Murni",
-        "[OK] Ground Truth Terkunci"
+        "• Multi-Pass Affix Stripping",
+        "• Root Protection (jaran, etc.)",
+        "• Sasak Phonotactic Check:",
+        "  Length >= 3 & Valid Vowel",
+        "• Balai Bahasa Grounding",
+        "[Yield] 1,790 Pure Lemmas"
     ],
-    header_color=c_p4_hdr, line_spacing=3.0
+    hdr_color=c_p3_hdr, body_bg=c_p3_bg, border_color=c_p3_border,
+    line_spacing=3.2
 )
 
-# Arrow 3 -> 4
-draw_arrow(ax, 58.6, 45.4, 60.0, 45.4)
+# Transition 3 -> 4
+draw_arrow(ax, 58.8, 47.2, 60.8, 47.2, lw=2.2)
 
-# Stage 4: Morphonemic Permutation
-draw_header_card(
-    ax, x=60.2, y=29.5, w=17.6, h=31.8,
-    stage_num="PHASE 4", title="Permutation",
+# Stage 4: Permutation (x = 60.8 to 78.4, center = 69.6)
+draw_card(
+    ax, x=60.8, y=30.8, w=17.6, h=32.8,
+    badge="STAGE 4", title="Permutation",
     items=[
-        "• 42 Pola Morfofonemik:",
-        "  - Prefiks (te-, se-, ka-, be-)",
-        "  - Nasal verba (m-, n-, ng-, ny-)",
-        "  - Sufiks (-ang, -an, -in, -i)",
-        "  - Konfiks & reduplikasi",
-        "  - Klitika posesif (-ne, -de)",
-        "[OK] 100k Permutasi Gramatika"
+        "• 42 Productive Affix Rules:",
+        "  - Prefixes (te-, se-, ka-)",
+        "  - Nasal Verba (N- assimilation)",
+        "  - Suffixes (-ang, -an, -i)",
+        "  - Circumfixes & Reduplication",
+        "  - Enclitic Compounding",
+        "[Yield] 100,000 Systematic Pairs"
     ],
-    header_color=c_p2_hdr, line_spacing=3.0
+    hdr_color=c_p4_hdr, body_bg=c_p4_bg, border_color=c_p4_border,
+    line_spacing=3.2
 )
 
-# Arrow 4 -> 5
-draw_arrow(ax, 78.0, 45.4, 79.4, 45.4)
+# Transition 4 -> 5
+draw_arrow(ax, 78.4, 47.2, 80.4, 47.2, lw=2.2)
 
-# Stage 5: Dialect Stratification & QA
-draw_header_card(
-    ax, x=79.6, y=29.5, w=17.6, h=31.8,
-    stage_num="PHASE 5", title="QA & Stratify",
+# Stage 5: Dialect Stratification & QA (x = 80.4 to 98.0, center = 89.2)
+draw_card(
+    ax, x=80.4, y=30.8, w=17.6, h=32.8,
+    badge="STAGE 5", title="QA & Stratify",
     items=[
-        "• Stratifikasi 5 Dialek Lombok:",
-        "  - General / Baku (43.2%)",
-        "  - Meno-Mene (23.0%)",
-        "  - Ngeno-Ngene (12.7%)",
-        "  - Merikuq-Merikaq (10.5%)",
-        "  - Kuto-Kute (10.5%)",
-        "• Verifikasi Pakar (κ = 0.91)",
-        "[OK] 0.00% OOV, Bebas Galat"
+        "• 5-Dialect Cluster Stratification:",
+        "  - General Standard: 43.2%",
+        "  - Meno-Mene: 23.0%",
+        "  - Ngeno-Ngene: 12.7%",
+        "  - Merikuq / Kuto-Kute: 21.1%",
+        "• Expert Validation (κ = 0.91)",
+        "[Verified] 0.00% OOV Benchmark"
     ],
-    header_color=c_p5_hdr, line_spacing=3.0
+    hdr_color=c_p5_hdr, body_bg=c_p5_bg, border_color=c_p5_border,
+    line_spacing=3.2
 )
 
-# Downward Flow Arrow from Phase 5 to Output Section
-# Card 5 bottom is at y=29.5; start arrow cleanly at y=28.2 (outside card)
-draw_arrow(ax, 88.4, 28.2, 88.4, 22.0)
+# Flow from Stage 5 down to Phase 3 Distribution Bus
+draw_arrow(ax, 89.2, 30.8, 89.2, 23.6, label="Curated Output", color="#0f766e", lw=2.0)
+
 
 # ====================================================================
-# SECTION 3: VERIFIED GOLD-STANDARD OUTPUT ARTIFACTS (Bottom Row)
-# Section title placed ABOVE the horizontal distribution bus (zero arrow collision!)
+# SECTION 3: PUBLISHED GOLD-STANDARD DATASET ARTIFACTS (Bottom Row: y = 2.2 to 19.4)
 # ====================================================================
+# Section Title Banner
+sec3_badge = patches.FancyBboxPatch(
+    (2.0, 25.2), 50.0, 2.8,
+    boxstyle="round,pad=0.0,rounding_size=0.6",
+    facecolor="#ccfbf1", edgecolor=c_art_hdr, lw=1.0, zorder=2
+)
+ax.add_patch(sec3_badge)
 ax.text(
-    3.0, 25.2,
-    "STEP 3: PUBLISHED GOLD-STANDARD DATASET ARTIFACTS (RESEARCH-GRADE OUTPUTS)",
+    3.6, 26.6,
+    "PHASE 3: PUBLISHED GOLD-STANDARD RESEARCH ARTIFACTS",
     ha="left", va="center",
-    fontsize=8.5, fontweight="bold",
-    color=c_art_hdr
+    fontsize=9.4, fontweight="bold",
+    color=c_art_hdr, zorder=3
 )
 
-# Horizontal distribution bus at y = 22.0 (well below the section title at y = 25.2)
-ax.plot([18.0, 88.4], [22.0, 22.0], color="#334155", lw=1.5, zorder=4)
+# Distribution bus at y = 23.6 (runs from x = 89.2 left to x = 17.3)
+ax.plot([17.3, 89.2], [23.6, 23.6], color="#334155", lw=2.0, zorder=5)
 
-# Arrows pointing to top of Stage 3 cards (cards top is y=17.8, arrows arrive at y=18.3 with clear gap)
-draw_arrow(ax, 18.0, 22.0, 18.0, 18.3)
-draw_arrow(ax, 50.0, 22.0, 50.0, 18.3)
-draw_arrow(ax, 82.0, 22.0, 82.0, 18.3)
+# Arrows pointing down to top of Artifact Cards at y = 19.4
+draw_arrow(ax, 17.3, 23.6, 17.3, 19.4, lw=1.8)
+draw_arrow(ax, 50.0, 23.6, 50.0, 19.4, lw=1.8)
+draw_arrow(ax, 82.7, 23.6, 82.7, 19.4, lw=1.8)
 
-draw_header_card(
-    ax, x=3.0, y=1.8, w=30.0, h=16.0,
-    stage_num="", title="Artifact 1: benchmark_100k.csv",
+draw_card(
+    ax, x=2.0, y=2.2, w=30.6, h=17.2,
+    badge="", title="Artifact 1: benchmark_100k.csv",
     items=[
-        "• TEPAT 100,000 Baris Data Morfologi",
-        "• Header: surface, lemma, prefix, infix, suffix",
-        "• Akurasi SasakNLP: 80.44% (McNemar p < 0.0001)",
-        "[Verified] Ground-Truth Leksikal Lengkap"
+        "• EXACTLY 100,000 Morphological Pairs",
+        "• Columns: surface, lemma, prefix, infix, suffix, dialect",
+        "• SasakNLP Accuracy: 80.44% vs Baselines (1.01%, 55.21%)",
+        "[Verified] Gold-Standard Stress-Test Benchmark"
     ],
-    header_color=c_art_hdr, body_bg=c_art_bg, border_color=c_art_border,
-    line_spacing=2.7
+    hdr_color=c_art_hdr, body_bg=c_art_bg, border_color=c_art_border,
+    line_spacing=2.6
 )
 
-draw_header_card(
-    ax, x=35.0, y=1.8, w=30.0, h=16.0,
-    stage_num="", title="Artifact 2: sasak_sentences_large.csv",
+draw_card(
+    ax, x=34.7, y=2.2, w=30.6, h=17.2,
+    badge="", title="Artifact 2: sasak_sentences_large.csv",
     items=[
-        "• 12,591 Kalimat Autentik Bahasa Sasak",
-        "• Header: id, text, word_count, dialect, source",
-        "• Reduksi Ruang Fitur Kosakata: 31.98%",
-        "[Verified] Representasi Korpus Nyata"
+        "• 12,591 Authentic Sentences (188,881 Tokens)",
+        "• Real Discourse Context from Oral Literature & Folklore",
+        "• Vocabulary Feature Space Compression: 31.98%",
+        "[Verified] Large-Scale Natural Evaluation Corpus"
     ],
-    header_color=c_art_hdr, body_bg=c_art_bg, border_color=c_art_border,
-    line_spacing=2.7
+    hdr_color=c_art_hdr, body_bg=c_art_bg, border_color=c_art_border,
+    line_spacing=2.6
 )
 
-draw_header_card(
-    ax, x=67.0, y=1.8, w=30.0, h=16.0,
-    stage_num="", title="Artifact 3: default_lexicon.json",
+draw_card(
+    ax, x=67.4, y=2.2, w=30.6, h=17.2,
+    badge="", title="Artifact 3: kamus_balai_bahasa_ntb.csv",
     items=[
-        "• 1,990 Lema Terkurasi + 2,761 Kamus NTB",
-        "• Metadata: POS, dialek, etimologi, akar kata",
-        "• Proteksi Overstemming: 100% Terlindungi",
-        "[Verified] Fondasi Evaluasi Standar Scopus"
+        "• 2,761 Verified Root Entries (Balai Bahasa NTB)",
+        "• High-Speed PrefixTrie Verification Structure: O(L)",
+        "• Overstemming Restriction: 2.28% (vs 24.8% Greedy)",
+        "[Verified] Foundational Machine Lexicon (SasakLex)"
     ],
-    header_color=c_art_hdr, body_bg=c_art_bg, border_color=c_art_border,
-    line_spacing=2.7
+    hdr_color=c_art_hdr, body_bg=c_art_bg, border_color=c_art_border,
+    line_spacing=2.6
 )
 
 plt.subplots_adjust(left=0.01, right=0.99, top=0.98, bottom=0.02)
-save_path = output_dir / "fig5_dataset_acquisition_pipeline.png"
-plt.savefig(save_path, dpi=300, facecolor="#ffffff", edgecolor="none")
+
+# Save to all target locations
+output_paths = [
+    Path("docs/figures/fig5_dataset_acquisition_pipeline.png"),
+    Path("artikel/figures/fig5_dataset_acquisition_pipeline.png"),
+    Path("sasaknlp/artikel/figures/fig5_dataset_acquisition_pipeline.png"),
+    Path("sasaknlp/docs/figures/fig5_dataset_acquisition_pipeline.png"),
+    Path("huggingface/space/figures/fig5_dataset_acquisition_pipeline.png"),
+]
+
+for p in output_paths:
+    p.parent.mkdir(parents=True, exist_ok=True)
+    plt.savefig(p, dpi=300, facecolor="#ffffff", edgecolor="none")
+    print(f"✅ Generated high-clarity Figure 5 at: {p}")
+
 plt.close()
-print(f"[✓] Successfully generated refined publication-grade Figure 5: {save_path}")
+print("🎉 All Figure 5 assets successfully updated!")
