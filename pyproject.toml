@@ -61,7 +61,8 @@ where = ["src"]
 sasaknlp = [
     "lexicon/data/*.json",
     "morphology/rules/*.json",
-    "dialect/rules/*.json"
+    "dialect/rules/*.json",
+    "stopwords/data/*.json"
 ]
 
 [tool.pytest.ini_options]

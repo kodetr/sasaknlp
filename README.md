@@ -121,6 +121,21 @@ print(f"Dialect: {dialect} ({confidence:.0%} confidence)")
 # Output: Dialect: selaparang (95% confidence)
 ```
 
+### 4. Stopwords Filtering
+
+```python
+from sasaknlp import get_stopwords, remove_stopwords, is_stopword
+
+# Query corpus stopwords
+print(is_stopword("dait"))   # True (conjunction 'and')
+print(is_stopword("mangan")) # False (verb 'eat')
+
+# Filter sentence or token list
+text = "Tiyang mangan nasiq leq bale dait nginem kupi"
+print(remove_stopwords(text))
+# Output: 'mangan nasiq bale nginem kupi'
+```
+
 ---
 
 ## 🔬 Research Focus & Architecture

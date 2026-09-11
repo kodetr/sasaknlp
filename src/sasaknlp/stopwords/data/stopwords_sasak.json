@@ -1,0 +1,63 @@
+{
+  "description": "Corpus-derived and linguistically curated stopwords (kata tugas) for Bahasa Sasak.",
+  "language": "sas",
+  "version": "1.0.0",
+  "categories": {
+    "prepositions": [
+      "leq", "le'", "lek", "leman", "lekan", "ojok", "jok", "tipaq", "tipak",
+      "kance", "bareng", "siq", "sik", "sampeq", "sampek", "jangke", "jangkek",
+      "antap", "antapne", "kancene", "dalem", "arepan", "muri", "julun"
+    ],
+    "conjunctions": [
+      "dait", "laguq", "laguk", "sengaq", "sengak", "sengaqne", "lamun", "amun",
+      "terus", "beterus", "adeq", "adek", "adeqne", "kancan", "sehingge",
+      "keranaq", "keranak", "lantaran", "sewaktu", "sesampun", "make", "atao",
+      "atawa", "padahal", "tapi", "asal", "pokok", "bahwe"
+    ],
+    "particles_and_aspect": [
+      "saq", "sak", "yaq", "yak", "juaq", "juak", "bae", "baen", "dogang",
+      "doang", "wah", "uwah", "gen", "nane", "laeq", "laek", "mudi", "malik",
+      "masih", "sempet", "jari", "mule", "setetune", "gati", "cume", "tetep",
+      "silaq", "silak", "be", "sih", "te"
+    ],
+    "negation": [
+      "ndeq", "ndek", "ndeqne", "ndaq", "ndak", "ndaraq", "ndarak", "nenten",
+      "ndeqman", "ndekman", "endaq", "endak", "endah"
+    ],
+    "pronouns": [
+      "aku", "tiang", "tiyang", "kaji", "ite", "itew", "kami", "ente", "side",
+      "pelungguh", "kamu", "ie", "iye", "pade", "deside", "sami", "mesaq", "mesak"
+    ],
+    "demonstratives": [
+      "nike", "niko", "niki", "nani", "derike", "deriki", "neneq", "nenek",
+      "ino", "iti", "eta", "eto"
+    ],
+    "question_words": [
+      "sai", "saie", "napi", "ape", "pira", "piro", "pire", "kembek", "kenape",
+      "berembe", "embe", "mbe"
+    ],
+    "quantifiers": [
+      "sopoq", "sopok", "selapuq", "selapuk", "selapuqne", "luweq", "luwek"
+    ]
+  },
+  "dialect_specific": {
+    "selaparang": [
+      "menu", "meni", "tiyang", "kaji"
+    ],
+    "ngeno_ngene": [
+      "ngeno", "ngene", "ente", "aku"
+    ],
+    "mriak_mriku": [
+      "mriak", "mriku", "meriq", "merik"
+    ],
+    "ngeto_ngete": [
+      "ngeto", "ngete"
+    ],
+    "kuto_kute": [
+      "kuto", "kute"
+    ],
+    "kramak_alus": [
+      "tiyang", "pelungguh", "deside", "sampun", "nenten", "mangkin", "sami"
+    ]
+  }
+}

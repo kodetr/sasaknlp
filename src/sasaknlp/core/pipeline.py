@@ -16,6 +16,7 @@ from sasaknlp.normalization.normalizer import SasakNormalizer
 from sasaknlp.stemmer.ranking import CandidateRanker
 from sasaknlp.stemmer.stemmer import SasakStemmer
 from sasaknlp.stemmer.validator import DictionaryValidator
+from sasaknlp.stopwords import SasakStopwords
 from sasaknlp.tokenizer.sentence_tokenizer import SasakSentenceTokenizer
 from sasaknlp.tokenizer.tokenizer import SasakTokenizer
 
@@ -57,6 +58,7 @@ class SasakNLP:
         self.normalizer = SasakNormalizer(config=self.config.normalizer)
         self.tokenizer = SasakTokenizer()
         self.sentence_tokenizer = SasakSentenceTokenizer()
+        self.stopwords = SasakStopwords(dialect=self.config.dialect if self.config.dialect != "auto" else None)
 
         # 2. Lexicon Management
         self.lexicon = SasakLexManager(
@@ -164,3 +166,23 @@ class SasakNLP:
     def split_sentences(self, text: str) -> List[str]:
         """Split text into sentences."""
         return self.sentence_tokenizer.tokenize(text)
+
+    def remove_stopwords(
+        self,
+        text_or_tokens: Union[str, List[str]],
+        dialect: Optional[str] = None,
+    ) -> Union[str, List[str]]:
+        """Filter out Sasak stopwords from input string or token list.
+
+        Args:
+            text_or_tokens: Input text string or list of word tokens.
+            dialect: Optional dialect override. If None, uses active pipeline dialect.
+
+        Returns:
+            Filtered string or token list without stopwords.
+        """
+        eff_dialect = dialect or (self.stemmer.dialect if self.stemmer.dialect != "auto" else None)
+        if isinstance(text_or_tokens, list):
+            return self.stopwords.filter_tokens(text_or_tokens, dialect=eff_dialect)
+        return self.stopwords.filter_text(text_or_tokens, dialect=eff_dialect)
+

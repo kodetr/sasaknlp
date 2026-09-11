@@ -22,6 +22,12 @@ from sasaknlp.lexicon import LexiconLoader, PrefixTrie, SasakLexManager
 from sasaknlp.morphology import CandidateGenerator, MorphologicalAnalyzer
 from sasaknlp.normalization import SasakNormalizer
 from sasaknlp.stemmer import CandidateRanker, DictionaryValidator, SasakStemmer
+from sasaknlp.stopwords import (
+    SasakStopwords,
+    get_stopwords,
+    is_stopword,
+    remove_stopwords,
+)
 from sasaknlp.tokenizer import SasakSentenceTokenizer, SasakTokenizer
 
 
@@ -43,6 +49,10 @@ __all__ = [
     "SasakNormalizer",
     "SasakTokenizer",
     "SasakSentenceTokenizer",
+    "SasakStopwords",
+    "get_stopwords",
+    "remove_stopwords",
+    "is_stopword",
     "DictionaryValidator",
     "CandidateRanker",
     "DialectManager",
