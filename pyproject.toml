@@ -36,6 +36,13 @@ classifiers = [
 requires-python = ">=3.9"
 dependencies = []
 
+[project.urls]
+Homepage = "https://kodetr.com"
+Repository = "https://github.com/kodetr/sasaknlp"
+Documentation = "https://github.com/kodetr/sasaknlp#readme"
+"Demo Web" = "https://huggingface.co/spaces/kodetr/sasaknlp-demo"
+"Dataset" = "https://huggingface.co/datasets/kodetr/sasak-benchmark-100k"
+
 [project.optional-dependencies]
 dev = [
     "pytest>=7.0.0",

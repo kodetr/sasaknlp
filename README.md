@@ -314,8 +314,10 @@ If you use **SasakNLP** in your research, computational linguistics publications
 
 ## 👨‍💻 Pembuat / Author
 
-- **Pengembang & Peneliti Utama**: **kodetr**
+- **Pengembang & Peneliti Utama**: **kodetr** ([kodetr.com](https://kodetr.com))
+- **Website Resmi**: [https://kodetr.com](https://kodetr.com)
 - **Repositori Resmi**: [https://github.com/kodetr/sasaknlp](https://github.com/kodetr/sasaknlp)
+- **Hugging Face Space Demo**: [https://huggingface.co/spaces/kodetr/sasaknlp-demo](https://huggingface.co/spaces/kodetr/sasaknlp-demo)
 - **Lisensi**: MIT Open Source
 
 ---
