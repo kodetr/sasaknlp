@@ -24,3 +24,6 @@ htmlcov/
 
 # Word lock files
 ~$*.docx
+
+# Papers and manuscripts (do not commit to github)
+artikel/
